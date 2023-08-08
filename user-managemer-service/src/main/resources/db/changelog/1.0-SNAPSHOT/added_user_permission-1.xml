@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="2355" author="ygoway">
+        <createTable tableName="user_permission">
+            <column name="user_id" type="int">
+                <constraints foreignKeyName="id" references="user(id)" unique="true" nullable="false"/>
+            </column>
+            <column name="permission" type="varchar(8)" defaultValue="consumer">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="5634" author="ygoway">
+        <addPrimaryKey tableName="user_permission" columnNames="user_id,permission"/>
+    </changeSet>
+</databaseChangeLog>
