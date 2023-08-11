@@ -1,13 +1,13 @@
 # Maven
-**.mvn/
-**mvnw
-**mvnw.cmd
+**/.mvn/
+**/mvnw
+**/mvnw.cmd
 
 # Binaries
-**target/
+**/target/
 
 # IntelliJ IDEA
-**.idea/
+**/.idea/
 *.iws
 *.iml
 *.ipr
