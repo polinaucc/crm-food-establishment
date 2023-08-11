@@ -12,6 +12,6 @@ Menu is a list of dishes with prices. The `Menu is divided into categories (main
 
 Logged in or not registered user has an opportunity to view menu.
 
-ER-diagrams for core service
+ER-diagrams for core service. We us the relational data model. 
 
-![menu_order_v2.png](..%2F..%2F..%2F..%2FUsers%2Fshysh%2FDesktop%2F2342%2Fmenu_order_v2.png)
+![menu_order](menu_order_v2.png)

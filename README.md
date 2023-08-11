@@ -21,12 +21,11 @@ The project is a CRM (customer relationship management) system for food establis
 * Track feedback on service, food, prices.
 
 
-In the architecture, we used microservices.
-This is best suited for building and deploying software applications. Each service has its own database. For communication between services sync HTTP REST used.
+In the architecture, we used microservices. Each service has its own database. For communication between services sync HTTP REST used.
 
-Model View Presenter Architecture
+Model View Presenter Architecture.
 
 
-![architecture.jpg](..%2F..%2F..%2FUsers%2Fshysh%2FDesktop%2F2342%2Farchitecture.jpg)
+![architecture](architecture.jpg)
 
 [Full description of the project](https://docs.google.com/document/d/1ukXwbbVWVgMsnx_iHVCGbTTp5z1j9K2WF8orbK0ez7E/edit)

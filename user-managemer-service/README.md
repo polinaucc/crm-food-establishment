@@ -6,6 +6,6 @@ The system can be used to: help owners, admin employees, waiters, kitchen employ
 Users can have an opportunity to enter his/her personal data, enter a new username and password to be registered in a system. Users will be registered as  customers.
 
 
-ER-diagrams for user-manager
+ER-diagrams for user-manager. We us the relational data model.
 
-![user_manager_v2.png](..%2F..%2F..%2F..%2FUsers%2Fshysh%2FDesktop%2F2342%2Fuser_manager_v2.png)
+![user_manager](user_manager_v2.png)
