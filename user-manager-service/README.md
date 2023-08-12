@@ -9,3 +9,7 @@ Users can have an opportunity to enter his/her personal data, enter a new userna
 ER-diagrams for user-manager
 
 ![user_manager_v2.png](..%2F..%2F..%2F..%2FUsers%2Fshysh%2FDesktop%2F2342%2Fuser_manager_v2.png)
+
+### Addition
+
+USERMANAGER_DATABASE_PASSWORD is the local variable which references to database password.
