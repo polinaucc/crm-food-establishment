@@ -15,3 +15,7 @@ Logged in or not registered user has an opportunity to view menu.
 ER-diagrams for core service
 
 ![menu_order_v2.png](..%2F..%2F..%2F..%2FUsers%2Fshysh%2FDesktop%2F2342%2Fmenu_order_v2.png)
+
+# Addition
+
+CORE-SERVICE_PASSWORD it is the local variable which references to database password.
