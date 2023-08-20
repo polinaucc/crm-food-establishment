@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1" author="dima">
+        <createTable tableName="payment">
+            <column name="id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column
+                    name="order_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cash" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column
+                    name="sum" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="Datetime">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="status" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
