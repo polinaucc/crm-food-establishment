@@ -4,6 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet id="1" author="ygoway">
+        <comment>Init user table</comment>
         <createTable tableName="user">
             <column name="id" type="int" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true"/>
@@ -19,20 +20,26 @@
             </column>
         </createTable>
     </changeSet>
+
     <changeSet id="2" author="ygoway">
+        <comment>Init user_permission table</comment>
         <createTable tableName="user_permission">
             <column name="user_id" type="int">
-                <constraints foreignKeyName="fk_user_id" references="user(id)" unique="true" nullable="false"/>
+                <constraints foreignKeyName="fk_user_id" references="user(id)" nullable="false"/>
             </column>
             <column name="permission" type="varchar(8)" defaultValue="consumer">
                 <constraints nullable="false" />
             </column>
         </createTable>
     </changeSet>
+
     <changeSet id="3" author="ygoway">
+        <comment>Creating composite pk based on fk user_id and permission columns</comment>
         <addPrimaryKey tableName="user_permission" columnNames="user_id,permission"/>
     </changeSet>
+
     <changeSet id="4" author="ygoway">
+        <comment>Init personal_info table</comment>
         <createTable tableName="personal_info">
             <column name="id" type="int" autoIncrement="${autoIncrement}">
                 <constraints primaryKey="true"/>
@@ -46,7 +53,7 @@
             <column name="last_name" type="varchar(32)">
                 <constraints nullable="false" />
             </column>
-            <column name="sex" type="boolean">
+            <column name="is_male" type="boolean">
                 <constraints nullable="true"/>
             </column>
             <column name="birthday" type="date"/>
