@@ -21,10 +21,19 @@ public class UserPersonalInfo {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "firstName")
     private String firstName;
+
+    @Column(name = "lastName")
     private String lastName;
+
+    @Column(name = "isMale")
     private Boolean isMale;
+
+    @Column(name = "birthday")
     private LocalDate birthday;
+
+    @Column(name = "address")
     private String address;
 
 }

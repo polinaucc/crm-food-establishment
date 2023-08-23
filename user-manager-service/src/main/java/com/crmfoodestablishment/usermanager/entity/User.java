@@ -23,8 +23,12 @@ public class User {
     @Column(name = "id", unique = true, nullable = false)
     private Integer id;
 
+    @Column(name = "password")
     private String password;
+
+    @Column(name = "email", unique = true)
     private String email;
+
     @Column(name = "uuid", columnDefinition = "BINARY")
     @JdbcTypeCode(SqlTypes.BINARY)
     private UUID uuid;

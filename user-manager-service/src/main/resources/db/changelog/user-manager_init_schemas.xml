@@ -3,6 +3,10 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
+    <changeSet id="0" author="ygoway">
+        <tagDatabase tag="clean_db"/>
+    </changeSet>
+
     <changeSet id="1" author="ygoway">
         <comment>Init user table</comment>
         <createTable tableName="user">
@@ -60,4 +64,9 @@
             <column name="address" type="varchar(1024)"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="10" author="ygoway">
+        <tagDatabase tag="db_init"/>
+    </changeSet>
+
 </databaseChangeLog>
