@@ -4,14 +4,14 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <preConditions>
-        <dbms type="postgreslq"/>
+        <dbms type="postgresql"/>
     </preConditions>
 
     <changeSet id="0" author="ygoway">
         <tagDatabase tag="db_init"/>
     </changeSet>
 
-    <include file="db/changelog/1.0-SNAPSHOT/added_user-1.xml"/>
+    <include file="user-manager_init_schemas.xml" relativeToChangelogFile="true"/>
 
     <changeSet id="10" author="ygoway">
         <tagDatabase tag="v.1.0"/>
