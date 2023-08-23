@@ -21,10 +21,10 @@ public class UserPersonalInfo {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "firstName")
+    @Column(name = "firstName", length = 32)
     private String firstName;
 
-    @Column(name = "lastName")
+    @Column(name = "lastName", length = 32)
     private String lastName;
 
     @Column(name = "isMale")
@@ -33,7 +33,7 @@ public class UserPersonalInfo {
     @Column(name = "birthday")
     private LocalDate birthday;
 
-    @Column(name = "address")
+    @Column(name = "address", length = 1024)
     private String address;
 
 }

@@ -23,10 +23,10 @@ public class User {
     @Column(name = "id", unique = true, nullable = false)
     private Integer id;
 
-    @Column(name = "password")
+    @Column(name = "password", length = 32)
     private String password;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, length = 64)
     private String email;
 
     @Column(name = "uuid", columnDefinition = "BINARY")
