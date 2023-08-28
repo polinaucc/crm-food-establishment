@@ -8,4 +8,4 @@ The detailed requirements can be checked here:
 
 ER-diagrams for payment service. We us the relational data model. Is located here:
 
-![payment](https://docs.google.com/document/d/1wnfXWRxNdMSoB173JtJNFRSd3XVxfZph8C1fQOcTKiY/edit)
+[Payment](https://docs.google.com/document/d/1wnfXWRxNdMSoB173JtJNFRSd3XVxfZph8C1fQOcTKiY/edit)

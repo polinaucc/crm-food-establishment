@@ -28,7 +28,7 @@ Communication between system components (services) are sync, REST is used.
 
 Model View Presenter Architecture. Is located here: 
 
-![architecture](https://docs.google.com/document/d/1wnfXWRxNdMSoB173JtJNFRSd3XVxfZph8C1fQOcTKiY/edit)
+[Architecture](https://docs.google.com/document/d/1wnfXWRxNdMSoB173JtJNFRSd3XVxfZph8C1fQOcTKiY/edit)
 
 Product requirements (Functional and Non Functional) are located here:
 

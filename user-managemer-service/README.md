@@ -10,4 +10,4 @@ The detailed requirements can be checked here:
 
 ER-diagrams for user-manager. We us the relational data model. Is located here:
 
-![user_manager](https://docs.google.com/document/d/1wnfXWRxNdMSoB173JtJNFRSd3XVxfZph8C1fQOcTKiY/edit)
+[User_manager](https://docs.google.com/document/d/1wnfXWRxNdMSoB173JtJNFRSd3XVxfZph8C1fQOcTKiY/edit)

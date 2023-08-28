@@ -13,4 +13,4 @@ The detailed requirements can be checked here:
 
 ER-diagrams for core service. We us the relational data model. Is located here:
 
-![menu_order](https://docs.google.com/document/d/1wnfXWRxNdMSoB173JtJNFRSd3XVxfZph8C1fQOcTKiY/edit)
+[Menu_order](https://docs.google.com/document/d/1wnfXWRxNdMSoB173JtJNFRSd3XVxfZph8C1fQOcTKiY/edit)
