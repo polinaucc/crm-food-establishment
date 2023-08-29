@@ -2,14 +2,15 @@ package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 public class Dish {
     @Id
@@ -26,4 +27,15 @@ public class Dish {
     @ManyToOne
     @JoinColumn(name = "menu_id", nullable = false, referencedColumnName = "id")
     private Menu menu;
+
+    @OneToMany(
+            mappedBy = "dish",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    public List<DishInOrder> dishes;
+
+    public Stream<DishInOrder> getDishes() {
+        return dishes.stream();
+    }
 }

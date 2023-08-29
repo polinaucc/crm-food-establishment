@@ -6,10 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 public class Menu {
     @Id
@@ -26,4 +27,7 @@ public class Menu {
     @Enumerated(EnumType.STRING)
     @Column(name = "season", nullable = false, length = 32)
     private Season season;
+
+    @OneToMany(mappedBy = "menu")
+    private List<Dish> dishes;
 }

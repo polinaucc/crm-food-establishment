@@ -2,34 +2,36 @@ package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "dish_order")
 public class DishInOrder {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EmbeddedId
     @Column(name = "id", nullable = false, unique = true)
-    private Integer id;
-
-    @OneToMany
-    @JoinColumn(name = "dish_id", nullable = false, referencedColumnName = "id")
-    private List<Dish> dishes;
-
-    @OneToMany
-    @JoinColumn(name = "order_id", nullable = false, referencedColumnName = "id")
-    private List<Order> orders;
+    private DishOrderId id;
 
     @Column(name = "count", nullable = false)
     private Short count;
 
-    @Column(name = "total_price_dish", nullable = false)
-    private Double TotalPriceDish;
+    @ManyToOne
+    @MapsId("dishId")
+    Dish dish;
+
+    @ManyToOne
+    @MapsId("orderId")
+    Order order;
+
+    @Column(name = "total_price", precision = 7, scale = 2, nullable = false)
+    private BigDecimal totalPrice;
+
+    @PrePersist
+    public void sumOrder() {
+        totalPrice = (BigDecimal) dish.getDishes().mapToDouble(dish -> dish.getDish().getPrice() * dish.count);
+    }
 }
