@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 public class Order {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
@@ -35,9 +37,19 @@ public class Order {
     private String comment;
 
     @OneToMany(
-            mappedBy = "dish",
+            mappedBy = "order",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
     private List<DishInOrder> orders;
+
+    @Column(name = "total_price", precision = 7, scale = 2, nullable = false)
+    private BigDecimal totalPrice;
+
+    @PrePersist
+    public void sumOrder() {
+        totalPrice = orders.stream().map(DishInOrder -> DishInOrder.getDish().getPrice()
+                .multiply(BigDecimal.valueOf(DishInOrder.getCount())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }

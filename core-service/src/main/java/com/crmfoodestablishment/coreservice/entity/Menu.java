@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 public class Menu {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)

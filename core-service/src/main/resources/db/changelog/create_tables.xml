@@ -32,7 +32,7 @@
             <column name="menu_id" type="int">
                 <constraints foreignKeyName="fk_menu_id" references="menu(id)" nullable="false"/>
             </column>
-            <column name="price" type="double">
+            <column name="price" type="decimal(7, 2)">
                 <constraints nullable="false"/>
             </column>
             <column name="ingredients" type="varchar(512)">
@@ -59,6 +59,9 @@
             <column name="comment" type="varchar(128)">
                 <constraints nullable="true"/>
             </column>
+            <column name="total_price" type="decimal(7, 2)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
@@ -80,9 +83,6 @@
                         nullable="false"/>
             </column>
             <column name="count" type="tinyint">
-                <constraints nullable="false"/>
-            </column>
-            <column name="total_price" type="decimal(7, 2)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
