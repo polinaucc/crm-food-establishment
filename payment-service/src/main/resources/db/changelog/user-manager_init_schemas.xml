@@ -18,15 +18,15 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="sum" type="double">
+            <column name="sum" type="decimal">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="payment_date" type="Datetime">
+            <column name="payment_date" type="datetime">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="status" type="String">
+            <column name="status" type="varchar">
                 <constraints nullable="false"/>
             </column>
         </createTable>
