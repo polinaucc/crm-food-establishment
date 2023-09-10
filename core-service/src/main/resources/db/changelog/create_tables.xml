@@ -8,7 +8,7 @@
     <changeSet id="1" author="zhenya_baraniuk">
         <comment>Create a menu table with all the appropriate fields.</comment>
         <createTable tableName="menu">
-            <column  name="id" type="int" autoIncrement="true">
+            <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(64)">
@@ -26,13 +26,13 @@
     <changeSet id="2" author="zhenya_baraniuk">
         <comment>Create a dish table with all the appropriate fields.</comment>
         <createTable tableName="dish">
-            <column  name="id" type="int" autoIncrement="true">
+            <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="menu_id" type="int">
                 <constraints foreignKeyName="fk_menu_id" references="menu(id)" nullable="false"/>
             </column>
-            <column name="price" type="double">
+            <column name="price" type="decimal(7, 2)">
                 <constraints nullable="false"/>
             </column>
             <column name="ingredients" type="varchar(512)">
@@ -47,10 +47,10 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="uuid" type="binary(16)">
+            <column name="uuid" type="uuid">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="user_uuid" type="binary(16)">
+            <column name="user_uuid" type="uuid">
                 <constraints nullable="false" unique="true"/>
             </column>
             <column name="creation_date" type="datetime">
@@ -59,7 +59,7 @@
             <column name="comment" type="varchar(128)">
                 <constraints nullable="true"/>
             </column>
-            <column name="total_price" type="double">
+            <column name="total_price" type="decimal(7, 2)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -68,19 +68,21 @@
     <changeSet id="3" author="zhenya_baraniuk">
         <comment>Create a dish_order table with all the appropriate fields.</comment>
         <createTable tableName="dish_order">
-            <column name="id" type="int" autoIncrement="true">
-                <constraints primaryKey="true"/>
-            </column>
             <column name="dish_id" type="int">
-                <constraints foreignKeyName="fk_dish_id" references="dish(id)" nullable="false"/>
+                <constraints
+                        foreignKeyName="fk_dish_id" references="dish(id)"
+                        primaryKey="true"
+                        primaryKeyName="id"
+                        nullable="false"/>
             </column>
             <column name="order_id" type="int">
-                <constraints foreignKeyName="fk_order_id" references="order(id)" nullable="false"/>
+                <constraints
+                        foreignKeyName="fk_order_id" references="order(id)"
+                        primaryKey="true"
+                        primaryKeyName="id"
+                        nullable="false"/>
             </column>
             <column name="count" type="tinyint">
-                <constraints nullable="false"/>
-            </column>
-            <column name="total_price_dish" type="double">
                 <constraints nullable="false"/>
             </column>
         </createTable>
