@@ -10,12 +10,13 @@
     </parent>
 
     <groupId>com.crm-food-establishment</groupId>
-    <artifactId>user-manager</artifactId>
+    <artifactId>payment-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>user-manager</name>
-    <description>User-manager service, which manages users</description>
+    <name>payment-service</name>
+    <description>Payment service, which manages payments</description>
 
     <properties>
+        <java.version>17</java.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
     </properties>
 
@@ -29,29 +30,15 @@
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
     <dependencyManagement>
         <dependencies>

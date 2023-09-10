@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -25,13 +26,15 @@ public class Payment {
     @Column(name = "is_cash", length = 32)
     private Boolean is_cash;
 
-    @Column(name = "sum", unique = true, nullable = false)
-    private Double sum;
+    @Column(name = "sum", unique = true, nullable = false, precision = 10, scale = 2)
+    private BigDecimal sum;
 
     @Column(name = "payment_date", unique = true, nullable = false)
     private LocalDateTime payment_date;
 
-    @Column(name = "status", unique = true, nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private PaymentStage status;
+
 
 }
