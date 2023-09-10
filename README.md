@@ -34,4 +34,20 @@ Product requirements (Functional and Non Functional) are located here:
 
 [Functional](https://docs.google.com/document/d/1ukXwbbVWVgMsnx_iHVCGbTTp5z1j9K2WF8orbK0ez7E/edit)
 
-[Notifications](https://docs.google.com/document/d/1bnIqMXma340uexmaUAD9UcVyvBcUUq_fvoodJ5vfYnw/edit)
+[Non Functional](https://docs.google.com/document/d/1bnIqMXma340uexmaUAD9UcVyvBcUUq_fvoodJ5vfYnw/edit)
+
+To running the service early, you need to take some steps:
+1. Creating a project: you need to use Maven clean install to create a project. You can use the mvn archetype:generate command, which allows you to select a project archetype. Version http://maven.apache.org/POM/4.0.0
+
+2. Eureka Setup: Use Eureka to register and configure it. Version 0.0.1-SNAPSHOT . Required parameters for configuration:
+
+spring.application.name=eureka-server
+server.port=8761
+
+eureka.client.register-with-eureka=false
+eureka.client.fetch-registry=false
+3. Spring Boot version: We called org.springframework.boot. Version 3.1.2
+
+4. MySQL database:
+
+

@@ -11,6 +11,6 @@ Logged in or not registered user has an opportunity to view menu.
 The detailed requirements can be checked here: 
 [Employees](https://docs.google.com/document/d/1ukXwbbVWVgMsnx_iHVCGbTTp5z1j9K2WF8orbK0ez7E/edit) 
 
-ER-diagrams for core service. We us the relational data model. Is located here:
+ER-diagrams for core service. We use the relational data model. Is located here:
 
 [Menu_order](https://docs.google.com/document/d/1wnfXWRxNdMSoB173JtJNFRSd3XVxfZph8C1fQOcTKiY/edit)
