@@ -1,4 +1,4 @@
-package entity;
+package com.crmfoodestablishment.paymentservice.entity;
 
 public enum PaymentStage {
     UNPAID("Unpaid"),

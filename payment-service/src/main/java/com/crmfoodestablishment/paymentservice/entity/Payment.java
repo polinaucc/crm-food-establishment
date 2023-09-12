@@ -1,4 +1,4 @@
-package entity;
+package com.crmfoodestablishment.paymentservice.entity;
 
 
 import jakarta.persistence.*;
@@ -23,7 +23,7 @@ public class Payment {
     @Column(name = "order_id", unique = true, nullable = false)
     private UUID order_id;
 
-    @Column(name = "is_cash", length = 32)
+    @Column(name = "is_cash")
     private Boolean is_cash;
 
     @Column(name = "sum", unique = true, nullable = false, precision = 10, scale = 2)
