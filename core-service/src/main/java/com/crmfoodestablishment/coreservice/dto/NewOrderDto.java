@@ -8,22 +8,26 @@ import org.hibernate.validator.constraints.Length;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Getter
 @Setter
 public class NewOrderDto {
 
-    List<DishInOrder> dishInOrderList = new ArrayList<>();
+    private List<DishInOrder> dishInOrderList = new ArrayList<>();
 
     @Length(max = 128)
-    String comment;
+    private String comment;
+
+    private UUID userUuid;
 
     public NewOrderDto() {}
 
-    public NewOrderDto(List<DishInOrder> dishInOrderList, String comment) {
+    public NewOrderDto(List<DishInOrder> dishInOrderList, String comment, UUID userUuid) {
         this.dishInOrderList = dishInOrderList;
         this.comment = comment;
+        this.userUuid = userUuid;
     }
 
     public NewOrderDto(NewOrderDto newOrderDto) {
