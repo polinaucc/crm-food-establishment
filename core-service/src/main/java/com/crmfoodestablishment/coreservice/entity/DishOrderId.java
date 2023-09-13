@@ -14,8 +14,8 @@ import java.io.Serializable;
 public class DishOrderId implements Serializable {
 
     @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    private Integer orderId;
 
     @Column(name = "dish_id", nullable = false)
-    private Long dishId;
+    private Integer dishId;
 }

@@ -1,14 +1,14 @@
 package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Stream;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -31,6 +31,7 @@ public class Dish {
 
     @OneToMany(
             mappedBy = "dish",
+            fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )

@@ -27,6 +27,6 @@ public class Menu {
     @Column(name = "season", nullable = false, length = 32)
     private Season season;
 
-    @OneToMany(mappedBy = "menu")
+    @OneToMany(mappedBy = "menu", fetch = FetchType.LAZY)
     private List<Dish> dishes;
 }

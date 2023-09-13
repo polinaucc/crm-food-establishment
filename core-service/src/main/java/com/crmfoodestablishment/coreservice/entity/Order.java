@@ -1,17 +1,17 @@
 package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -22,9 +22,9 @@ public class Order {
     @Column(name = "id", nullable = false, unique = true)
     private Integer id;
 
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.BINARY)
     @Column(name = "uuid", nullable = false)
-    private UUID uuid;
+    private UUID uuid = UUID.randomUUID();
 
     @JdbcTypeCode(SqlTypes.BINARY)
     @Column(name = "user_uuid", nullable = false)
@@ -38,17 +38,18 @@ public class Order {
 
     @OneToMany(
             mappedBy = "order",
+            fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<DishInOrder> orders;
+    private List<DishInOrder> listOfOrderDishes = new ArrayList<>();
 
     @Column(name = "total_price", precision = 7, scale = 2, nullable = false)
     private BigDecimal totalPrice;
 
     @PrePersist
     public void sumOrder() {
-        totalPrice = orders.stream().map(DishInOrder -> DishInOrder.getDish().getPrice()
+        totalPrice = listOfOrderDishes.stream().map(DishInOrder -> DishInOrder.getDish().getPrice()
                 .multiply(BigDecimal.valueOf(DishInOrder.getCount())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }

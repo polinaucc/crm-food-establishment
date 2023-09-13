@@ -1,11 +1,10 @@
 package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -19,11 +18,11 @@ public class DishInOrder {
     @Column(name = "count", nullable = false)
     private Short count;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("dishId")
     private Dish dish;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("orderId")
     private Order order;
 }
