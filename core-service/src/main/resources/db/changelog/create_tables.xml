@@ -50,10 +50,10 @@
             <column name="uuid" type="uuid">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="user_uuid" type="uuid">
+            <column name="user_uuid" type="binary(16)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="creation_date" type="datetime">
+            <column name="creation_date" type="timestamp">
                 <constraints nullable="false"/>
             </column>
             <column name="comment" type="varchar(128)">
