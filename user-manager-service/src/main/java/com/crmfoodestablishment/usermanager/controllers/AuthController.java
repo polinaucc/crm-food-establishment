@@ -2,6 +2,7 @@ package com.crmfoodestablishment.usermanager.controllers;
 
 import com.crmfoodestablishment.usermanager.entity.User;
 import com.crmfoodestablishment.usermanager.exceptions.InvalidTokenException;
+import com.crmfoodestablishment.usermanager.exceptions.NotFoundException;
 import com.crmfoodestablishment.usermanager.exceptions.WrongUserCredentialsException;
 import com.crmfoodestablishment.usermanager.payloads.LoginRequestPayload;
 import com.crmfoodestablishment.usermanager.payloads.RefreshPayload;
@@ -45,7 +46,7 @@ public class AuthController {
             throw new WrongUserCredentialsException("Wrong password");
         }
 
-        String accessToken = jwtService.issueAccessToken(createdUser.getUserPermissionList());
+        String accessToken = jwtService.issueAccessToken(user.getUserPermissionList());
         String refreshToken = jwtService.issueRefreshToken();
 
         return ResponseEntity.ok(new TokenPairResponsePayload(accessToken, refreshToken));
@@ -82,7 +83,9 @@ public class AuthController {
             throw new WrongUserCredentialsException("Wrong email");
         }
 
-        return ResponseEntity.ok(new TokenPairResponsePayload(accessToken, refreshToken));
+        String accessToken = jwtService.issueAccessToken(user.getUserPermissionList());
+
+        return ResponseEntity.ok(accessToken);
     }
 
     @PostMapping(AUTH_PATH + "/logout")
