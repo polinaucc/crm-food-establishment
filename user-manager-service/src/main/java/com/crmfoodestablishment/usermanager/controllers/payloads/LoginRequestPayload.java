@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.usermanager.payloads;
+package com.crmfoodestablishment.usermanager.controllers.payloads;
 
 import lombok.Data;
 

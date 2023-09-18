@@ -4,19 +4,16 @@ import com.crmfoodestablishment.usermanager.entity.User;
 import com.crmfoodestablishment.usermanager.exceptions.InvalidTokenException;
 import com.crmfoodestablishment.usermanager.exceptions.NotFoundException;
 import com.crmfoodestablishment.usermanager.exceptions.WrongUserCredentialsException;
-import com.crmfoodestablishment.usermanager.payloads.LoginRequestPayload;
-import com.crmfoodestablishment.usermanager.payloads.RefreshPayload;
-import com.crmfoodestablishment.usermanager.payloads.TokenPairResponsePayload;
-import com.crmfoodestablishment.usermanager.payloads.UserCreationRequestPayload;
-
-import com.crmfoodestablishment.usermanager.services.JwtService;
+import com.crmfoodestablishment.usermanager.controllers.payloads.LoginRequestPayload;
+import com.crmfoodestablishment.usermanager.controllers.payloads.TokenPairResponsePayload;
+import com.crmfoodestablishment.usermanager.controllers.payloads.UserCreationRequestPayload;
+import com.crmfoodestablishment.usermanager.security.JwtService;
 import com.crmfoodestablishment.usermanager.services.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,10 +43,12 @@ public class AuthController {
             throw new WrongUserCredentialsException("Wrong password");
         }
 
-        String accessToken = jwtService.issueAccessToken(user.getUserPermissionList());
-        String refreshToken = jwtService.issueRefreshToken();
+        String accessToken = jwtService.issueAccessToken(user);
+        String refreshToken = jwtService.issueRefreshToken(user);
 
-        return ResponseEntity.ok(new TokenPairResponsePayload(accessToken, refreshToken));
+        return ResponseEntity
+                .ok()
+                .body(new TokenPairResponsePayload(accessToken, refreshToken));
     }
 
     @PostMapping(AUTH_PATH + "/register")
@@ -58,38 +57,49 @@ public class AuthController {
     ) {
         User createdUser = userService.createUser(creationData);
 
-        //Питання - може краще передавати в issueTokenPair цілий об'єкт
-        String accessToken = jwtService.issueAccessToken(createdUser.getUserPermissionList());
-        String refreshToken = jwtService.issueRefreshToken();
+        String accessToken = jwtService.issueAccessToken(createdUser);
+        String refreshToken = jwtService.issueRefreshToken(createdUser);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Location", USER_PATH + "/" + createdUser.getId());
+        headers.add("Location", USER_CRUD_PATH + "/" + createdUser.getId());
 
-        return new ResponseEntity<>(new TokenPairResponsePayload(accessToken, refreshToken), headers, HttpStatus.OK);
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(new TokenPairResponsePayload(accessToken, refreshToken));
     }
 
     @PostMapping(AUTH_PATH + "/refresh")
     //Як транспортувати решреш токен?
-    //І що краще закодувати айді(імейл) в рефреш токен, або окремо?
-    public ResponseEntity<String> refresh(@RequestBody @Valid RefreshPayload refreshPayload) {
-        if(!jwtService.validateRefreshToken(refreshPayload.getRefreshToken())) {
+    public ResponseEntity<String> refresh(
+            @RequestBody String refreshToken
+    ) {
+        if(!jwtService.validateRefreshToken(refreshToken)) {
             throw new InvalidTokenException("Invalid refresh token given");
         }
 
         User user;
         try {
-            user = userService.findByEmail(refreshPayload.getEmail());
+            user = userService.findByEmail(
+                    jwtService.parseRefreshToken()
+                            .claims()
+                            .getSubject()
+            );
         } catch (NotFoundException e) {
             throw new WrongUserCredentialsException("Wrong email");
         }
 
-        String accessToken = jwtService.issueAccessToken(user.getUserPermissionList());
+        String accessToken = jwtService.issueAccessToken(user);
 
-        return ResponseEntity.ok(accessToken);
+        return ResponseEntity
+                .ok()
+                .body(accessToken);
     }
 
     @PostMapping(AUTH_PATH + "/logout")
-    public ResponseEntity<Void> logout(@RequestBody @Valid String userEmail) {
+    public ResponseEntity<Void> logout(
+            @RequestBody String userEmail
+    ) {
         jwtService.invalidateRefreshToken(userEmail);
 
         return ResponseEntity.ok().build();
