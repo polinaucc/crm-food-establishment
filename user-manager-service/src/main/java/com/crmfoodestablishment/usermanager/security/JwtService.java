@@ -10,10 +10,6 @@ public interface JwtService {
 
     String issueRefreshToken(User user);
 
-    boolean validateAccessToken(String accessToken);
-
-    boolean validateRefreshToken(String refreshToken);
-
     void invalidateRefreshToken(String userEmail);
 
     AccessToken parseAccessToken(String accessToken);

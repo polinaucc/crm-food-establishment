@@ -8,6 +8,7 @@ import com.crmfoodestablishment.usermanager.controllers.payloads.LoginRequestPay
 import com.crmfoodestablishment.usermanager.controllers.payloads.TokenPairResponsePayload;
 import com.crmfoodestablishment.usermanager.controllers.payloads.UserCreationRequestPayload;
 import com.crmfoodestablishment.usermanager.security.JwtService;
+import com.crmfoodestablishment.usermanager.security.models.RefreshToken;
 import com.crmfoodestablishment.usermanager.services.UserService;
 
 import jakarta.validation.Valid;
@@ -74,19 +75,18 @@ public class AuthController {
     public ResponseEntity<String> refresh(
             @RequestBody String refreshToken
     ) {
-        if(!jwtService.validateRefreshToken(refreshToken)) {
-            throw new InvalidTokenException("Invalid refresh token given");
-        }
+        RefreshToken parsedRefreshToken = jwtService.parseRefreshToken(refreshToken);
+
 
         User user;
         try {
             user = userService.findByEmail(
-                    jwtService.parseRefreshToken()
+                    parsedRefreshToken
                             .claims()
                             .getSubject()
             );
         } catch (NotFoundException e) {
-            throw new WrongUserCredentialsException("Wrong email");
+            throw new InvalidTokenException("Given invalid refresh token: no such logged in user");
         }
 
         String accessToken = jwtService.issueAccessToken(user);

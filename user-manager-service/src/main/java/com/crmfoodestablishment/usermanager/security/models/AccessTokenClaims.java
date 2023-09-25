@@ -1,5 +1,8 @@
 package com.crmfoodestablishment.usermanager.security.models;
 
-public record AccessTokenClaims(
+import java.util.Date;
 
+public record AccessTokenClaims(
+        Date issuedAt,
+        Date expiration
 ) {}
