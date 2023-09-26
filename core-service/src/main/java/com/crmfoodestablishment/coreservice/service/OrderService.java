@@ -6,7 +6,5 @@ import java.util.UUID;
 
 public interface OrderService {
 
-    UUID createOrder(NewOrderDto newOrderDto);
-
-    void createDishInOrder(NewOrderDto newOrderDto);
+    UUID createOrder(NewOrderDto newOrderDto);;
 }

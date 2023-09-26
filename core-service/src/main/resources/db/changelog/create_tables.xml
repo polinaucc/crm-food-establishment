@@ -43,14 +43,14 @@
 
     <changeSet id="4" author="zhenya_baraniuk">
         <comment>Create are order table with all the appropriate fields.</comment>
-        <createTable tableName="order">
+        <createTable tableName="orders">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="uuid" type="uuid">
+            <column name="uuid" type="binary(16)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="user_uuid" type="uuid">
+            <column name="user_uuid" type="binary(16)">
                 <constraints nullable="false" unique="true"/>
             </column>
             <column name="creation_date" type="datetime">
@@ -77,7 +77,7 @@
             </column>
             <column name="order_id" type="int">
                 <constraints
-                        foreignKeyName="fk_order_id" references="order(id)"
+                        foreignKeyName="fk_order_id" references="orders(id)"
                         primaryKey="true"
                         primaryKeyName="id"
                         nullable="false"/>

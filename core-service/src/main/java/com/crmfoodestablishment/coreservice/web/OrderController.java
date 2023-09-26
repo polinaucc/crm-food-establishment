@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("test-api/entity")
+@RequestMapping("orders")
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -20,9 +20,6 @@ public class OrderController {
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<UUID> createOrder(@RequestBody @Validated NewOrderDto newOrderDto) {
-        NewOrderDto clonedNewOrderDro = new NewOrderDto(newOrderDto);
-        orderService.createOrder(newOrderDto);
-        orderService.createDishInOrder(clonedNewOrderDro);
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(newOrderDto));
     }
 }

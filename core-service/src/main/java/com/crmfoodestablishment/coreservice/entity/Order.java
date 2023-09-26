@@ -15,6 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "orders")
 public class Order {
 
     @Id
@@ -39,7 +40,7 @@ public class Order {
     @OneToMany(
             mappedBy = "order",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             orphanRemoval = true
     )
     private List<DishInOrder> listOfOrderDishes = new ArrayList<>();
@@ -52,5 +53,10 @@ public class Order {
         totalPrice = listOfOrderDishes.stream().map(DishInOrder -> DishInOrder.getDish().getPrice()
                 .multiply(BigDecimal.valueOf(DishInOrder.getCount())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public void setListOfOrderDishes(List<DishInOrder> listOfOrderDishes) {
+        this.listOfOrderDishes = listOfOrderDishes;
+        this.listOfOrderDishes.forEach(dishInOrder -> dishInOrder.setOrder(this));
     }
 }
