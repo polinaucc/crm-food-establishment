@@ -1,9 +1,8 @@
 package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.util.List;
 
 @Data
@@ -17,7 +16,7 @@ public class Menu {
     @Column(name = "id", nullable = false, unique = true)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 64)
+    @Column(name = "name", nullable = false, unique = true, length = 64)
     private String name;
 
     @Column(name = "comment", length = 128)
@@ -29,4 +28,16 @@ public class Menu {
 
     @OneToMany(mappedBy = "menu")
     private List<Dish> dishes;
+
+    public Menu(String name, String comment, Season season) {
+        this.name = name;
+        this.comment = comment;
+        this.season = season;
+    }
+    public Menu(Integer id, String name, String comment, Season season) {
+        this.id = id;
+        this.name = name;
+        this.comment = comment;
+        this.season = season;
+    }
 }

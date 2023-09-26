@@ -1,59 +1,43 @@
 package com.crmfoodestablishment.coreservice.controller;
 
 import com.crmfoodestablishment.coreservice.entity.Menu;
-import com.crmfoodestablishment.coreservice.exception.MenuNotFoundException;
-import com.crmfoodestablishment.coreservice.repository.MenuRepository;
+import com.crmfoodestablishment.coreservice.service.MenuService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("api/v1/menu")
 @RequiredArgsConstructor
 public class MenuController {
 
-    private final MenuRepository menuRepository;
+    private final MenuService menuService;
 
-    @PostMapping("/menu/create")
-    public void createMenu(Menu menu) {
-        menuRepository.save(menu);
+    @PostMapping("/create")
+    public void createMenu(@Validated @RequestBody Menu menu) {
+        menuService.addMenu(menu);
     }
 
-    @GetMapping("/menu")
-    public List<Menu> getAllStudent() {
-        return menuRepository.findAll();
+    @GetMapping()
+    public List<Menu> getAllMenuList() {
+        return menuService.findAllMenu();
     }
 
-    @GetMapping("/menu/{id}")
-    public Menu menuView(@PathVariable Integer id) {
-        Optional<Menu> currentMenu = menuRepository.findById(id);
-
-        if (currentMenu.isEmpty()) {
-            throw new MenuNotFoundException("Menu not exist with id: " + id);
-        }
-
-        return currentMenu.get();
+    @GetMapping("/{id}")
+    public String menuView(@PathVariable(name = "id") Integer id) {
+        Menu menu = menuService.findByIdMenu(id);
+        return menu.toString();
     }
 
-    @PutMapping("/menu/{id}")
-    public ResponseEntity<Menu> updateMenu(@PathVariable Integer id, @RequestBody Menu menu) {
-        Optional<Menu> currentMenu = menuRepository.findById(id);
-
-        if (currentMenu.isEmpty()) {
-            throw new MenuNotFoundException("Menu not exist with id: " + id);
-        }
-
-        menu.setId(id);
-        menuRepository.save(menu);
-
-        return ResponseEntity.noContent().build();
+    @PutMapping("/{id}")
+    public void updateMenu(@PathVariable(name = "id") Integer id, @RequestBody Menu menu) {
+        menuService.update(id, menu);
     }
 
-    @DeleteMapping("/menu/{id}")
-    public void deleteMenu(@PathVariable Integer id) {
-        menuRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public void deleteMenu(@PathVariable(name = "id") Integer id) {
+        menuService.deleteMenu(id);
     }
 }

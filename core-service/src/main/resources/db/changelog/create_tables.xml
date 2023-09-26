@@ -12,7 +12,7 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(64)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="comment" type="varchar(128)">
                 <constraints nullable="true"/>
