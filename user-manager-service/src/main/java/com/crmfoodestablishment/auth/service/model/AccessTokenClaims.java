@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.usermanager.security.models;
+package com.crmfoodestablishment.auth.service.model;
 
 import java.util.Date;
 

@@ -1,9 +1,7 @@
-package com.crmfoodestablishment.usermanager.controllers.payloads;
+package com.crmfoodestablishment.auth.controller.payload;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 
-@Data
 @AllArgsConstructor
 public class TokenPairResponsePayload {
 

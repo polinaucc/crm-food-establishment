@@ -1,8 +1,8 @@
-package com.crmfoodestablishment.usermanager.security;
+package com.crmfoodestablishment.auth.service;
 
 import com.crmfoodestablishment.usermanager.entity.User;
-import com.crmfoodestablishment.usermanager.security.models.AccessToken;
-import com.crmfoodestablishment.usermanager.security.models.RefreshToken;
+import com.crmfoodestablishment.auth.service.model.AccessToken;
+import com.crmfoodestablishment.auth.service.model.RefreshToken;
 
 public interface JwtService {
 

@@ -1,8 +1,8 @@
-package com.crmfoodestablishment.usermanager.controllers.payloads;
+package com.crmfoodestablishment.auth.controller.payload;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class LoginRequestPayload {
 
     private String email;
