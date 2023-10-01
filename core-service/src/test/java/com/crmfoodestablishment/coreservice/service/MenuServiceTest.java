@@ -24,50 +24,51 @@ class MenuServiceTest {
     MenuRepository menuRepository;
 
     @InjectMocks
-    private MenuService underTest;
+    private MenuService service;
 
-    @BeforeEach
-    void setUp() {
-        underTest = new MenuService(menuRepository);
-    }
 
-    @Test
-    void canAddNewMenu() {
+    private static Menu createMenu() {
         Menu menu = new Menu(
                 "summer menu",
                 "new summer menu",
                 Season.SUMMER
         );
+        return menu;
+    }
 
-        underTest.addMenu(menu);
 
+    @BeforeEach
+    void setUp() {
+        service = new MenuService(menuRepository);
+    }
+
+    @Test
+    void canAddNewMenu() {
+        Menu menu = createMenu();
+
+        service.addMenu(menu);
         ArgumentCaptor<Menu> menuArgumentCaptor = ArgumentCaptor.forClass(Menu.class);
-
         verify(menuRepository)
                 .save(menuArgumentCaptor.capture());
-
         Menu captoreMenu = menuArgumentCaptor.getValue();
+
         assertThat(captoreMenu).isEqualTo(menu);
     }
 
     @Test
     void canGetExceptionWhenMenuIdExist() {
-        Menu menu = new Menu(
-                "summer menu",
-                "new summer menu",
-                Season.SUMMER
-        );
+        Menu menu = createMenu();
         doReturn(true).when(menuRepository).existsById(menu.getId());
 
-        assertThatThrownBy(() -> underTest.addMenu(menu))
+        assertThatThrownBy(() -> service.addMenu(menu))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Menu name " + menu.getName() +
+                .hasMessageContaining("Menu name: " + menu.getName() +
                         " has been taken");
     }
 
     @Test
     void canGetAllMenu() {
-        underTest.findAllMenu();
+        service.findAllMenu();
 
         verify(menuRepository).findAll();
     }
@@ -75,11 +76,7 @@ class MenuServiceTest {
     @Test
     void canGetMenuWithId() {
         int id = 1;
-        Menu menu = new Menu(
-                "summer menu",
-                "new summer menu",
-                Season.SUMMER
-        );
+        Menu menu = createMenu();
 
         when(menuRepository.findById(id))
                 .thenReturn(Optional.of(menu));
@@ -90,40 +87,39 @@ class MenuServiceTest {
     @Test
     void canGetExceptionWhenIdMenuNotFound() {
         int id = 1;
-        Menu menu = new Menu(
-                "summer menu",
-                "new summer menu",
-                Season.SUMMER
-        );
 
         given(menuRepository.findById(id)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> underTest.findByIdMenu(id))
+        assertThatThrownBy(() -> service.findByIdMenu(id))
                 .isInstanceOf(MenuNotFoundException.class)
                 .hasMessage("No menu found for this id");
     }
 
     @Test
-    @Disabled
     void canDeleteMenu() {
-        int id = 1;
-        Menu menu = new Menu(id,
-                "summer menu",
-                "new summer menu",
-                Season.SUMMER
-        );
+        Menu menu = createMenu();
+        service.addMenu(menu);
+        when(menuRepository.findById(menu.getId()))
+                .thenReturn(Optional.of(menu));
 
-        underTest.deleteMenu(id);
+        Boolean deleteMenu = service.deleteMenu(menu.getId());
 
-        ArgumentCaptor<Menu> menuArgumentCaptor = ArgumentCaptor.forClass(Menu.class);
-        verify(menuRepository).delete(menuArgumentCaptor.capture());
-//        Menu captoreMenu = menuArgumentCaptor.getValue();
-//        assertThat(captoreMenu).isEqualTo(menu);
+        assertThat(deleteMenu).isTrue();
     }
 
     @Test
-    @Disabled
-    void update() {
+    void canUpdateMenu() {
+        Menu menu = createMenu();
+        service.addMenu(menu);
+        when(menuRepository.findById(menu.getId()))
+                .thenReturn(Optional.of(menu));
+        menu.setName("winter menu");
+        menu.setComment("new winter menu");
+        menu.setSeason(Season.WINTER);
 
+        service.update(menu.getId(), menu);
+
+        Menu updatedMenu = service.findByIdMenu(menu.getId());
+        assertThat(updatedMenu).isEqualTo(menu);
     }
 }

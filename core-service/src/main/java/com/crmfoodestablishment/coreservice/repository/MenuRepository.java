@@ -9,5 +9,4 @@ import java.util.Optional;
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Integer> {
 
-    boolean findMenuByName(String name);
 }
