@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class AuthControllerAdvice {
 
-    @ExceptionHandler(value = {WrongUserCredentialsException.class})
+    @ExceptionHandler(value = {InvalidUserCredentialsException.class})
     public ResponseEntity<ApiErrorInfo> handleWrongUserCredentials(
-            WrongUserCredentialsException exception
+            InvalidUserCredentialsException exception
     ) {
         ApiErrorInfo errorInfo = ApiErrorInfo.builder()
                 .title("Wrong user credentials exception")
@@ -37,9 +37,9 @@ public class AuthControllerAdvice {
         return new ResponseEntity<>(errorInfo, errorInfo.getStatus());
     }
 
-    @ExceptionHandler(value = {RegistrationException.class})
+    @ExceptionHandler(value = {FailedRegistrationException.class})
     public ResponseEntity<ApiErrorInfo> handleRegistration(
-            RegistrationException exception
+            FailedRegistrationException exception
     ) {
         ApiErrorInfo errorInfo = ApiErrorInfo.builder()
                 .title("Registration exception")

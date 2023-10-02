@@ -35,5 +35,4 @@ public class UserPersonalInfo {
 
     @Column(name = "address", length = 1024)
     private String address;
-
 }

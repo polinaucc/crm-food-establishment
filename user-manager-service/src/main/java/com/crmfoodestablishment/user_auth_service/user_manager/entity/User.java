@@ -14,19 +14,18 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@Table(name = "users")
 @RequiredArgsConstructor
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     private Integer id;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password", length = 32)
     private String password;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(name = "email", unique = true, length = 64)
     private String email;
 
     @Column(name = "uuid", columnDefinition = "BINARY")

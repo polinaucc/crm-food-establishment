@@ -4,11 +4,12 @@ import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.RegisterResponsePayload;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.TokenPairResponsePayload;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.UserCreationRequestPayload;
+import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.FailedRegistrationException;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.InvalidTokenException;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.RegistrationException;
-import com.crmfoodestablishment.user_auth_service.user_manager.exception.NotFoundException;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.WrongUserCredentialsException;
+import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.InvalidUserCredentialsException;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.service.model.RefreshToken;
+
+import com.crmfoodestablishment.user_auth_service.user_manager.exception.NotFoundException;
 import com.crmfoodestablishment.user_auth_service.user_manager.entity.User;
 import com.crmfoodestablishment.user_auth_service.user_manager.services.UserService;
 
@@ -32,15 +33,13 @@ public class AuthServiceImpl implements AuthService {
         //multiple refresh i.e. sessions allowed for same user because
         //he may also log in from mobile
 
-        User user;
-        try {
-            user = userService.findByEmail(credentials.getEmail());
-        } catch (NotFoundException e) {
-            throw new WrongUserCredentialsException("Wrong email");
-        }
+        User user = findUserByEmailOrThrow(
+                credentials.getEmail(),
+                new InvalidUserCredentialsException("Wrong email")
+        );
 
         if(!user.getPassword().equals(credentials.getPassword())) {
-            throw new WrongUserCredentialsException("Wrong password");
+            throw new InvalidUserCredentialsException("Wrong password");
         }
 
         String accessToken = jwtService.issueAccessToken(user);
@@ -53,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public RegisterResponsePayload register(UserCreationRequestPayload creationData) {
         if (userService.existsByEmail(creationData.getEmail())) {
-            throw new RegistrationException("Registration exception: given already occupied email");
+            throw new FailedRegistrationException("Registration exception: given already occupied email");
         }
 
         creationData.setPassword(
@@ -77,17 +76,11 @@ public class AuthServiceImpl implements AuthService {
     public String refresh(String refreshToken) {
         RefreshToken parsedRefreshToken = jwtService.parseRefreshToken(refreshToken);
 
-        User user;
         //a bit redundant check needed for situation when user is deleted or email changed
-        try {
-            user = userService.findByEmail(
-                    parsedRefreshToken
-                            .claims()
-                            .getSubject()
-            );
-        } catch (NotFoundException e) {
-            throw new InvalidTokenException("Given invalid refresh token: no such logged in user");
-        }
+        User user = findUserByEmailOrThrow(
+                parsedRefreshToken.claims().getSubject(),
+                new InvalidTokenException("Given invalid refresh token: no such logged in user")
+        );
 
         log.info("User: " + user.getEmail() + " refreshed access token");
         return jwtService.issueAccessToken(user);
@@ -97,5 +90,13 @@ public class AuthServiceImpl implements AuthService {
     public void logout(String userEmail) {
         jwtService.invalidateRefreshToken(userEmail);
         log.info("User: " + userEmail + " logged out");
+    }
+
+    private User findUserByEmailOrThrow(String email, RuntimeException exception) {
+        try {
+            return userService.findByEmail(email);
+        } catch (NotFoundException e) {
+            throw exception;
+        }
     }
 }

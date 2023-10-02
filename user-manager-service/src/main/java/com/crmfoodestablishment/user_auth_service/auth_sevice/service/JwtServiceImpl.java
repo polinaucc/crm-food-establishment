@@ -2,7 +2,6 @@ package com.crmfoodestablishment.user_auth_service.auth_sevice.service;
 
 import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.InvalidTokenException;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.service.model.AccessToken;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.model.AccessTokenClaims;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.service.model.RefreshToken;
 import com.crmfoodestablishment.user_auth_service.user_manager.entity.User;
 
@@ -36,6 +35,7 @@ public class JwtServiceImpl implements JwtService {
     private final PrivateKey accessTokenSecretKey;
     private final Long accessTokenExpirationTime;
     private final JwtParser accessTokenParser;
+    private final AccessTokenHandlerAdapter accessTokenHandlerAdapter;
 
     private final StringRedisTemplate refreshTokenRedisTemplate;
 
@@ -57,16 +57,16 @@ public class JwtServiceImpl implements JwtService {
     ) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
-        this.refreshTokenSecretKey = convertStringToPrivateKey(refreshTokenSecretKey, keyFactory);
-        PublicKey refreshTokenPublicKeyObject = convertStringToPublicKey(refreshTokenPublicKey, keyFactory);
+        this.refreshTokenSecretKey = convertStringTokenToPrivateKey(refreshTokenSecretKey, keyFactory);
+        PublicKey refreshTokenPublicKeyObject = convertStringTokenToPublicKey(refreshTokenPublicKey, keyFactory);
         this.refreshTokenExpirationTime = refreshTokenExpirationTime;
         refreshTokenParser = Jwts.parserBuilder()
                 .setSigningKey(refreshTokenPublicKeyObject)
                 .build();
+        accessTokenHandlerAdapter = new AccessTokenHandlerAdapter();
 
-
-        this.accessTokenSecretKey = convertStringToPrivateKey(accessTokenSecretKey, keyFactory);
-        PublicKey accessTokenPublicKeyObject = convertStringToPublicKey(accessTokenPublicKey, keyFactory);
+        this.accessTokenSecretKey = convertStringTokenToPrivateKey(accessTokenSecretKey, keyFactory);
+        PublicKey accessTokenPublicKeyObject = convertStringTokenToPublicKey(accessTokenPublicKey, keyFactory);
         this.accessTokenExpirationTime = accessTokenExpirationTime;
         accessTokenParser = Jwts.parserBuilder()
                 .setSigningKey(accessTokenPublicKeyObject)
@@ -130,18 +130,10 @@ public class JwtServiceImpl implements JwtService {
         AccessToken parsedAccessToken;
 
         try {
-            parsedAccessToken = accessTokenParser.parse(accessToken, new JwtHandlerAdapter<>() {
-                @Override
-                public AccessToken onClaimsJws(Jws<Claims> jws) {
-                    return new AccessToken(
-                            jws.getHeader(),
-                            new AccessTokenClaims(
-                                    jws.getBody().getIssuedAt(),
-                                    jws.getBody().getExpiration()
-                            )
-                    );
-                }
-            });
+            parsedAccessToken = accessTokenParser.parse(
+                    accessToken,
+                    accessTokenHandlerAdapter
+            );
         } catch (SignatureException e) {
             throw new InvalidTokenException("Invalid token: given token with invalid signature");
         }
@@ -165,9 +157,10 @@ public class JwtServiceImpl implements JwtService {
             throw new InvalidTokenException("Invalid token: given token with invalid signature");
         }
 
-        if (Boolean.FALSE.equals(refreshTokenRedisTemplate.hasKey(parsedRefreshToken
-                .getBody()
-                .getSubject()))
+        if (Boolean.FALSE.equals(refreshTokenRedisTemplate.hasKey(
+                parsedRefreshToken
+                    .getBody()
+                    .getSubject()))
         ) {
             throw new InvalidTokenException(
                     "Given invalid refresh token: no such tokens for that subject"
@@ -180,7 +173,7 @@ public class JwtServiceImpl implements JwtService {
         );
     }
 
-    private PrivateKey convertStringToPrivateKey(
+    private PrivateKey convertStringTokenToPrivateKey(
             String token,
             KeyFactory keyFactory
     ) throws InvalidKeySpecException {
@@ -189,7 +182,7 @@ public class JwtServiceImpl implements JwtService {
         return keyFactory.generatePrivate(tokenSecretKeySpec);
     }
 
-    private PublicKey convertStringToPublicKey(
+    private PublicKey convertStringTokenToPublicKey(
             String token,
             KeyFactory keyFactory
     ) throws InvalidKeySpecException {
