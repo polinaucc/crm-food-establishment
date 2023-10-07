@@ -5,10 +5,11 @@ import com.crmfoodestablishment.coreservice.entity.Season;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @Data
+@RequiredArgsConstructor
 public class MenuDto {
 
     private Integer id;

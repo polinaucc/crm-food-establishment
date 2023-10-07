@@ -2,13 +2,14 @@ package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor
 public class Menu {
 
     @Id
@@ -34,10 +35,5 @@ public class Menu {
         this.comment = comment;
         this.season = season;
     }
-    public Menu(Integer id, String name, String comment, Season season) {
-        this.id = id;
-        this.name = name;
-        this.comment = comment;
-        this.season = season;
-    }
+
 }
