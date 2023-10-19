@@ -27,7 +27,7 @@ public class AccessTokenHandlerAdapter extends JwtHandlerAdapter<AccessToken> {
                         ),
                         jws.getBody().get(
                                 "permissions",
-                                (Class<List<Permission>>) new ArrayList<Permission>().getClass()
+                                new ArrayList<Permission>().getClass()
                         )
                 )
         );
