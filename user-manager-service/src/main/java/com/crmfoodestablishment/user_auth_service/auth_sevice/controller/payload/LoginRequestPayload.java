@@ -10,6 +10,7 @@ import lombok.Setter;
 public class LoginRequestPayload {
 
     @Email
+    @NotBlank
     private String email;
 
     @NotBlank
