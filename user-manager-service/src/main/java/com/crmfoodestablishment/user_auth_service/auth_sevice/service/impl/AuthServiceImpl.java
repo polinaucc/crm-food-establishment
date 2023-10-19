@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.service;
+package com.crmfoodestablishment.user_auth_service.auth_sevice.service.impl;
 
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.LoginRequestPayload;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.RegisterResponsePayload;
@@ -7,7 +7,9 @@ import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload
 import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.FailedRegistrationException;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.InvalidTokenException;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.InvalidUserCredentialsException;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.model.RefreshToken;
+import com.crmfoodestablishment.user_auth_service.auth_sevice.service.AuthService;
+import com.crmfoodestablishment.user_auth_service.auth_sevice.service.JwtService;
+import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.RefreshToken;
 
 import com.crmfoodestablishment.user_auth_service.user_manager.exception.NotFoundException;
 import com.crmfoodestablishment.user_auth_service.user_manager.entity.User;
@@ -18,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +37,12 @@ public class AuthServiceImpl implements AuthService {
         //multiple refresh i.e. sessions allowed for same user because
         //he may also log in from mobile
 
-        User user = findUserByEmailOrThrow(
-                credentials.getEmail(),
-                new InvalidUserCredentialsException("Wrong email")
-        );
+        User user;
+        try {
+            user = userService.findByEmail(credentials.getEmail());
+        } catch (NotFoundException e) {
+            throw new InvalidUserCredentialsException("Wrong email");
+        }
 
         if(!user.getPassword().equals(credentials.getPassword())) {
             throw new InvalidUserCredentialsException("Wrong password");
@@ -76,27 +82,20 @@ public class AuthServiceImpl implements AuthService {
     public String refresh(String refreshToken) {
         RefreshToken parsedRefreshToken = jwtService.parseRefreshToken(refreshToken);
 
-        //a bit redundant check needed for situation when user is deleted or email changed
-        User user = findUserByEmailOrThrow(
-                parsedRefreshToken.claims().getSubject(),
-                new InvalidTokenException("Given invalid refresh token: no such logged in user")
-        );
+        User user;
+        try {
+            user = userService.findByUuid(parsedRefreshToken.claims().sub());
+        } catch (NotFoundException e) {
+            throw new InvalidTokenException("Invalid subject: no such user with that id");
+        }
 
-        log.info("User: " + user.getEmail() + " refreshed access token");
+        log.info("User: " + user.getUuid() + " refreshed access token");
         return jwtService.issueAccessToken(user);
     }
 
     @Override
-    public void logout(String userEmail) {
-        jwtService.invalidateRefreshToken(userEmail);
-        log.info("User: " + userEmail + " logged out");
-    }
-
-    private User findUserByEmailOrThrow(String email, RuntimeException exception) {
-        try {
-            return userService.findByEmail(email);
-        } catch (NotFoundException e) {
-            throw exception;
-        }
+    public void logout(UUID userUuid) {
+        jwtService.invalidateRefreshToken(userUuid);
+        log.info("User: " + userUuid + " logged out");
     }
 }

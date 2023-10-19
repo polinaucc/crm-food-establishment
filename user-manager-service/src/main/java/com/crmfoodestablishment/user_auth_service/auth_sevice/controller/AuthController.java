@@ -7,17 +7,20 @@ import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.TokenPairResponsePayload;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 
+import org.hibernate.validator.constraints.UUID;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Validated
 public class AuthController {
 
     public static final String AUTH_PATH = "/api/v1/auth";
@@ -59,11 +62,15 @@ public class AuthController {
                 .body(accessToken);
     }
 
-    @PostMapping(AUTH_PATH + "/logout")
+    @PostMapping(AUTH_PATH + "/logout/{userUuid}")
     public ResponseEntity<Void> logout(
-            @RequestBody @Email String userEmail
+            @PathVariable
+            @UUID(allowNil = false)
+            String userUuid
     ) {
-        authService.logout(userEmail);
+        authService.logout(
+                java.util.UUID.fromString(userUuid)
+        );
 
         return ResponseEntity.ok().build();
     }

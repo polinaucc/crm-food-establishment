@@ -5,6 +5,8 @@ import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.TokenPairResponsePayload;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.UserCreationRequestPayload;
 
+import java.util.UUID;
+
 public interface AuthService {
 
     TokenPairResponsePayload login(LoginRequestPayload credentials);
@@ -13,5 +15,5 @@ public interface AuthService {
 
     String refresh(String refreshToken);
 
-    void logout(String userEmail);
+    void logout(UUID userUuid);
 }

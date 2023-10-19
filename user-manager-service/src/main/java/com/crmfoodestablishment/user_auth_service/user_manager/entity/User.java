@@ -38,4 +38,14 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private UserPersonalInfo userPersonalInfo;
 
+    public List<Permission> getPermissionsList() {
+        List<Permission> permissionList = new ArrayList<>();
+
+        this.getUserPermissionList()
+                .forEach(
+                        userPermission -> permissionList.add(userPermission.getUserPermissionId().getPermission())
+                );
+
+        return permissionList;
+    }
 }

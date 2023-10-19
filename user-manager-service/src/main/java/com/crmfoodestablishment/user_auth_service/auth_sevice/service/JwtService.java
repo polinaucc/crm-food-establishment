@@ -1,8 +1,10 @@
 package com.crmfoodestablishment.user_auth_service.auth_sevice.service;
 
 import com.crmfoodestablishment.user_auth_service.user_manager.entity.User;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.model.AccessToken;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.model.RefreshToken;
+import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.AccessToken;
+import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.RefreshToken;
+
+import java.util.UUID;
 
 public interface JwtService {
 
@@ -10,7 +12,7 @@ public interface JwtService {
 
     String issueRefreshToken(User user);
 
-    void invalidateRefreshToken(String userEmail);
+    void invalidateRefreshToken(UUID userUuid);
 
     AccessToken parseAccessToken(String accessToken);
 
