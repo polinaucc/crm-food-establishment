@@ -2,17 +2,22 @@ package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor(access = AccessLevel.PUBLIC)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@RequiredArgsConstructor
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Menu {
 
     @Id
+    @Column(name = "uuid", nullable = false, unique = true, columnDefinition = "BINARY(16)")
+    @JdbcTypeCode(SqlTypes.BINARY)
+    private UUID uuid;
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
     private Integer id;
@@ -35,5 +40,4 @@ public class Menu {
         this.comment = comment;
         this.season = season;
     }
-
 }

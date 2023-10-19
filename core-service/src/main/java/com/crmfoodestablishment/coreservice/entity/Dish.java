@@ -2,10 +2,8 @@ package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Data
 @NoArgsConstructor
@@ -21,7 +19,6 @@ public class Dish {
     @Column(name = "price", precision = 7, scale = 2, nullable = false)
     private BigDecimal price;
 
-    @lombok.Getter
     @Column(name = "ingredients", nullable = false, length = 512)
     private String ingredients;
 

@@ -23,11 +23,11 @@ public class Order {
     private Integer id;
 
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "uuid", nullable = false)
+    @Column(name = "uuid", nullable = false, unique = true)
     private UUID uuid;
 
     @JdbcTypeCode(SqlTypes.BINARY)
-    @Column(name = "user_uuid", nullable = false)
+    @Column(name = "user_uuid", nullable = false, unique = true)
     private UUID userUuid;
 
     @Column(name = "creation_date", nullable = false)

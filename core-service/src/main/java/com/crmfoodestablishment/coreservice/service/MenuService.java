@@ -7,33 +7,35 @@ import com.crmfoodestablishment.coreservice.mapper.MenuMapper;
 import com.crmfoodestablishment.coreservice.repository.MenuRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class MenuService {
 
     private final MenuRepository menuRepository;
+    private final MenuMapper menuMapper = Mappers.getMapper(MenuMapper.class);
 
-    private final MenuMapper menuMapper;
-
-    private Menu checkIfMenuExist(Integer id) {
-        return menuRepository.findById(id)
-                .orElseThrow(() -> new MenuNotFoundException("No menu found for this id"));
+    private Menu checkIfMenuExist(UUID uuid) {
+        return menuRepository.findById(uuid)
+                .orElseThrow(() -> new MenuNotFoundException("No menu found for this uuid"));
 
     }
 
-    public Integer addMenu(MenuDto menuDto) {
-        boolean idExist = menuRepository.existsById(menuDto.getId());
-        if (idExist) {
+    public UUID addMenu(MenuDto menuDto) {
+        boolean uuidExist = menuRepository.existsByUuid(menuDto.getUuid());
+        if (uuidExist) {
             throw new IllegalStateException("Menu name: " + menuDto.getName() + " has been taken");
         }
+
         Menu menuToSave = menuMapper.fromMenuDtoToMenuEntity(menuDto);
         Menu savedMenu = menuRepository.save(menuToSave);
 
         MenuDto savedMenuDto = menuMapper.fromMenuEntityToMenuDto(savedMenu);
-        return savedMenuDto.getId();
+        return savedMenuDto.getUuid();
     }
 
     public List<MenuDto> findAllMenu() {
@@ -42,23 +44,23 @@ public class MenuService {
                 .toList();
     }
 
-    public MenuDto findByMenuId(Integer id) {
-        Menu menu = checkIfMenuExist(id);
+    public MenuDto findByMenuId(UUID uuid) {
+        Menu menu = checkIfMenuExist(uuid);
         return menuMapper.fromMenuEntityToMenuDto(menu);
     }
 
     @Transactional
-    public MenuDto update(Integer id, MenuDto menuDto) {
-        checkIfMenuExist(id);
+    public MenuDto update(UUID uuid, MenuDto menuDto) {
+        checkIfMenuExist(uuid);
         Menu menu = menuMapper.fromMenuDtoToMenuEntity(menuDto);
         Menu savedMenu = menuRepository.save(menu);
 
         return menuMapper.fromMenuEntityToMenuDto(savedMenu);
     }
 
-    public Integer deleteMenu(Integer id) {
-        checkIfMenuExist(id);
-        menuRepository.deleteById(id);
-        return id;
+    public UUID deleteMenu(UUID uuid) {
+        Menu menu = checkIfMenuExist(uuid);
+        menuRepository.deleteById(uuid);
+        return menu.getUuid();
     }
 }

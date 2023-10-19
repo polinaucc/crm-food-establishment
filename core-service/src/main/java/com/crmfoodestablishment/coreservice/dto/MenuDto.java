@@ -1,28 +1,32 @@
 package com.crmfoodestablishment.coreservice.dto;
 
-import com.crmfoodestablishment.coreservice.entity.Dish;
 import com.crmfoodestablishment.coreservice.entity.Season;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import java.util.List;
+import java.util.UUID;
 
 @Data
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class MenuDto {
 
-    private Integer id;
+    private UUID uuid = UUID.randomUUID();
 
-    @NotBlank
     @NotNull
+    @NotBlank
     private String name;
 
-    @NotBlank
-    @NotNull
     private String comment;
 
+    @NotNull
     private Season season;
 
-    private List<Dish> dishes;
+    private List<DishDto> dishes;
 }
