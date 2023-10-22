@@ -2,9 +2,13 @@ package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @Getter
@@ -13,11 +17,14 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 @Entity
 public class Dish {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
     private Integer id;
+
+    @JdbcTypeCode(SqlTypes.UUID)
+    @Column(name = "uuid", nullable = false)
+    private UUID uuid = UUID.randomUUID(); //TODO: add to the DB
 
     @Column(name = "price", precision = 7, scale = 2, nullable = false)
     private BigDecimal price;
@@ -32,12 +39,13 @@ public class Dish {
     @OneToMany(
             mappedBy = "dish",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.MERGE,
             orphanRemoval = true
     )
-    public List<DishInOrder> dishes;
+    private List<DishInOrder> orders;
 
-    public Stream<DishInOrder> getDishes() {
-        return dishes.stream();
+    public void setOrders(List<DishInOrder> orders) {
+        this.orders = orders;
+        this.orders.forEach(dishInOrder -> dishInOrder.setDish(this));
     }
 }

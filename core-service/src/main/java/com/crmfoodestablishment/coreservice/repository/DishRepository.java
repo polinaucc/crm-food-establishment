@@ -3,9 +3,10 @@ package com.crmfoodestablishment.coreservice.repository;
 import com.crmfoodestablishment.coreservice.entity.Dish;
 import org.springframework.data.repository.CrudRepository;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public interface DishRepository extends CrudRepository<Dish, Integer> {
 
-    List<Dish> findDishesByIdIn(List<Integer> dishesIds);
+    Optional<Dish> findByUuid(UUID uuid);
 }

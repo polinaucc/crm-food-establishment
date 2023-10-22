@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -27,6 +29,9 @@ public class Menu {
     @Column(name = "season", nullable = false, length = 32)
     private Season season;
 
-    @OneToMany(mappedBy = "menu", fetch = FetchType.LAZY)
-    private List<Dish> dishes;
+    @OneToMany(
+            mappedBy = "menu",
+            fetch = FetchType.LAZY
+    )
+    private List<Dish> dishes = new ArrayList<>();
 }

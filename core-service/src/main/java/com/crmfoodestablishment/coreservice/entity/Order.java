@@ -18,16 +18,23 @@ import java.util.UUID;
 @Table(name = "orders")
 public class Order {
 
+    @PrePersist
+    public void initTotalPrice() {
+        totalPrice = dishes.stream()
+                .map(dishInOrder -> dishInOrder.getDish().getPrice().multiply(BigDecimal.valueOf(dishInOrder.getAmount())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
     private Integer id;
 
-    @JdbcTypeCode(SqlTypes.BINARY)
+    @JdbcTypeCode(SqlTypes.UUID)
     @Column(name = "uuid", nullable = false)
     private UUID uuid = UUID.randomUUID();
 
-    @JdbcTypeCode(SqlTypes.BINARY)
+    @JdbcTypeCode(SqlTypes.UUID)
     @Column(name = "user_uuid", nullable = false)
     private UUID userUuid;
 
@@ -43,20 +50,19 @@ public class Order {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             orphanRemoval = true
     )
-    private List<DishInOrder> listOfOrderDishes = new ArrayList<>();
+    private List<DishInOrder> dishes = new ArrayList<>();
 
     @Column(name = "total_price", precision = 7, scale = 2, nullable = false)
     private BigDecimal totalPrice;
 
-    @PrePersist
-    public void sumOrder() {
-        totalPrice = listOfOrderDishes.stream().map(DishInOrder -> DishInOrder.getDish().getPrice()
-                .multiply(BigDecimal.valueOf(DishInOrder.getCount())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    public void setDishes(List<DishInOrder> listOfOrderDishes) {
+        this.dishes = listOfOrderDishes;
+        this.dishes.stream().forEach(dishInOrder -> dishInOrder.setOrder(this));
     }
 
-    public void setListOfOrderDishes(List<DishInOrder> listOfOrderDishes) {
-        this.listOfOrderDishes = listOfOrderDishes;
-        this.listOfOrderDishes.forEach(dishInOrder -> dishInOrder.setOrder(this));
+    public void addDish(Dish dish, Short amount) {
+        DishInOrder dishInOrder = new DishInOrder(this, dish, amount);
+        dishes.add(dishInOrder);
+        dish.getOrders().add(dishInOrder);
     }
 }

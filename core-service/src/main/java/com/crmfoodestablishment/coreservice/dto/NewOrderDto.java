@@ -1,6 +1,7 @@
 package com.crmfoodestablishment.coreservice.dto;
 
 import com.crmfoodestablishment.coreservice.entity.DishInOrder;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,10 +17,22 @@ import java.util.UUID;
 @NoArgsConstructor
 public class NewOrderDto {
 
-    private List<DishInOrder> listOfOrderDishes;
+    private UUID userUuid;
 
-    @Length(max = 128)
+    @NotEmpty
+    private List<DishInOrderDto> dishes;
+
     private String comment;
 
-    private UUID userUuid;
+    @NotEmpty
+    private DeliveryMethod deliveryMethod;
+
+    private DeliveryDetailsDto deliveryDetails; //TODO: needs validation: if address -> deliveryDetails, if pickup, local -> delivDetails = null
+
+    @Getter
+    @Setter
+    public static class DishInOrderDto {
+        private UUID uuid;
+        private Short amount;
+    }
 }

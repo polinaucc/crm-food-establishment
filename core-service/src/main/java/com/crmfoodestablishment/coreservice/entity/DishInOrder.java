@@ -10,13 +10,11 @@ import lombok.*;
 @Entity
 @Table(name = "dish_order")
 public class DishInOrder {
-
     @EmbeddedId
-    @Column(name = "id", nullable = false, unique = true)
-    private DishOrderId id = new DishOrderId();
+    private DishOrderId dishOrderId;
 
-    @Column(name = "count", nullable = false)
-    private Short count;
+    @Column(name = "amount", nullable = false)
+    private Short amount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("dishId")
@@ -27,4 +25,11 @@ public class DishInOrder {
     @MapsId("orderId")
     @JoinColumn(name = "order_id")
     private Order order;
+
+    public DishInOrder(Order order, Dish dish, Short amount) {
+        this.amount = amount;
+        this.dish = dish;
+        this.order = order;
+        this.dishOrderId = new DishOrderId(order.getId(), dish.getId());
+    }
 }
