@@ -2,15 +2,18 @@ package com.crmfoodestablishment.user_auth_service.auth_sevice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 
-//TODO implement security config
+import java.util.UUID;
+
 @Configuration
 public class AuthConfig {
 
     @Bean
-    public PasswordEncoder encoder() {
-        return new BCryptPasswordEncoder();
+    public RedisTemplate<UUID, String> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<UUID, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        return template;
     }
 }

@@ -8,7 +8,6 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtHandlerAdapter;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static com.crmfoodestablishment.user_auth_service.auth_sevice.service.TimeUtils.convertDateToLocalDateTime;

@@ -1,7 +1,7 @@
 package com.crmfoodestablishment.user_auth_service.auth_sevice.controller;
 
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.RegisterResponsePayload;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.UserCreationRequestPayload;
+import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.UserRegistrationRequestPayload;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.service.AuthService;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.LoginRequestPayload;
 import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.TokenPairResponsePayload;
@@ -40,7 +40,7 @@ public class AuthController {
 
     @PostMapping(AUTH_PATH + "/register")
     public ResponseEntity<RegisterResponsePayload> register(
-            @RequestBody @Valid UserCreationRequestPayload creationData
+            @RequestBody @Valid UserRegistrationRequestPayload creationData
     ) {
         RegisterResponsePayload registerResponse = authService.register(creationData);
 

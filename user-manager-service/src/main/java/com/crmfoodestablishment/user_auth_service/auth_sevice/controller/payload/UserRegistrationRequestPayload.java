@@ -7,5 +7,7 @@ import lombok.Setter;
 //TODO write validation
 @Getter
 @Setter
-public class UserCreationRequestPayload {
+public class UserRegistrationRequestPayload {
+
+    private String email;
 }

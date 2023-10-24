@@ -1,7 +1,7 @@
 package com.crmfoodestablishment.user_auth_service.user_manager.services;
 
 import com.crmfoodestablishment.user_auth_service.user_manager.entity.User;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.UserCreationRequestPayload;
+import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.UserRegistrationRequestPayload;
 
 import java.util.UUID;
 
@@ -14,5 +14,6 @@ public interface UserService {
 
     Boolean existsByEmail(String email);
 
-    User createUser(UserCreationRequestPayload creationData);
+    //TODO don't forget to hash password before saving user
+    User createUser(UserRegistrationRequestPayload creationData);
 }
