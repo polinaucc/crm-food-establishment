@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload;
+package com.crmfoodestablishment.user_auth_service.auth_service.controller.payload;
 
 import lombok.Getter;
 import lombok.Setter;

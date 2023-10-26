@@ -1,8 +1,8 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.service;
+package com.crmfoodestablishment.user_auth_service.auth_service.service;
 
 import com.crmfoodestablishment.user_auth_service.user_manager.entity.User;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.AccessToken;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.RefreshToken;
+import com.crmfoodestablishment.user_auth_service.auth_service.service.token.AccessToken;
+import com.crmfoodestablishment.user_auth_service.auth_service.service.token.RefreshToken;
 
 import java.util.UUID;
 

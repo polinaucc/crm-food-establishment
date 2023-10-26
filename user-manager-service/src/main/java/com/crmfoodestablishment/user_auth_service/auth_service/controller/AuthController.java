@@ -1,10 +1,10 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.controller;
+package com.crmfoodestablishment.user_auth_service.auth_service.controller;
 
-import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.RegisterResponsePayload;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.UserRegistrationRequestPayload;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.AuthService;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.LoginRequestPayload;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.controller.payload.TokenPairResponsePayload;
+import com.crmfoodestablishment.user_auth_service.auth_service.controller.payload.RegisterResponsePayload;
+import com.crmfoodestablishment.user_auth_service.auth_service.controller.payload.UserRegistrationRequestPayload;
+import com.crmfoodestablishment.user_auth_service.auth_service.service.AuthService;
+import com.crmfoodestablishment.user_auth_service.auth_service.controller.payload.LoginRequestPayload;
+import com.crmfoodestablishment.user_auth_service.auth_service.controller.payload.TokenPairResponsePayload;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;

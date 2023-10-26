@@ -1,11 +1,11 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.service.impl;
+package com.crmfoodestablishment.user_auth_service.auth_service.service.impl;
 
-import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.InvalidTokenException;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.adapter.AccessTokenHandlerAdapter;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.JwtService;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.adapter.RefreshTokenHandlerAdapter;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.AccessToken;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.RefreshToken;
+import com.crmfoodestablishment.user_auth_service.auth_service.exception.InvalidTokenException;
+import com.crmfoodestablishment.user_auth_service.auth_service.service.token.adapter.AccessTokenHandlerAdapter;
+import com.crmfoodestablishment.user_auth_service.auth_service.service.JwtService;
+import com.crmfoodestablishment.user_auth_service.auth_service.service.token.adapter.RefreshTokenHandlerAdapter;
+import com.crmfoodestablishment.user_auth_service.auth_service.service.token.AccessToken;
+import com.crmfoodestablishment.user_auth_service.auth_service.service.token.RefreshToken;
 import com.crmfoodestablishment.user_auth_service.user_manager.entity.User;
 
 import io.jsonwebtoken.*;
@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static com.crmfoodestablishment.user_auth_service.auth_sevice.service.TimeUtils.convertLocalDateTimeToDate;
+import static com.crmfoodestablishment.user_auth_service.auth_service.service.TimeUtils.convertLocalDateTimeToDate;
 
 @Service
 @Slf4j

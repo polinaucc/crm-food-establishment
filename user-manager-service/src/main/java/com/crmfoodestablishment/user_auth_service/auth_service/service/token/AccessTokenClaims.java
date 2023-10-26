@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.service.token;
+package com.crmfoodestablishment.user_auth_service.auth_service.service.token;
 
 import com.crmfoodestablishment.user_auth_service.user_manager.entity.Permission;
 

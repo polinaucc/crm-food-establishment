@@ -1,7 +1,7 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.controller;
+package com.crmfoodestablishment.user_auth_service.auth_service.controller;
 
 import com.crmfoodestablishment.user_auth_service.ApiErrorInfo;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.*;
+import com.crmfoodestablishment.user_auth_service.auth_service.exception.*;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
