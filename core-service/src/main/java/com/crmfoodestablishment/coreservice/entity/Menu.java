@@ -11,16 +11,17 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Menu {
 
     @Id
-    @Column(name = "uuid", nullable = false, unique = true, columnDefinition = "BINARY(16)")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, unique = true, updatable = false)
+    private Integer id;
+
+    @Column(name = "uuid", nullable = false, unique = true, updatable = false, columnDefinition = "BINARY(16)")
     @JdbcTypeCode(SqlTypes.BINARY)
     private UUID uuid;
-
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false, unique = true)
-    private Integer id;
 
     @Column(name = "name", nullable = false, unique = true, length = 64)
     private String name;
@@ -34,10 +35,4 @@ public class Menu {
 
     @OneToMany(mappedBy = "menu")
     private List<Dish> dishes;
-
-    public Menu(String name, String comment, Season season) {
-        this.name = name;
-        this.comment = comment;
-        this.season = season;
-    }
 }

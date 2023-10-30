@@ -1,124 +1,142 @@
-//package com.crmfoodestablishment.coreservice.service;
+package com.crmfoodestablishment.coreservice.service;
 
+import com.crmfoodestablishment.coreservice.dto.MenuDto;
 import com.crmfoodestablishment.coreservice.entity.Menu;
 import com.crmfoodestablishment.coreservice.entity.Season;
-import com.crmfoodestablishment.coreservice.exception.MenuNotFoundException;
+import com.crmfoodestablishment.coreservice.mapper.MenuMapper;
 import com.crmfoodestablishment.coreservice.repository.MenuRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.List;
 import java.util.Optional;
-import static org.assertj.core.api.Java6Assertions.*;
-import static org.mockito.BDDMockito.given;
+import java.util.UUID;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-//@ExtendWith(MockitoExtension.class)
-//class MenuServiceTest {
-//
-//    @Mock
-//    MenuRepository menuRepository;
-//
-//    @InjectMocks
-//    private MenuService service;
-//
-//
-//    private static Menu createMenu() {
-//        Menu menu = new Menu(
-//                "summer menu",
-//                "new summer menu",
-//                Season.SUMMER
-//        );
-//        return menu;
-//    }
-//
-//
-//    @BeforeEach
-//    void setUp() {
-//        service = new MenuService(menuRepository);
-//    }
-//
-//    @Test
-//    void canAddNewMenu() {
-//        Menu menu = createMenu();
-//
-//        service.addMenu(menu);
-//        ArgumentCaptor<Menu> menuArgumentCaptor = ArgumentCaptor.forClass(Menu.class);
-//        verify(menuRepository)
-//                .save(menuArgumentCaptor.capture());
-//        Menu captoreMenu = menuArgumentCaptor.getValue();
-//
-//        assertThat(captoreMenu).isEqualTo(menu);
-//    }
-//
-//    @Test
-//    void canGetExceptionWhenMenuIdExist() {
-//        Menu menu = createMenu();
-//        doReturn(true).when(menuRepository).existsById(menu.getId());
-//
-//        assertThatThrownBy(() -> service.addMenu(menu))
-//                .isInstanceOf(IllegalStateException.class)
-//                .hasMessageContaining("Menu name: " + menu.getName() +
-//                        " has been taken");
-//    }
-//
-//    @Test
-//    void canGetAllMenu() {
-//        service.findAllMenu();
-//
-//        verify(menuRepository).findAll();
-//    }
-//
-//    @Test
-//    void canGetMenuWithId() {
-//        int id = 1;
-//        Menu menu = createMenu();
-//
-//        when(menuRepository.findById(id))
-//                .thenReturn(Optional.of(menu));
-//
-//        assertThat(menuRepository.findById(id)).isEqualTo(Optional.of(menu));
-//    }
-//
-//    @Test
-//    void canGetExceptionWhenIdMenuNotFound() {
-//        int id = 1;
-//
-//        given(menuRepository.findById(id)).willReturn(Optional.empty());
-//
-//        assertThatThrownBy(() -> service.findByMenuId(id))
-//                .isInstanceOf(MenuNotFoundException.class)
-//                .hasMessage("No menu found for this id");
-//    }
-//
-//    @Test
-//    void canDeleteMenu() {
-//        Menu menu = createMenu();
-//        service.addMenu(menu);
-//        when(menuRepository.findById(menu.getId()))
-//                .thenReturn(Optional.of(menu));
-//
-//        Boolean deleteMenu = service.deleteMenu(menu.getId());
-//
-//        assertThat(deleteMenu).isTrue();
-//    }
-//
-//    @Test
-//    void canUpdateMenu() {
-//        Menu menu = createMenu();
-//        service.addMenu(menu);
-//        when(menuRepository.findById(menu.getId()))
-//                .thenReturn(Optional.of(menu));
-//        menu.setName("winter menu");
-//        menu.setComment("new winter menu");
-//        menu.setSeason(Season.WINTER);
-//
-//        service.update(menu.getId(), menu);
-//
-//        Menu updatedMenu = service.findByMenuId(menu.getId());
-//        assertThat(updatedMenu).isEqualTo(menu);
-//    }
-//}
+@ExtendWith(MockitoExtension.class)
+class MenuServiceTest {
+    @InjectMocks
+    private MenuService service;
+
+    @Mock
+    MenuRepository menuRepository;
+
+    @Mock
+    MenuMapper menuMapper;
+
+    @BeforeEach
+    void setUp() {
+        service = new MenuService(menuRepository);
+    }
+
+    private static Menu createMenu() {
+        return Menu.builder()
+                .uuid(UUID.randomUUID())
+                .name("summer menu")
+                .comment("new summer menu")
+                .season(Season.SUMMER)
+                .build();
+    }
+
+    private static MenuDto createMenuDto() {
+        return MenuDto.builder()
+                .name("summer menu")
+                .comment("new summer menu")
+                .season(Season.SUMMER)
+                .build();
+    }
+
+    @Test
+    void shouldAddNewMenu() {
+        Menu menu = createMenu();
+        MenuDto menuDto = createMenuDto();
+
+        when(menuRepository.existsByName(any())).thenReturn(false);
+        when(menuRepository.save(any())).thenReturn(menu);
+
+        UUID uuid = service.addMenu(menuDto);
+
+        verify(menuRepository, times(1)).save(any());
+        assertNotNull(uuid);
+    }
+
+    @Test
+    void shouldGetExceptionWhenMenuIdExist() {
+        MenuDto menuDto = createMenuDto();
+
+        when(menuRepository.existsByName(any())).thenReturn(true);
+
+        assertThatThrownBy(() -> service.addMenu(menuDto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Menu " + menuDto.getName() + " is available");
+    }
+
+    @Test
+    void shouldGetMenuWithId() {
+        Menu menu = createMenu();
+
+        when(menuRepository.existsByUuid(any())).thenReturn(true);
+        when(menuRepository.getMenuByUuid(menu.getUuid())).thenReturn(Optional.of(menu));
+
+        MenuDto menuDto = service.findByMenuUuid(menu.getUuid());
+
+        verify(menuRepository, times(1)).existsByUuid(menu.getUuid());
+        assertNotNull(menuDto);
+        assertEquals(menu.getUuid(), menuDto.getUuid());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUuidNotFound() {
+        UUID uuid = UUID.randomUUID();
+
+        when(menuRepository.existsByUuid(any())).thenReturn(false);
+
+        assertThatThrownBy(() -> service.findByMenuUuid(uuid))
+                .isInstanceOf(MenuNotFoundException.class)
+                .hasMessage("Menu with uuid " + uuid + " is not found");
+    }
+
+    @Test
+    void shouldGetAllMenu() {
+        List<MenuDto> allMenu = service.findAllMenu();
+
+        verify(menuRepository).findAll();
+    }
+
+    @Test
+    void shouldDeleteMenu() {
+        Menu menu = createMenu();
+
+        when(menuRepository.existsByUuid(any())).thenReturn(true);
+        when(menuRepository.getMenuByUuid(menu.getUuid())).thenReturn(Optional.of(menu));
+        UUID deleteMenuUuid = service.deleteMenu(menu.getUuid());
+
+        verify(menuRepository, times(1)).delete(menu);
+        assertThat(deleteMenuUuid).isEqualTo(menu.getUuid());
+    }
+
+    @Test
+    void shouldUpdateMenu() {
+        Menu menu = createMenu();
+        MenuDto menuDto = MenuDto.builder()
+                .name("winter menu")
+                .comment("new winter menu")
+                .season(Season.WINTER)
+                .build();
+
+        when(menuRepository.existsByUuid(any())).thenReturn(true);
+        when(menuRepository.getMenuByUuid(menu.getUuid())).thenReturn(Optional.of(menu));
+        MenuDto updatedMenuDto = service.update(menu.getUuid(), menuDto);
+
+        assertThat(updatedMenuDto.getUuid()).isEqualTo(menu.getUuid());
+        assertThat(updatedMenuDto.getName()).isEqualTo(menuDto.getName());
+        assertThat(updatedMenuDto.getComment()).isEqualTo(menuDto.getComment());
+        assertThat(updatedMenuDto.getSeason()).isEqualTo(menuDto.getSeason());
+    }
+}

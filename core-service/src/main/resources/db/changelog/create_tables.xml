@@ -9,10 +9,10 @@
         <comment>Create a menu table with all the appropriate fields.</comment>
         <createTable tableName="menu">
             <column name="id" type="int" autoIncrement="true">
-                <constraints unique="true" nullable="false"/>
+                <constraints primaryKey="true"/>
             </column>
             <column name="uuid" type="binary(16)">
-                <constraints primaryKey="true"/>
+                <constraints unique="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(64)">
                 <constraints nullable="false" unique="true"/>

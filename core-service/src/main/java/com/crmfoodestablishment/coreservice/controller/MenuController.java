@@ -27,7 +27,7 @@ public class MenuController {
 
     @GetMapping("/{id}")
     public MenuDto getMenu(@PathVariable(name = "id") UUID uuid) {
-        return menuService.findByMenuId(uuid);
+        return menuService.findByMenuUuid(uuid);
     }
 
     @PutMapping("/{id}")
