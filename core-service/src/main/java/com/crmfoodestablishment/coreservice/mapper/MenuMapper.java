@@ -4,8 +4,6 @@ import com.crmfoodestablishment.coreservice.dto.MenuDto;
 import com.crmfoodestablishment.coreservice.entity.Menu;
 import org.mapstruct.*;
 
-import java.util.Optional;
-
 @Mapper(
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )

@@ -15,12 +15,13 @@ import java.util.UUID;
 public class Menu {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy =  GenerationType.SEQUENCE, generator = "menu_id_seq")
+    @SequenceGenerator(name = "menu_id_seq", sequenceName = "menu_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false, unique = true, updatable = false)
     private Integer id;
 
-    @Column(name = "uuid", nullable = false, unique = true, updatable = false, columnDefinition = "BINARY(16)")
-    @JdbcTypeCode(SqlTypes.BINARY)
+    @Column(name = "uuid", nullable = false, unique = true, updatable = false)
+    @JdbcTypeCode(SqlTypes.UUID)
     private UUID uuid;
 
     @Column(name = "name", nullable = false, unique = true, length = 64)

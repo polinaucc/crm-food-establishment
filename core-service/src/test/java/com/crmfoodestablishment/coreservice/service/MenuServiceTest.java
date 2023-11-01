@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -59,7 +60,6 @@ class MenuServiceTest {
 
         when(menuRepository.existsByName(any())).thenReturn(false);
         when(menuRepository.save(any())).thenReturn(menu);
-
         UUID uuid = service.addMenu(menuDto);
 
         verify(menuRepository, times(1)).save(any());
@@ -81,21 +81,18 @@ class MenuServiceTest {
     void shouldGetMenuWithId() {
         Menu menu = createMenu();
 
-        when(menuRepository.existsByUuid(any())).thenReturn(true);
         when(menuRepository.getMenuByUuid(menu.getUuid())).thenReturn(Optional.of(menu));
-
         MenuDto menuDto = service.findByMenuUuid(menu.getUuid());
 
-        verify(menuRepository, times(1)).existsByUuid(menu.getUuid());
         assertNotNull(menuDto);
         assertEquals(menu.getUuid(), menuDto.getUuid());
     }
 
     @Test
-    void shouldThrowExceptionWhenUuidNotFound() {
+    void shouldThrowExceptionWhenIdNotFound() {
         UUID uuid = UUID.randomUUID();
 
-        when(menuRepository.existsByUuid(any())).thenReturn(false);
+        when(menuRepository.getMenuByUuid(any())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.findByMenuUuid(uuid))
                 .isInstanceOf(MenuNotFoundException.class)
@@ -104,33 +101,30 @@ class MenuServiceTest {
 
     @Test
     void shouldGetAllMenu() {
+        Menu menu = createMenu();
+        Menu menu2 = Menu.builder()
+                .uuid(UUID.randomUUID())
+                .name("winter dishes")
+                .comment("all dishes to winter season")
+                .season(Season.WINTER)
+                .build();
+
+        when(menuRepository.findAll()).thenReturn(Arrays.asList(menu, menu2));
         List<MenuDto> allMenu = service.findAllMenu();
 
-        verify(menuRepository).findAll();
-    }
-
-    @Test
-    void shouldDeleteMenu() {
-        Menu menu = createMenu();
-
-        when(menuRepository.existsByUuid(any())).thenReturn(true);
-        when(menuRepository.getMenuByUuid(menu.getUuid())).thenReturn(Optional.of(menu));
-        UUID deleteMenuUuid = service.deleteMenu(menu.getUuid());
-
-        verify(menuRepository, times(1)).delete(menu);
-        assertThat(deleteMenuUuid).isEqualTo(menu.getUuid());
+        assertEquals(2, allMenu.size());
     }
 
     @Test
     void shouldUpdateMenu() {
         Menu menu = createMenu();
         MenuDto menuDto = MenuDto.builder()
+                .uuid(menu.getUuid())
                 .name("winter menu")
                 .comment("new winter menu")
                 .season(Season.WINTER)
                 .build();
 
-        when(menuRepository.existsByUuid(any())).thenReturn(true);
         when(menuRepository.getMenuByUuid(menu.getUuid())).thenReturn(Optional.of(menu));
         MenuDto updatedMenuDto = service.update(menu.getUuid(), menuDto);
 
@@ -138,5 +132,16 @@ class MenuServiceTest {
         assertThat(updatedMenuDto.getName()).isEqualTo(menuDto.getName());
         assertThat(updatedMenuDto.getComment()).isEqualTo(menuDto.getComment());
         assertThat(updatedMenuDto.getSeason()).isEqualTo(menuDto.getSeason());
+    }
+
+    @Test
+    void shouldDeleteMenu() {
+        Menu menu = createMenu();
+
+        when(menuRepository.getMenuByUuid(menu.getUuid())).thenReturn(Optional.of(menu));
+        UUID deleteMenuUuid = service.deleteMenu(menu.getUuid());
+
+        verify(menuRepository, times(1)).delete(menu);
+        assertThat(deleteMenuUuid).isEqualTo(menu.getUuid());
     }
 }
