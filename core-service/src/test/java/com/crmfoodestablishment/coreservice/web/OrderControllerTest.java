@@ -1,6 +1,6 @@
 package com.crmfoodestablishment.coreservice.web;
 
-import com.crmfoodestablishment.coreservice.dto.NewOrderDto;
+import com.crmfoodestablishment.coreservice.dto.order.NewOrderDto;
 import com.crmfoodestablishment.coreservice.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

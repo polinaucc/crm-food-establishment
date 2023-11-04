@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.coreservice.dto;
+package com.crmfoodestablishment.coreservice.entity;
 
 public enum DeliveryMethod {
     ADDRESS_DELIVERY,

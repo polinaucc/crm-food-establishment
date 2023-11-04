@@ -1,6 +1,6 @@
 package com.crmfoodestablishment.coreservice.service;
 
-import com.crmfoodestablishment.coreservice.dto.NewOrderDto;
+import com.crmfoodestablishment.coreservice.dto.order.NewOrderDto;
 
 import java.util.UUID;
 

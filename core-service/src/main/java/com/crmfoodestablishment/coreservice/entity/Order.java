@@ -52,12 +52,29 @@ public class Order {
     )
     private List<DishInOrder> dishes = new ArrayList<>();
 
+    @OneToOne(
+            mappedBy = "order",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private DeliveryDetails deliveryDetails = new DeliveryDetails();
+
     @Column(name = "total_price", precision = 7, scale = 2, nullable = false)
     private BigDecimal totalPrice;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "delivery_method", nullable = false, length = 16)
+    private DeliveryMethod deliveryMethod;
 
     public void setDishes(List<DishInOrder> listOfOrderDishes) {
         this.dishes = listOfOrderDishes;
         this.dishes.stream().forEach(dishInOrder -> dishInOrder.setOrder(this));
+    }
+
+    public void setDeliveryDetails(DeliveryDetails deliveryDetails) {
+        this.deliveryDetails = deliveryDetails;
+        this.deliveryDetails.setOrder(this);
     }
 
     public void addDish(Dish dish, Short amount) {

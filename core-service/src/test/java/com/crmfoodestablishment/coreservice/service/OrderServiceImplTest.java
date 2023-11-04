@@ -1,11 +1,11 @@
 package com.crmfoodestablishment.coreservice.service;
 
-import com.crmfoodestablishment.coreservice.dto.NewOrderDto;
+import com.crmfoodestablishment.coreservice.dto.order.NewOrderDto;
 import com.crmfoodestablishment.coreservice.entity.Order;
 import com.crmfoodestablishment.coreservice.repository.DishRepository;
 import com.crmfoodestablishment.coreservice.repository.OrderRepository;
 import com.crmfoodestablishment.coreservice.service.exception.NotFoundException;
-import com.crmfoodestablishment.coreservice.service.impl.OrderServiceConsumerImpl;
+import com.crmfoodestablishment.coreservice.service.impl.OrderServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class OrderServiceConsumerImplTest {
+public class OrderServiceImplTest {
 
-    private OrderServiceConsumerImpl orderService;
+    private OrderServiceImpl orderService;
 
     @Mock
     private OrderRepository orderRepository;
@@ -33,7 +33,7 @@ public class OrderServiceConsumerImplTest {
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        orderService = new OrderServiceConsumerImpl(orderRepository, dishRepository, orderMapper);
+        orderService = new OrderServiceImpl(orderRepository, dishRepository, orderMapper);
     }
 
     @Test
