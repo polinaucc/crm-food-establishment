@@ -58,7 +58,7 @@ public class Order {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private DeliveryDetails deliveryDetails = new DeliveryDetails();
+    private DeliveryDetails deliveryDetails;
 
     @Column(name = "total_price", precision = 7, scale = 2, nullable = false)
     private BigDecimal totalPrice;

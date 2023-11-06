@@ -105,7 +105,7 @@
                         nullable="false"/>
             </column>
             <column name="uuid" type="uuid">
-                <constraints nullable="false" unique="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="first_name" type="varchar(64)">
                 <constraints nullable="false"/>

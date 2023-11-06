@@ -19,7 +19,7 @@ public class DeliveryDetails {
     private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId("orderId")
+    @MapsId
     @JoinColumn(name = "order_id")
     private Order order;
 
