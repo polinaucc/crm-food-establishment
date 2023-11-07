@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.exception;
+package com.crmfoodestablishment.userauthservice.authservice.exception;
 
 public class InvalidUserCredentialsException extends RuntimeException {
 

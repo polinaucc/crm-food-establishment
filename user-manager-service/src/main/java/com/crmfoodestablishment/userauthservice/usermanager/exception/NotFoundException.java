@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.user_auth_service.user_manager.exception;
+package com.crmfoodestablishment.userauthservice.usermanager.exception;
 
 public class NotFoundException extends RuntimeException {
 

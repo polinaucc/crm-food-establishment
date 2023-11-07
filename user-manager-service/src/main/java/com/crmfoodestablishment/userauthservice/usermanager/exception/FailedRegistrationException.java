@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.exception;
+package com.crmfoodestablishment.userauthservice.usermanager.exception;
 
 public class FailedRegistrationException extends RuntimeException {
 
