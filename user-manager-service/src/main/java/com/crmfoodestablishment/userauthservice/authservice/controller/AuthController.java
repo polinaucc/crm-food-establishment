@@ -1,0 +1,62 @@
+package com.crmfoodestablishment.userauthservice.authservice.controller;
+
+import com.crmfoodestablishment.userauthservice.authservice.service.AuthService;
+import com.crmfoodestablishment.userauthservice.authservice.controller.payload.LoginRequestPayload;
+import com.crmfoodestablishment.userauthservice.authservice.token.TokenPair;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import lombok.RequiredArgsConstructor;
+
+import org.hibernate.validator.constraints.UUID;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/auth")
+@RequiredArgsConstructor
+@Validated
+public class AuthController {
+
+    public static final String AUTH_PATH = "/api/v1/auth";
+
+    private final AuthService authService;
+
+    @PostMapping("/login")
+    public ResponseEntity<TokenPair> login(
+            @RequestBody @Valid LoginRequestPayload credentials
+    ) {
+        TokenPair tokenPair = authService.login(credentials);
+
+        return ResponseEntity
+                .ok()
+                .body(tokenPair);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<String> refresh(
+            @RequestBody
+            @Pattern(regexp = "/^([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_\\-\\+\\/=]*)/")
+            String refreshToken
+    ) {
+        String accessToken = authService.refresh(refreshToken);
+
+        return ResponseEntity
+                .ok()
+                .body(accessToken);
+    }
+
+    @PostMapping("/logout/{userUuid}")
+    public ResponseEntity<Void> logout(
+            @PathVariable
+            @UUID(allowNil = false)
+            String userUuid
+    ) {
+        authService.logout(
+                java.util.UUID.fromString(userUuid)
+        );
+
+        return ResponseEntity.ok().build();
+    }
+}
