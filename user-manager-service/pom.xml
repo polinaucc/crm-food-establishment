@@ -13,7 +13,10 @@
     <artifactId>user-auth-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>user-auth-service</name>
-    <description>User-auth service, which manages users and auth</description>
+    <description>
+        Provides CRUD operations on Users resources
+        along with authentication operations such as login, logout and token refresh
+    </description>
 
     <properties>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
@@ -37,10 +40,6 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -55,15 +54,20 @@
         </dependency>
 
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
