@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.user_auth_service;
+package com.crmfoodestablishment.userauthservice;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
