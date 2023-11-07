@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.user_auth_service;
+package com.crmfoodestablishment.userauthservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
