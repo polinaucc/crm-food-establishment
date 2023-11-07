@@ -15,8 +15,7 @@ import java.util.UUID;
 public class Menu {
 
     @Id
-    @GeneratedValue(strategy =  GenerationType.SEQUENCE, generator = "menu_id_seq")
-    @SequenceGenerator(name = "menu_id_seq", sequenceName = "menu_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy =  GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true, updatable = false)
     private Integer id;
 

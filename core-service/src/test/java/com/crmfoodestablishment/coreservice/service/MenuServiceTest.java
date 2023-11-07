@@ -5,7 +5,6 @@ import com.crmfoodestablishment.coreservice.entity.Menu;
 import com.crmfoodestablishment.coreservice.entity.Season;
 import com.crmfoodestablishment.coreservice.mapper.MenuMapper;
 import com.crmfoodestablishment.coreservice.repository.MenuRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,17 +25,12 @@ class MenuServiceTest {
     private MenuService service;
 
     @Mock
-    MenuRepository menuRepository;
+    private MenuRepository menuRepository;
 
     @Mock
-    MenuMapper menuMapper;
+    private MenuMapper menuMapper;
 
-    @BeforeEach
-    void setUp() {
-        service = new MenuService(menuRepository);
-    }
-
-    private static Menu createMenu() {
+    private Menu createMenu() {
         return Menu.builder()
                 .uuid(UUID.randomUUID())
                 .name("summer menu")
@@ -45,7 +39,7 @@ class MenuServiceTest {
                 .build();
     }
 
-    private static MenuDto createMenuDto() {
+    private MenuDto createMenuDto() {
         return MenuDto.builder()
                 .name("summer menu")
                 .comment("new summer menu")

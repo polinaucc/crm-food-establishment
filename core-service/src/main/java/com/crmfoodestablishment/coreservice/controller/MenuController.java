@@ -15,12 +15,12 @@ public class MenuController {
 
     private final MenuService menuService;
 
-    @PostMapping()
+    @PostMapping
     public UUID createMenu(@Valid @RequestBody MenuDto menuDto) {
         return menuService.addMenu(menuDto);
     }
 
-    @GetMapping()
+    @GetMapping
     public List<MenuDto> getAllMenuList() {
         return menuService.findAllMenu();
     }

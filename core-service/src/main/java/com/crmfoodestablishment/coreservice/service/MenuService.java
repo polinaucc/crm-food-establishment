@@ -30,24 +30,24 @@ public class MenuService {
                     throw new IllegalStateException("Menu " + name + " is available");
                 });
 
-        Menu menuEntity = menuMapper.fromMenuDtoToMenuEntity(menuDto);
-        menuEntity.setUuid(UUID.randomUUID());
+        Menu menuEntity = menuMapper.mapMenuDtoToMenu(menuDto);
+        menuMapper.setUuid(menuEntity);
         Menu savedMenu = menuRepository.save(menuEntity);
 
-        MenuDto savedMenuDto = menuMapper.fromMenuEntityToMenuDto(savedMenu);
+        MenuDto savedMenuDto = menuMapper.mapMenuToMenuDto(savedMenu);
         return savedMenuDto.getUuid();
     }
 
     public List<MenuDto> findAllMenu() {
         return menuRepository.findAll().stream()
-                .map(menuMapper::fromMenuEntityToMenuDto)
+                .map(menuMapper::mapMenuToMenuDto)
                 .toList();
     }
 
     public MenuDto findByMenuUuid(UUID uuid) {
         Optional<Menu> menuByUuid = menuRepository.getMenuByUuid(uuid);
 
-        return menuMapper.fromMenuEntityToMenuDto(menuByUuid.orElseThrow(()
+        return menuMapper.mapMenuToMenuDto(menuByUuid.orElseThrow(()
                 -> throwMenuNotFoundException(uuid)));
     }
 
@@ -58,7 +58,7 @@ public class MenuService {
                     existingMenu.setName(menuDto.getName());
                     existingMenu.setComment(menuDto.getComment());
                     existingMenu.setSeason(menuDto.getSeason());
-                    return menuMapper.fromMenuEntityToMenuDto(existingMenu);
+                    return menuMapper.mapMenuToMenuDto(existingMenu);
                 }).orElseThrow(() -> throwMenuNotFoundException(uuid));
     }
 
