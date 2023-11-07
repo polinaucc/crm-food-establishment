@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="create_users_table" author="Sasha_M">
+        <createTable  tableName="users">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="uuid" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="firstName" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lastName" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isMale" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="birthday" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address" type="varchar(1024)"/>
+        </createTable>
+
+        <createSequence
+                sequenceName="users_seq"
+                startValue="1"
+                incrementBy="50"
+        />
+
+        <addUniqueConstraint
+                columnNames="uuid"
+                constraintName="users_uuid_key"
+                tableName="users"
+        />
+        <addUniqueConstraint
+                columnNames="email"
+                constraintName="users_email_key"
+                tableName="users"
+        />
+    </changeSet>
+</databaseChangeLog>
