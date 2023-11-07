@@ -1,16 +1,18 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.service.impl;
+package com.crmfoodestablishment.userauthservice.authservice.service.impl;
 
-import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.InvalidTokenException;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.adapter.AccessTokenHandlerAdapter;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.JwtService;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.adapter.RefreshTokenHandlerAdapter;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.AccessToken;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.service.token.RefreshToken;
-import com.crmfoodestablishment.user_auth_service.user_manager.entity.User;
-
-import io.jsonwebtoken.*;
+import com.crmfoodestablishment.userauthservice.authservice.config.jwt.JwtProperties;
+import com.crmfoodestablishment.userauthservice.authservice.exception.InvalidTokenException;
+import com.crmfoodestablishment.userauthservice.authservice.service.JwtService;
+import com.crmfoodestablishment.userauthservice.authservice.token.AccessToken;
+import com.crmfoodestablishment.userauthservice.authservice.token.RefreshToken;
+import com.crmfoodestablishment.userauthservice.authservice.token.TokenPair;
+import com.crmfoodestablishment.userauthservice.authservice.token.adapter.AccessTokenHandlerAdapter;
+import com.crmfoodestablishment.userauthservice.authservice.token.adapter.RefreshTokenHandlerAdapter;
+import com.crmfoodestablishment.userauthservice.usermanager.dto.UserDTO;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -22,58 +24,59 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Base64;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.crmfoodestablishment.user_auth_service.auth_sevice.service.TimeUtils.convertLocalDateTimeToDate;
+import static com.crmfoodestablishment.userauthservice.authservice.service.TimeUtils.convertLocalDateTimeToDate;
 
 @Service
 @Slf4j
 public class JwtServiceImpl implements JwtService {
 
+    private final JwtProperties jwtProperties;
+
     private final PrivateKey refreshTokenSecretKey;
-    private final Long refreshTokenExpirationTime;
     private final JwtParser refreshTokenParser;
     private final RefreshTokenHandlerAdapter refreshTokenHandlerAdapter;
 
     private final PrivateKey accessTokenSecretKey;
-    private final Long accessTokenExpirationTime;
     private final JwtParser accessTokenParser;
     private final AccessTokenHandlerAdapter accessTokenHandlerAdapter;
 
     private final RedisTemplate<UUID, String> refreshTokenRedisTemplate;
 
     public JwtServiceImpl(
-            @Value("${auth.jwt.refreshToken.secretKey}")
-            String refreshTokenSecretKey,
-            @Value("${auth.jwt.refreshToken.publicKey}")
-            String refreshTokenPublicKey,
-            @Value("${auth.jwt.refreshToken.expirationTime}")
-            Long refreshTokenExpirationTime,
-            @Value("${auth.jwt.accessToken.secretKey}")
-            String accessTokenSecretKey,
-            @Value("${auth.jwt.accessToken.publicKey}")
-            String accessTokenPublicKey,
-            @Value("${auth.jwt.accessToken.expirationTime}")
-            Long accessTokenExpirationTime,
-
+            JwtProperties jwtProperties,
             RedisTemplate<UUID, String> refreshTokenRedisTemplate
     ) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
-        this.refreshTokenSecretKey = convertStringTokenToPrivateKey(refreshTokenSecretKey, keyFactory);
-        PublicKey refreshTokenPublicKeyObject = convertStringTokenToPublicKey(refreshTokenPublicKey, keyFactory);
-        this.refreshTokenExpirationTime = refreshTokenExpirationTime;
+        this.jwtProperties = jwtProperties;
+
+        this.refreshTokenSecretKey = convertStringTokenToPrivateKey(
+                jwtProperties.refreshToken().secretKey(),
+                keyFactory
+        );
+        PublicKey refreshTokenPublicKey = convertStringTokenToPublicKey(
+                jwtProperties.refreshToken().publicKey(),
+                keyFactory
+        );
         refreshTokenParser = Jwts.parserBuilder()
-                .setSigningKey(refreshTokenPublicKeyObject)
+                .setSigningKey(refreshTokenPublicKey)
                 .build();
         refreshTokenHandlerAdapter = new RefreshTokenHandlerAdapter();
 
-        this.accessTokenSecretKey = convertStringTokenToPrivateKey(accessTokenSecretKey, keyFactory);
-        PublicKey accessTokenPublicKeyObject = convertStringTokenToPublicKey(accessTokenPublicKey, keyFactory);
-        this.accessTokenExpirationTime = accessTokenExpirationTime;
+        this.accessTokenSecretKey = convertStringTokenToPrivateKey(
+                jwtProperties.accessToken().secretKey(),
+                keyFactory
+        );
+        PublicKey accessTokenPublicKey = convertStringTokenToPublicKey(
+                jwtProperties.accessToken().publicKey(),
+                keyFactory
+        );
         accessTokenParser = Jwts.parserBuilder()
-                .setSigningKey(accessTokenPublicKeyObject)
+                .setSigningKey(accessTokenPublicKey)
                 .build();
         accessTokenHandlerAdapter = new AccessTokenHandlerAdapter();
 
@@ -81,15 +84,17 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String issueAccessToken(User user) {
+    public String issueAccessToken(UserDTO user) {
         LocalDateTime issuedTime = LocalDateTime.now();
-        LocalDateTime expirationTime = issuedTime.plusMinutes(accessTokenExpirationTime);
+        LocalDateTime expirationTime = issuedTime.plusMinutes(
+                jwtProperties.accessToken().expirationTime()
+        );
 
         String token = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
                 .setExpiration(convertLocalDateTimeToDate(expirationTime))
                 .setSubject(user.getUuid().toString())
-                .claim("permissions", user.getPermissionsList())
+                .claim("roles", user.getRoles())
                 .signWith(accessTokenSecretKey, SignatureAlgorithm.RS256)
                 .compact();
 
@@ -98,9 +103,11 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String issueRefreshToken(User user) {
+    public String issueRefreshToken(UserDTO user) {
         LocalDateTime issuedTime = LocalDateTime.now();
-        LocalDateTime expirationTime = issuedTime.plusMinutes(refreshTokenExpirationTime);
+        LocalDateTime expirationTime = issuedTime.plusMinutes(
+                jwtProperties.refreshToken().expirationTime()
+        );
 
         String token = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
@@ -113,12 +120,20 @@ public class JwtServiceImpl implements JwtService {
                 .set(
                         user.getUuid(),
                         token,
-                        refreshTokenExpirationTime,
+                        jwtProperties.refreshToken().expirationTime(),
                         TimeUnit.SECONDS
                 );
 
         log.info("Issued refresh token for user: " + user.getEmail());
         return token;
+    }
+
+    @Override
+    public TokenPair issueTokenPair(UserDTO user) {
+        String accessToken = issueAccessToken(user);
+        String refreshToken = issueRefreshToken(user);
+
+        return new TokenPair(accessToken, refreshToken);
     }
 
     @Override
