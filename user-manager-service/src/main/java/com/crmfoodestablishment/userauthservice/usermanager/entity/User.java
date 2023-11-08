@@ -37,7 +37,7 @@ public class User {
     )
     @CollectionTable(
             name = "user_roles",
-            joinColumns = @JoinColumn(name = "userId")
+            joinColumns = @JoinColumn(name = "user_id")
     )
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
