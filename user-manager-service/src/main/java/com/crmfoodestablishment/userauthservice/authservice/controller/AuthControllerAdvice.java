@@ -1,8 +1,9 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.controller;
+package com.crmfoodestablishment.userauthservice.authservice.controller;
 
-import com.crmfoodestablishment.user_auth_service.ApiErrorInfo;
-import com.crmfoodestablishment.user_auth_service.auth_sevice.exception.*;
+import com.crmfoodestablishment.userauthservice.ApiErrorInfo;
+import com.crmfoodestablishment.userauthservice.authservice.exception.*;
 
+import com.crmfoodestablishment.userauthservice.usermanager.exception.FailedRegistrationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,7 +19,7 @@ public class AuthControllerAdvice {
     ) {
         ApiErrorInfo errorInfo = ApiErrorInfo.builder()
                 .title("Wrong user credentials exception")
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.UNAUTHORIZED)
                 .description(exception.getMessage())
                 .build();
 

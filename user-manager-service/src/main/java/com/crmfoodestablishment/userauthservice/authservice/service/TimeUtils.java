@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.user_auth_service.auth_sevice.service;
+package com.crmfoodestablishment.userauthservice.authservice.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
