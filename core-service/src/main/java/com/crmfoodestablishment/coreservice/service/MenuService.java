@@ -31,7 +31,6 @@ public class MenuService {
                 });
 
         Menu menuEntity = menuMapper.mapMenuDtoToMenu(menuDto);
-        menuMapper.setUuid(menuEntity);
         Menu savedMenu = menuRepository.save(menuEntity);
 
         MenuDto savedMenuDto = menuMapper.mapMenuToMenuDto(savedMenu);
