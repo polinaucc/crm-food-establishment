@@ -4,12 +4,10 @@ import com.crmfoodestablishment.coreservice.dto.MenuDto;
 import com.crmfoodestablishment.coreservice.entity.Menu;
 import com.crmfoodestablishment.coreservice.mapper.MenuMapper;
 import com.crmfoodestablishment.coreservice.repository.MenuRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,14 +22,11 @@ public class MenuService {
     }
 
     public UUID addMenu(MenuDto menuDto) {
-        Optional.of(menuDto.getName())
-                .filter(menuRepository::existsByName)
-                .ifPresent(name -> {
-                    throw new IllegalStateException("Menu " + name + " is available");
-                });
-
-        Menu menuEntity = menuMapper.mapMenuDtoToMenu(menuDto);
-        Menu savedMenu = menuRepository.save(menuEntity);
+        if (menuRepository.existsByName(menuDto.getName())) {
+            throw new IllegalArgumentException("Menu " + menuDto.getName() + " is available");
+        }
+        Menu menuToSave = menuMapper.mapMenuDtoToMenu(menuDto);
+        Menu savedMenu = menuRepository.save(menuToSave);
 
         MenuDto savedMenuDto = menuMapper.mapMenuToMenuDto(savedMenu);
         return savedMenuDto.getUuid();
@@ -44,13 +39,12 @@ public class MenuService {
     }
 
     public MenuDto findByMenuUuid(UUID uuid) {
-        Optional<Menu> menuByUuid = menuRepository.getMenuByUuid(uuid);
+        Menu foundMenu = menuRepository.getMenuByUuid(uuid)
+                .orElseThrow(() -> throwMenuNotFoundException(uuid));
 
-        return menuMapper.mapMenuToMenuDto(menuByUuid.orElseThrow(()
-                -> throwMenuNotFoundException(uuid)));
+        return menuMapper.mapMenuToMenuDto(foundMenu);
     }
 
-    @Transactional
     public MenuDto update(UUID uuid, MenuDto menuDto) {
         return menuRepository.getMenuByUuid(uuid)
                 .map(existingMenu -> {
