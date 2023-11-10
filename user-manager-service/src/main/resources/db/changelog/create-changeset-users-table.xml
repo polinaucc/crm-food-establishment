@@ -18,6 +18,9 @@
             <column name="password" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="role" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="firstName" type="varchar(32)">
                 <constraints nullable="false"/>
             </column>

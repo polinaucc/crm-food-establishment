@@ -5,8 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -31,17 +29,9 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @ElementCollection(
-            targetClass = Role.class,
-            fetch = FetchType.EAGER
-    )
-    @CollectionTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id")
-    )
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Set<Role> roles = new HashSet<>();
+    private Role role;
 
     @Embedded
     private UserPersonalInfo personalInfo;
