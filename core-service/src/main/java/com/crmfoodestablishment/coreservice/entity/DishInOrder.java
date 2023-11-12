@@ -2,13 +2,13 @@ package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Data;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Data
 @Table(name = "dish_order")
 public class DishInOrder {
 
