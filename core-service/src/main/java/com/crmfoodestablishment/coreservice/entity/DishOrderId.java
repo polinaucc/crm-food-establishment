@@ -13,9 +13,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class DishOrderId implements Serializable {
 
-    @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    @Column(name = "order_id", insertable = false, updatable = false)
+    private Integer orderId;
 
-    @Column(name = "dish_id", nullable = false)
-    private Long dishId;
+    @Column(name = "dish_id", insertable = false, updatable = false)
+    private Integer dishId;
 }

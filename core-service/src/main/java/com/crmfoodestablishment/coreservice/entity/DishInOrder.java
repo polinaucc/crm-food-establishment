@@ -1,29 +1,35 @@
 package com.crmfoodestablishment.coreservice.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "dish_order")
 public class DishInOrder {
-
     @EmbeddedId
-    @Column(name = "id", nullable = false, unique = true)
-    private DishOrderId id;
+    private DishOrderId dishOrderId;
 
-    @Column(name = "count", nullable = false)
-    private Short count;
+    @Column(name = "amount", nullable = false)
+    private Short amount;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("dishId")
+    @JoinColumn(name = "dish_id")
     private Dish dish;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("orderId")
+    @JoinColumn(name = "order_id")
     private Order order;
+
+    public DishInOrder(Order order, Dish dish, Short amount) {
+        this.amount = amount;
+        this.dish = dish;
+        this.order = order;
+        this.dishOrderId = new DishOrderId(order.getId(), dish.getId());
+    }
 }

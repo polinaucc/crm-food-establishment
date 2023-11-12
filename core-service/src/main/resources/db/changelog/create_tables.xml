@@ -29,6 +29,9 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
+            <column name="uuid" type="uuid">
+                <constraints nullable="false" unique="true"/>
+            </column>
             <column name="menu_id" type="int">
                 <constraints foreignKeyName="fk_menu_id" references="menu(id)" nullable="false"/>
             </column>
@@ -43,7 +46,7 @@
 
     <changeSet id="4" author="zhenya_baraniuk">
         <comment>Create are order table with all the appropriate fields.</comment>
-        <createTable tableName="order">
+        <createTable tableName="orders">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
@@ -62,6 +65,9 @@
             <column name="total_price" type="decimal(7, 2)">
                 <constraints nullable="false"/>
             </column>
+            <column name="delivery_method" type="varchar(16)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
@@ -77,14 +83,37 @@
             </column>
             <column name="order_id" type="int">
                 <constraints
-                        foreignKeyName="fk_order_id" references="order(id)"
+                        foreignKeyName="fk_order_id" references="orders(id)"
                         primaryKey="true"
                         primaryKeyName="id"
                         nullable="false"/>
             </column>
-            <column name="count" type="tinyint">
+            <column name="amount" type="tinyint">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="4" author="ygoway">
+        <comment>Create a delivery details table with all the appropriate fields.</comment>
+        <createTable tableName="delivery_details">
+            <column name="order_id" type="int">
+                <constraints
+                        foreignKeyName="fk_order_id" references="orders(id)"
+                        primaryKey="true"
+                        primaryKeyName="order_id"
+                        nullable="false"/>
+            </column>
+            <column name="uuid" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="varchar(64)"/>
+            <column name="phone_number" type="varchar(16)"/>
+            <column name="address" type="varchar(1024)"/>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
