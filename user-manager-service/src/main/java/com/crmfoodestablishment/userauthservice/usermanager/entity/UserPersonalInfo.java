@@ -13,14 +13,14 @@ import java.time.LocalDate;
 @Setter
 public class UserPersonalInfo {
 
-    @Column(name = "firstName", nullable = false, length = 32)
+    @Column(name = "first_name", nullable = false, length = 32)
     private String firstName;
 
-    @Column(name = "lastName", nullable = false, length = 32)
+    @Column(name = "last_name", nullable = false, length = 32)
     private String lastName;
 
-    @Column(name = "isMale", nullable = false)
-    private Boolean isMale;
+    @Column(name = "is_male", nullable = false)
+    private boolean isMale;
 
     @Column(name = "birthday", nullable = false)
     private LocalDate birthday;

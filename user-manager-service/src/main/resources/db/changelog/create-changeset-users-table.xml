@@ -21,13 +21,13 @@
             <column name="role" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="firstName" type="varchar(32)">
+            <column name="first_name" type="varchar(32)">
                 <constraints nullable="false"/>
             </column>
-            <column name="lastName" type="varchar(32)">
+            <column name="last_name" type="varchar(32)">
                 <constraints nullable="false"/>
             </column>
-            <column name="isMale" type="boolean">
+            <column name="is_male" type="boolean">
                 <constraints nullable="false"/>
             </column>
             <column name="birthday" type="date">

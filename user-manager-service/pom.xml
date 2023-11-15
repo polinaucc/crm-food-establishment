@@ -14,8 +14,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>user-auth-service</name>
     <description>
-        Provides CRUD operations on Users resources
-        along with authentication operations such as login, logout and token refresh
+        Service that manages user information along with authentication operations
     </description>
 
     <properties>
