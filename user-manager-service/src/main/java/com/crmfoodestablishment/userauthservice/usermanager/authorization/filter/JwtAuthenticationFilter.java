@@ -3,6 +3,7 @@ package com.crmfoodestablishment.userauthservice.usermanager.authorization.filte
 import com.crmfoodestablishment.userauthservice.authservice.service.JwtService;
 import com.crmfoodestablishment.userauthservice.authservice.token.AccessToken;
 import com.crmfoodestablishment.userauthservice.usermanager.entity.Role;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -52,9 +54,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                     accessToken.claims().sub(),
                     null,
-                    accessToken.claims().roles().stream()
-                            .map(this::convertRoleToSimpleGrantedAuthority)
-                            .toList()
+                    List.of(convertRoleToSimpleGrantedAuthority(
+                            accessToken.claims().role()
+                    ))
             );
             token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

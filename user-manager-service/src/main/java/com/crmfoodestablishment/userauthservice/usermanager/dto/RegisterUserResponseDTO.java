@@ -1,16 +1,18 @@
-package com.crmfoodestablishment.userauthservice.usermanager.controller.payload;
+package com.crmfoodestablishment.userauthservice.usermanager.dto;
 
 import com.crmfoodestablishment.userauthservice.authservice.token.TokenPair;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @AllArgsConstructor
 @Getter
 @Setter
-public class RegisterResponsePayload {
+public class RegisterUserResponseDTO {
 
-    private String urlOfCreatedUser;
+    private UUID userUuid;
 
     private TokenPair tokenPair;
 }

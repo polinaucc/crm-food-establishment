@@ -1,27 +1,24 @@
 package com.crmfoodestablishment.userauthservice.usermanager.service;
 
-import com.crmfoodestablishment.userauthservice.usermanager.exception.FailedRegistrationException;
-import com.crmfoodestablishment.userauthservice.usermanager.controller.payload.RegisterResponsePayload;
-import com.crmfoodestablishment.userauthservice.authservice.token.TokenPair;
 import com.crmfoodestablishment.userauthservice.authservice.service.JwtService;
-import com.crmfoodestablishment.userauthservice.usermanager.controller.UserController;
-import com.crmfoodestablishment.userauthservice.usermanager.controller.payload.UpdateUserRequestPayload;
-import com.crmfoodestablishment.userauthservice.usermanager.controller.payload.UserRegistrationRequestPayload;
+import com.crmfoodestablishment.userauthservice.authservice.token.TokenPair;
+import com.crmfoodestablishment.userauthservice.usermanager.dto.RegisterUserRequestDTO;
+import com.crmfoodestablishment.userauthservice.usermanager.dto.RegisterUserResponseDTO;
+import com.crmfoodestablishment.userauthservice.usermanager.dto.UpdateUserRequestDTO;
 import com.crmfoodestablishment.userauthservice.usermanager.dto.UserDTO;
 import com.crmfoodestablishment.userauthservice.usermanager.entity.Role;
 import com.crmfoodestablishment.userauthservice.usermanager.entity.User;
-import com.crmfoodestablishment.userauthservice.usermanager.entity.UserPersonalInfo;
 import com.crmfoodestablishment.userauthservice.usermanager.exception.InvalidArgumentException;
 import com.crmfoodestablishment.userauthservice.usermanager.exception.NotFoundException;
 import com.crmfoodestablishment.userauthservice.usermanager.mapper.UserMapper;
 import com.crmfoodestablishment.userauthservice.usermanager.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -32,41 +29,19 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
-    private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
     @Override
-    public UserDTO getByEmail(String email) {
-        AtomicReference<UserDTO> userDTO = new AtomicReference<>();
-
-        userRepository.findByEmail(email).ifPresentOrElse(
-                foundUser -> userDTO.set(
-                        userMapper.mapUserToUserDTO(foundUser)
-                ),
-                this::logAndThrowNotFoundException
-        );
-
-        return userDTO.get();
-    }
-
-    @Override
-    public Boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
-
-    @Override
-    public RegisterResponsePayload register(
-            UserRegistrationRequestPayload creationData,
-            Role role
+    public RegisterUserResponseDTO register(
+            RegisterUserRequestDTO creationData
     ) {
-        UserDTO savedUser = createUser(creationData, role);
+        User savedUser = createUser(creationData);
         TokenPair tokenPair = jwtService.issueTokenPair(savedUser);
 
-        String createdUserUrl = UserController.USER_PATH + "/" + savedUser.getUuid();
-
         log.info("User: " + savedUser.getEmail() + " registered");
-        return new RegisterResponsePayload(
-                createdUserUrl,
+
+        return new RegisterUserResponseDTO(
+                savedUser.getUuid(),
                 tokenPair
         );
     }
@@ -74,56 +49,57 @@ public class UserServiceImpl implements UserService {
     @Override
     public void update(
             UUID userUuid,
-            UpdateUserRequestPayload updatedData
+            UpdateUserRequestDTO updatedData
     ) {
-        validateUniquenessOfEmail(
-                updatedData.getEmail(),
-                userUuid,
-                new InvalidArgumentException("Invalid argument exception: given already occupied email")
-        );
+        AtomicReference<User> userToUpdate = new AtomicReference<>();
 
-        userRepository.findByUuid(userUuid).ifPresentOrElse(
+        userRepository.findByEmail(updatedData.getEmail()).ifPresent(
                 foundUser -> {
-                    foundUser.setEmail(updatedData.getEmail());
-                    foundUser.setPassword(
-                            passwordEncoder.encode(updatedData.getPassword())
-                    );
-                    foundUser.getPersonalInfo().setFirstName(updatedData.getFirstName());
-                    foundUser.getPersonalInfo().setLastName(updatedData.getLastName());
-                    foundUser.getPersonalInfo().setBirthday(updatedData.getBirthday());
-                    foundUser.getPersonalInfo().setIsMale(updatedData.getIsMale());
-                    foundUser.getPersonalInfo().setAddress(updatedData.getEmail());
-
-                    userRepository.save(foundUser);
-                    log.info("Updated user: " + userUuid);
-                },
-                this::logAndThrowNotFoundException
+                    if (foundUser.getUuid().equals(userUuid)) {
+                        userToUpdate.set(foundUser);
+                    } else {
+                        logAndThrowException(
+                                new InvalidArgumentException("Given already occupied email")
+                        );
+                    }
+                }
         );
-    }
 
-    @Override
-    public void updateRoles(
-            UUID userUuid,
-            Set<Role> updatedRoles
-    ) {
-        userRepository.findByUuid(userUuid).ifPresentOrElse(
-                foundUser -> {
-                    foundUser.setRoles(updatedRoles);
-
-                    userRepository.save(foundUser);
-                    log.info("Updated roles of user: " + userUuid);
-                },
-                this::logAndThrowNotFoundException
-        );
-    }
-
-    @Override
-    public void delete(UUID userUuid) {
-        if (!userRepository.existsByUuid(userUuid)) {
-            logAndThrowNotFoundException();
+        if (userToUpdate.get() == null) {
+            userRepository.findByUuid(userUuid).ifPresentOrElse(
+                    userToUpdate::set,
+                    this::logAndThrowNotFoundException
+            );
         }
 
-        userRepository.deleteByUuid(userUuid);
+        userMapper.mapUpdateUserRequestDTOToUser(
+                updatedData,
+                userToUpdate.get()
+        );
+
+        userRepository.save(userToUpdate.get());
+        log.info("Updated user: " + userUuid);
+    }
+
+    @Override
+    public void delete(
+            UUID userUuid
+    ) {
+        AtomicReference<User> userToDelete = new AtomicReference<>();
+        userRepository.findByUuid(userUuid).ifPresentOrElse(
+                userToDelete::set,
+                this::logAndThrowNotFoundException
+        );
+
+        Role userToDeleteRole = userToDelete.get().getRole();
+        if (userToDeleteRole == Role.ADMIN || userToDeleteRole == Role.EMPLOYEE) {
+            userToDelete.get().setRole(Role.CLIENT);
+
+            userRepository.save(userToDelete.get());
+        } else if (userToDeleteRole == Role.CLIENT) {
+            userRepository.delete(userToDelete.get());
+        }
+
         log.info("Deleted user: " + userUuid);
     }
 
@@ -150,51 +126,41 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
-    private void validateUniquenessOfEmail(
-            String email,
-            UUID userUuid,
-            RuntimeException exception
+    private User createUser(
+            RegisterUserRequestDTO creationData
     ) {
-        userRepository.findByEmail(email).ifPresent(
-                foundUser -> {
-                    if (!foundUser.getUuid().equals(userUuid)) {
-                        log.error(exception.getMessage(), exception);
-                        throw exception;
-                    }
-                }
+        Optional<User> user = userRepository.findByEmail(creationData.getEmail());
+        User userToRegister = null;
+
+        if (
+                user.isPresent()
+                && user.get().getRole() == Role.CLIENT
+                && (creationData.getRole() == Role.ADMIN || creationData.getRole() == Role.EMPLOYEE)
+        ) {
+            userToRegister = user.get();
+        } else if (user.isEmpty()) {
+            userToRegister = new User(UUID.randomUUID());
+        } else {
+            logAndThrowException(
+                    new InvalidArgumentException("Given already occupied email")
+            );
+        }
+
+        userMapper.mapRegisterUserRequestDTOToUser(
+                creationData,
+                userToRegister
         );
+
+        return userRepository.save(userToRegister);
     }
 
-    private UserDTO createUser(
-            UserRegistrationRequestPayload creationData,
-            Role role
-    ) {
-        validateUniquenessOfEmail(
-                creationData.getEmail(),
-                null,
-                new FailedRegistrationException("Registration exception: given already occupied email")
-        );
-
-        User user = new User(UUID.randomUUID());
-        user.setEmail(creationData.getEmail());
-        user.setPassword(
-                passwordEncoder.encode(creationData.getPassword())
-        );
-        user.getRoles().add(role);
-        user.setPersonalInfo(new UserPersonalInfo());
-        user.getPersonalInfo().setFirstName(creationData.getFirstName());
-        user.getPersonalInfo().setLastName(creationData.getLastName());
-        user.getPersonalInfo().setBirthday(creationData.getBirthday());
-        user.getPersonalInfo().setIsMale(creationData.getIsMale());
-        user.getPersonalInfo().setAddress(creationData.getEmail());
-
-        return userMapper.mapUserToUserDTO(
-                userRepository.save(user)
-        );
+    private void logAndThrowException(RuntimeException exception) {
+        log.error(exception.getMessage(), exception);
+        throw exception;
     }
 
     private void logAndThrowNotFoundException() {
-        var error = new NotFoundException("Given invalid argument: no such users found");
+        var error = new NotFoundException("No such users found");
         log.error(error.getMessage(), error);
         throw error;
     }

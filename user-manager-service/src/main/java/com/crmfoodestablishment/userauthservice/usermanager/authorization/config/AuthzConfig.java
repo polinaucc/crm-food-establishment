@@ -13,6 +13,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static com.crmfoodestablishment.userauthservice.usermanager.controller.AdminController.ADMIN_PATH;
+import static com.crmfoodestablishment.userauthservice.usermanager.controller.ClientController.CLIENT_PATH;
+import static com.crmfoodestablishment.userauthservice.usermanager.controller.ClientController.CLIENT_PATH_ID;
+import static com.crmfoodestablishment.userauthservice.usermanager.controller.EmployeeController.EMPLOYEE_PATH;
 import static com.crmfoodestablishment.userauthservice.usermanager.controller.UserController.USER_PATH;
 import static com.crmfoodestablishment.userauthservice.usermanager.controller.UserController.USER_PATH_ID;
 
@@ -29,24 +33,27 @@ public class AuthzConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
+                                ADMIN_PATH + "/**"
+                        ).hasRole(Role.OWNER.name())
+                        .requestMatchers(
+                                EMPLOYEE_PATH + "/**"
+                        ).access()
+                        .hasRole(Role.ADMIN.name())
+                        .requestMatchers(
                                 HttpMethod.POST,
-                                USER_PATH + "/customer"
+                                CLIENT_PATH
                         ).permitAll()
                         .requestMatchers(
-                                HttpMethod.POST,
-                                USER_PATH + "/**"
-                        ).hasRole(Role.ADMIN.name())
+                                CLIENT_PATH_ID
+                        ).authenticated()
                         .requestMatchers(
-                                HttpMethod.PUT,
-                                USER_PATH_ID + "/role"
-                        ).hasRole(Role.ADMIN.name())
+                                HttpMethod.GET,
+                                USER_PATH_ID
+                        ).authenticated()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 USER_PATH
-                        ).hasRole(Role.ADMIN.name())
-                        .requestMatchers(
-                                USER_PATH_ID
-                        ).authenticated()
+                        ).hasRole(Role.EMPLOYEE.name())
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session

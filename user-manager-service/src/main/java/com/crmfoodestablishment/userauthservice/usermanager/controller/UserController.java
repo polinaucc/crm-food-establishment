@@ -1,85 +1,55 @@
 package com.crmfoodestablishment.userauthservice.usermanager.controller;
 
-import com.crmfoodestablishment.userauthservice.usermanager.controller.payload.RegisterResponsePayload;
-import com.crmfoodestablishment.userauthservice.authservice.token.TokenPair;
-import com.crmfoodestablishment.userauthservice.usermanager.controller.payload.UpdateUserRequestPayload;
-import com.crmfoodestablishment.userauthservice.usermanager.controller.payload.UserRegistrationRequestPayload;
+import com.crmfoodestablishment.userauthservice.usermanager.dto.RegisterUserRequestDTO;
+import com.crmfoodestablishment.userauthservice.usermanager.dto.RegisterUserResponseDTO;
+import com.crmfoodestablishment.userauthservice.usermanager.dto.UpdateUserRequestDTO;
 import com.crmfoodestablishment.userauthservice.usermanager.dto.UserDTO;
-import com.crmfoodestablishment.userauthservice.usermanager.entity.Role;
 import com.crmfoodestablishment.userauthservice.usermanager.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
-import java.util.Set;
 
 @RestController
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
 
-    public static final String USER_PATH = "/api/v1/user";
-    public static final String USER_PATH_ID = USER_PATH + "/{userId}";
+    public static final String USER_PATH = "/api/user";
+    public static final String USER_ID_PATH_VAR = "/{userId}";
+    public static final String USER_PATH_ID = USER_PATH + USER_ID_PATH_VAR;
 
     private final UserService userService;
 
-    @PostMapping(USER_PATH + "/admin")
-    public ResponseEntity<TokenPair> registerAdmin(
+    @PostMapping
+    public ResponseEntity<RegisterUserResponseDTO> registerUser(
             @RequestBody
             @Valid
-            UserRegistrationRequestPayload creationData
+            RegisterUserRequestDTO creationData
     ) {
-        RegisterResponsePayload registerResponse = userService.register(creationData, Role.ADMIN);
+        RegisterUserResponseDTO registerResponse = userService.register(
+                creationData
+        );
 
-        return ResponseEntity
-                .created(URI.create(registerResponse.getUrlOfCreatedUser()))
-                .body(registerResponse.getTokenPair());
+        return new ResponseEntity<>(registerResponse, HttpStatus.CREATED);
     }
 
-    @PostMapping(USER_PATH + "/employee")
-    public ResponseEntity<TokenPair> registerEmployee(
-            @RequestBody
-            @Valid
-            UserRegistrationRequestPayload creationData
-    ) {
-        RegisterResponsePayload registerResponse = userService.register(creationData, Role.EMPLOYEE);
-
-        return ResponseEntity
-                .created(URI.create(registerResponse.getUrlOfCreatedUser()))
-                .body(registerResponse.getTokenPair());
-    }
-
-    @PostMapping(USER_PATH + "/customer")
-    public ResponseEntity<TokenPair> registerCustomer(
-            @RequestBody
-            @Valid
-            UserRegistrationRequestPayload creationData
-    ) {
-        RegisterResponsePayload registerResponse = userService.register(creationData, Role.CUSTOMER);
-
-        return ResponseEntity
-                .created(URI.create(registerResponse.getUrlOfCreatedUser()))
-                .body(registerResponse.getTokenPair());
-    }
-
-    @PutMapping(USER_PATH_ID)
-    @PreAuthorize(
-            //I would like to use here Permission.ADMIN.name(),
-            //but do it such full name of Permission need to be specified
-            "hasRole('ROLE_ADMIN') or #userId == authentication.principal"
-    )
+    @PutMapping(USER_ID_PATH_VAR)
     public ResponseEntity<Void> updateUser(
             @PathVariable
             @UUID(allowNil = false)
             String userId,
             @RequestBody
             @Valid
-            UpdateUserRequestPayload updatedData
+            UpdateUserRequestDTO updatedData
     ) {
         userService.update(
                 java.util.UUID.fromString(userId),
@@ -89,26 +59,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(USER_PATH_ID + "/role")
-    public ResponseEntity<Void> updateUserRole(
-            @PathVariable
-            @UUID(allowNil = false)
-            String userId,
-            @RequestBody
-            Set<Role> updatedRoles
-    ) {
-        userService.updateRoles(
-                java.util.UUID.fromString(userId),
-                updatedRoles
-        );
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping(USER_PATH_ID)
-    @PreAuthorize(
-            "hasRole('ROLE_ADMIN') or #userId == authentication.principal"
-    )
+    @DeleteMapping(USER_ID_PATH_VAR)
     public ResponseEntity<Void> deleteUser(
             @PathVariable
             @UUID(allowNil = false)
@@ -121,9 +72,9 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(USER_PATH_ID)
+    @GetMapping(USER_ID_PATH_VAR)
     @PreAuthorize(
-            "hasRole('ROLE_ADMIN') or #userId == authentication.principal"
+            "hasRole('ROLE_EMPLOYEE') or #userId == authentication.principal"
     )
     public ResponseEntity<UserDTO> getUserById(
             @PathVariable
@@ -137,7 +88,7 @@ public class UserController {
         return ResponseEntity.ok(userResponsePayload);
     }
 
-    @GetMapping(USER_PATH)
+    @GetMapping
     public ResponseEntity<List<UserDTO>> listUsers() {
         List<UserDTO> foundUsers = userService.listAll();
 

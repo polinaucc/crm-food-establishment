@@ -1,15 +1,13 @@
 package com.crmfoodestablishment.userauthservice.usermanager.dto;
 
 import com.crmfoodestablishment.userauthservice.usermanager.entity.Role;
-import com.crmfoodestablishment.userauthservice.usermanager.entity.UserPersonalInfo;
 import lombok.*;
 
-import java.util.Set;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
@@ -18,9 +16,28 @@ public class UserDTO {
 
     private String email;
 
-    private String password;
+    private Role role;
 
-    private Set<Role> roles;
+    private String firstName;
 
-    private UserPersonalInfo personalInfo;
+    private String lastName;
+
+    private boolean isMale;
+
+    private LocalDate birthday;
+
+    private String address;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserDTO teacher)) return false;
+
+        return getUuid().equals(teacher.getUuid());
+    }
+
+    @Override
+    public int hashCode() {
+        return getUuid().hashCode();
+    }
 }

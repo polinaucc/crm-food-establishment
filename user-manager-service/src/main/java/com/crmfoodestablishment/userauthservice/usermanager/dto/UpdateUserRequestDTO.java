@@ -1,5 +1,6 @@
-package com.crmfoodestablishment.userauthservice.usermanager.controller.payload;
+package com.crmfoodestablishment.userauthservice.usermanager.dto;
 
+import com.crmfoodestablishment.userauthservice.usermanager.entity.Role;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -9,7 +10,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class UpdateUserRequestPayload {
+public class UpdateUserRequestDTO {
 
     @NotNull
     @Email(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
@@ -18,7 +19,9 @@ public class UpdateUserRequestPayload {
     @NotBlank
     private String password;
 
-    //так зробити або саме UserPersonalInfo використати?
+    @NotNull
+    private Role role;
+
     @NotBlank
     @Size(max = 32)
     private String firstName;
