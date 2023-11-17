@@ -1,6 +1,6 @@
 package com.crmfoodestablishment.coreservice.service.impl;
 
-import com.crmfoodestablishment.coreservice.dto.order.NewOrderDto;
+import com.crmfoodestablishment.coreservice.dto.order.CreateNewOrderDto;
 import com.crmfoodestablishment.coreservice.entity.Dish;
 import com.crmfoodestablishment.coreservice.entity.Order;
 import com.crmfoodestablishment.coreservice.repository.DishRepository;
@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+import static com.crmfoodestablishment.coreservice.entity.DeliveryMethod.*;
+
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -24,15 +26,23 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public UUID createOrder(NewOrderDto newOrderDto) {
+    public UUID createOrder(CreateNewOrderDto createNewOrderDto) {
+        validateDeliveryMethod(createNewOrderDto);
 
-        newOrderDto.validateDeliveryMethod(newOrderDto.getDeliveryDetails());
-        Order orderToSave = orderMapper.newOrderDtoToOrder(newOrderDto);
-        newOrderDto.getDishes().forEach(dishWithAmount -> {
+        Order orderToSave = orderMapper.mapOrderDtoToOrder(createNewOrderDto);
+        createNewOrderDto.getDishes().forEach(dishWithAmount -> {
             Dish dish = dishRepository.findByUuid(dishWithAmount.getUuid()).orElseThrow(() -> new NotFoundException("Dish is not found"));
             orderToSave.addDish(dish, dishWithAmount.getAmount());
         });
 
         return orderRepository.save(orderToSave).getUuid();
+    }
+
+    private void validateDeliveryMethod(CreateNewOrderDto createNewOrderDto) {
+        if (createNewOrderDto.getDeliveryDetails().getPhoneNumber() == null) {
+            createNewOrderDto.setDeliveryMethod(LOCAL);
+        } else if (createNewOrderDto.getDeliveryDetails().getAddress() == null) {
+            createNewOrderDto.setDeliveryMethod(SELF_PICKUP);
+        } else createNewOrderDto.setDeliveryMethod(ADDRESS_DELIVERY);
     }
 }

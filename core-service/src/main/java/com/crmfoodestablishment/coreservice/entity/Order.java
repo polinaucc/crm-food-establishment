@@ -1,9 +1,26 @@
 package com.crmfoodestablishment.coreservice.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.EnumType;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,7 +32,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "orders")
+@Table(name = "client_order")
 public class Order {
 
     @PrePersist
@@ -67,6 +84,13 @@ public class Order {
     @Column(name = "delivery_method", nullable = false, length = 16)
     private DeliveryMethod deliveryMethod;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_status", nullable = false, length = 16)
+    private OrderStatus orderStatus = OrderStatus.NEW;
+
+    @Column(name = "modification_date", nullable = false)
+    private LocalDateTime modificationDate = LocalDateTime.now();
+
     public void setDishes(List<DishInOrder> listOfOrderDishes) {
         this.dishes = listOfOrderDishes;
         this.dishes.stream().forEach(dishInOrder -> dishInOrder.setOrder(this));
@@ -75,6 +99,11 @@ public class Order {
     public void setDeliveryDetails(DeliveryDetails deliveryDetails) {
         this.deliveryDetails = deliveryDetails;
         this.deliveryDetails.setOrder(this);
+    }
+
+    public void setOrderStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
+        this.modificationDate = LocalDateTime.now();
     }
 
     public void addDish(Dish dish, Short amount) {

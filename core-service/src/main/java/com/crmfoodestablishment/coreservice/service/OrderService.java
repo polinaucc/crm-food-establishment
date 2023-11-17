@@ -1,10 +1,10 @@
 package com.crmfoodestablishment.coreservice.service;
 
-import com.crmfoodestablishment.coreservice.dto.order.NewOrderDto;
+import com.crmfoodestablishment.coreservice.dto.order.CreateNewOrderDto;
 
 import java.util.UUID;
 
 public interface OrderService {
 
-    UUID createOrder(NewOrderDto newOrderDto);;
+    UUID createOrder(CreateNewOrderDto createNewOrderDto);;
 }

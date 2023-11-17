@@ -1,6 +1,13 @@
 package com.crmfoodestablishment.coreservice.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.JoinColumn;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,7 +39,7 @@ public class DeliveryDetails {
     @Column(name = "last_name", length = 64)
     private String lastName;
 
-    @Column(name = "phone_number", nullable = false, length = 16)
+    @Column(name = "phone_number", nullable = false, length = 20)
     private String phoneNumber;
 
     @Column(name = "address", nullable = false, length = 1024)

@@ -1,15 +1,25 @@
 package com.crmfoodestablishment.coreservice.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.CascadeType;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -24,7 +34,7 @@ public class Dish {
 
     @JdbcTypeCode(SqlTypes.UUID)
     @Column(name = "uuid", nullable = false)
-    private UUID uuid = UUID.randomUUID(); //TODO: add to the DB
+    private UUID uuid = UUID.randomUUID();
 
     @Column(name = "price", precision = 7, scale = 2, nullable = false)
     private BigDecimal price;
@@ -39,7 +49,7 @@ public class Dish {
     @OneToMany(
             mappedBy = "dish",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.MERGE,
+            cascade = CascadeType.PERSIST,
             orphanRemoval = true
     )
     private List<DishInOrder> orders;

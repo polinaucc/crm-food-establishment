@@ -1,17 +1,22 @@
 package com.crmfoodestablishment.coreservice.web;
 
-import com.crmfoodestablishment.coreservice.dto.order.NewOrderDto;
+import com.crmfoodestablishment.coreservice.dto.order.CreateNewOrderDto;
 import com.crmfoodestablishment.coreservice.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("order-api/v1")
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -19,7 +24,8 @@ public class OrderController {
 
     @PostMapping("/order")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<UUID> createOrder(@RequestBody @Validated NewOrderDto newOrderDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(newOrderDto));
+    public ResponseEntity<UUID> createOrder(@RequestBody @Valid CreateNewOrderDto createNewOrderDto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(orderService.createOrder(createNewOrderDto));
     }
 }

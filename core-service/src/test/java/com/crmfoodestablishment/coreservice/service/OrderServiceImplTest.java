@@ -1,24 +1,29 @@
 package com.crmfoodestablishment.coreservice.service;
 
-import com.crmfoodestablishment.coreservice.dto.order.NewOrderDto;
+import com.crmfoodestablishment.coreservice.dto.order.CreateNewOrderDto;
 import com.crmfoodestablishment.coreservice.entity.Order;
 import com.crmfoodestablishment.coreservice.repository.DishRepository;
 import com.crmfoodestablishment.coreservice.repository.OrderRepository;
 import com.crmfoodestablishment.coreservice.service.exception.NotFoundException;
 import com.crmfoodestablishment.coreservice.service.impl.OrderServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
+@ExtendWith(MockitoExtension.class)
 public class OrderServiceImplTest {
 
+    @InjectMocks
     private OrderServiceImpl orderService;
 
     @Mock
@@ -30,20 +35,14 @@ public class OrderServiceImplTest {
     @Mock
     private OrderMapper orderMapper;
 
-    @BeforeEach
-    public void init() {
-        MockitoAnnotations.openMocks(this);
-        orderService = new OrderServiceImpl(orderRepository, dishRepository, orderMapper);
-    }
-
     @Test
     public void testOrderCreateMethod() {
-        NewOrderDto newOrderDto = new NewOrderDto();
+        CreateNewOrderDto createNewOrderDto = new CreateNewOrderDto();
 
         when(dishRepository.findByUuid(any(UUID.class)).orElseThrow(() -> new NotFoundException("Dish is not found")));
         when(orderRepository.save(any(Order.class))).thenReturn(new Order());
 
-        UUID result = orderService.createOrder(newOrderDto);
+        UUID result = orderService.createOrder(createNewOrderDto);
         assertNotNull(result);
 
         verify(dishRepository, times(1)).findByUuid(any(UUID.class));
