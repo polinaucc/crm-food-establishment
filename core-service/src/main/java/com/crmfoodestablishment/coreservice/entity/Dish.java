@@ -16,6 +16,9 @@ public class Dish {
     @Column(name = "id", nullable = false, unique = true)
     private Integer id;
 
+    @Column(name = "name", unique = true, nullable = false, length = 64)
+    private String name;
+
     @Column(name = "price", precision = 7, scale = 2, nullable = false)
     private BigDecimal price;
 
@@ -23,7 +26,9 @@ public class Dish {
     private String ingredients;
 
     @ManyToOne
-    @JoinColumn(name = "menu_id", nullable = false, referencedColumnName = "id")
+    @JoinColumn(name = "menu_id",
+            nullable = false,
+            referencedColumnName = "id")
     private Menu menu;
 
     @OneToMany(

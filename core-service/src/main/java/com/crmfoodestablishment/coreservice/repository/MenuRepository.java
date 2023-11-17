@@ -9,5 +9,9 @@ public interface MenuRepository extends JpaRepository<Menu, UUID> {
 
     boolean existsByName(String name);
 
+    boolean existsById(Integer id);
+
+    Menu getMenuById(Integer id);
+
     Optional<Menu> getMenuByUuid(UUID uuid);
 }
