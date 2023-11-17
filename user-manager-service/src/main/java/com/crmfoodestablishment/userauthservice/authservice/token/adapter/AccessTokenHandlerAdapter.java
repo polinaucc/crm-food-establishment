@@ -7,7 +7,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtHandlerAdapter;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 import static com.crmfoodestablishment.userauthservice.authservice.service.TimeUtils.convertDateToLocalDateTime;
@@ -25,8 +24,8 @@ public class AccessTokenHandlerAdapter extends JwtHandlerAdapter<AccessToken> {
                                 jws.getBody().getSubject()
                         ),
                         jws.getBody().get(
-                                "roles",
-                                new ArrayList<Role>().getClass()
+                                "role",
+                                Role.class
                         )
                 )
         );

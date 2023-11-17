@@ -1,7 +1,7 @@
 package com.crmfoodestablishment.userauthservice.authservice.controller;
 
 import com.crmfoodestablishment.userauthservice.authservice.service.AuthService;
-import com.crmfoodestablishment.userauthservice.authservice.controller.payload.LoginRequestPayload;
+import com.crmfoodestablishment.userauthservice.authservice.dto.CredentialsDTO;
 import com.crmfoodestablishment.userauthservice.authservice.token.TokenPair;
 
 import jakarta.validation.Valid;
@@ -14,18 +14,20 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Validated
 public class AuthController {
 
-    public static final String AUTH_PATH = "/api/v1/auth";
+    public static final String AUTH_PATH = "/api/auth";
 
     private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<TokenPair> login(
-            @RequestBody @Valid LoginRequestPayload credentials
+            @RequestBody
+            @Valid
+            CredentialsDTO credentials
     ) {
         TokenPair tokenPair = authService.login(credentials);
 

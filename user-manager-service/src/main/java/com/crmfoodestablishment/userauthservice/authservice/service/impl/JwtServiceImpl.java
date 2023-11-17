@@ -8,7 +8,8 @@ import com.crmfoodestablishment.userauthservice.authservice.token.RefreshToken;
 import com.crmfoodestablishment.userauthservice.authservice.token.TokenPair;
 import com.crmfoodestablishment.userauthservice.authservice.token.adapter.AccessTokenHandlerAdapter;
 import com.crmfoodestablishment.userauthservice.authservice.token.adapter.RefreshTokenHandlerAdapter;
-import com.crmfoodestablishment.userauthservice.usermanager.dto.UserDTO;
+import com.crmfoodestablishment.userauthservice.usermanager.entity.User;
+
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -84,7 +85,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String issueAccessToken(UserDTO user) {
+    public String issueAccessToken(User user) {
         LocalDateTime issuedTime = LocalDateTime.now();
         LocalDateTime expirationTime = issuedTime.plusMinutes(
                 jwtProperties.accessToken().expirationTime()
@@ -94,7 +95,7 @@ public class JwtServiceImpl implements JwtService {
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
                 .setExpiration(convertLocalDateTimeToDate(expirationTime))
                 .setSubject(user.getUuid().toString())
-                .claim("roles", user.getRoles())
+                .claim("role", user.getRole())
                 .signWith(accessTokenSecretKey, SignatureAlgorithm.RS256)
                 .compact();
 
@@ -103,7 +104,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String issueRefreshToken(UserDTO user) {
+    public String issueRefreshToken(User user) {
         LocalDateTime issuedTime = LocalDateTime.now();
         LocalDateTime expirationTime = issuedTime.plusMinutes(
                 jwtProperties.refreshToken().expirationTime()
@@ -129,7 +130,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public TokenPair issueTokenPair(UserDTO user) {
+    public TokenPair issueTokenPair(User user) {
         String accessToken = issueAccessToken(user);
         String refreshToken = issueRefreshToken(user);
 
@@ -153,13 +154,13 @@ public class JwtServiceImpl implements JwtService {
             );
         } catch (RuntimeException e) {
             throw new InvalidTokenException(
-                    "Invalid token: given invalid access token"
+                    "Given invalid access token"
             );
         }
 
         if (parsedAccessToken.claims().exp().isBefore(LocalDateTime.now())) {
             throw new InvalidTokenException(
-                    "Invalid token: given token has expired"
+                    "Given access token has expired"
             );
         }
 
@@ -177,7 +178,7 @@ public class JwtServiceImpl implements JwtService {
             );
         } catch (RuntimeException e) {
             throw new InvalidTokenException(
-                    "Invalid token: given invalid refresh token"
+                    "Given invalid refresh token"
             );
         }
 
@@ -185,7 +186,7 @@ public class JwtServiceImpl implements JwtService {
                 parsedRefreshToken.claims().sub()
         ))) {
             throw new InvalidTokenException(
-                    "Invalid token: given refresh token has expired"
+                    "Given refresh token has expired"
             );
         }
 

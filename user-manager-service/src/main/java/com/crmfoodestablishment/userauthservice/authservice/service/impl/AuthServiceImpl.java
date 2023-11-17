@@ -1,24 +1,22 @@
 package com.crmfoodestablishment.userauthservice.authservice.service.impl;
 
-import com.crmfoodestablishment.userauthservice.authservice.controller.payload.LoginRequestPayload;
-import com.crmfoodestablishment.userauthservice.authservice.token.TokenPair;
-import com.crmfoodestablishment.userauthservice.usermanager.dto.UserDTO;
+import com.crmfoodestablishment.userauthservice.authservice.dto.CredentialsDTO;
 import com.crmfoodestablishment.userauthservice.authservice.exception.InvalidTokenException;
 import com.crmfoodestablishment.userauthservice.authservice.exception.InvalidUserCredentialsException;
 import com.crmfoodestablishment.userauthservice.authservice.service.AuthService;
 import com.crmfoodestablishment.userauthservice.authservice.service.JwtService;
 import com.crmfoodestablishment.userauthservice.authservice.token.RefreshToken;
-
-import com.crmfoodestablishment.userauthservice.usermanager.exception.NotFoundException;
-import com.crmfoodestablishment.userauthservice.usermanager.service.UserService;
+import com.crmfoodestablishment.userauthservice.authservice.token.TokenPair;
+import com.crmfoodestablishment.userauthservice.usermanager.entity.User;
+import com.crmfoodestablishment.userauthservice.usermanager.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
@@ -26,27 +24,33 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
 
     private final JwtService jwtService;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public TokenPair login(LoginRequestPayload credentials) {
-        UserDTO user;
-        try {
-            user = userService.getByEmail(credentials.getEmail());
-        } catch (NotFoundException e) {
-            throw new InvalidUserCredentialsException("Wrong email");
-        }
+    public TokenPair login(CredentialsDTO credentials) {
+        AtomicReference<User> user = new AtomicReference<>();
 
-        if(!user.getPassword().equals(
-                passwordEncoder.encode(credentials.getPassword())
-        )) {
-            throw new InvalidUserCredentialsException("Wrong password");
-        }
+        userRepository.findByEmail(credentials.getEmail()).ifPresentOrElse(
+                foundUser -> {
+                    if (!foundUser.getPassword().equals(
+                            passwordEncoder.encode(credentials.getPassword())
+                    )) {
+                        logAndThrowException(
+                                new InvalidUserCredentialsException("Wrong password")
+                        );
+                    } else {
+                        user.set(foundUser);
+                    }
+                },
+                () -> logAndThrowException(
+                        new InvalidUserCredentialsException("Wrong email")
+                )
+        );
 
-        TokenPair tokenPair = jwtService.issueTokenPair(user);
+        TokenPair tokenPair = jwtService.issueTokenPair(user.get());
 
-        log.info("User: " + user.getEmail() + " logged");
+        log.info("User: " + user.get().getEmail() + " logged");
         return tokenPair;
     }
 
@@ -56,20 +60,26 @@ public class AuthServiceImpl implements AuthService {
 
         RefreshToken parsedRefreshToken = jwtService.parseRefreshToken(refreshToken);
 
-        UserDTO user;
-        try {
-            user = userService.getById(parsedRefreshToken.claims().sub());
-        } catch (NotFoundException e) {
-            throw new InvalidTokenException("Invalid subject: no such user with that id");
-        }
+        AtomicReference<User> user = new AtomicReference<>();
+        userRepository.findByUuid(parsedRefreshToken.claims().sub()).ifPresentOrElse(
+                user::set,
+                () -> logAndThrowException(
+                        new InvalidTokenException("Invalid subject: no such user with that id")
+                )
+        );
 
-        log.info("User: " + user.getUuid() + " refreshed access token");
-        return jwtService.issueAccessToken(user);
+        log.info("User: " + user.get().getUuid() + " refreshed access token");
+        return jwtService.issueAccessToken(user.get());
     }
 
     @Override
     public void logout(UUID userUuid) {
         jwtService.invalidateRefreshToken(userUuid);
         log.info("User: " + userUuid + " logged out");
+    }
+
+    private void logAndThrowException(RuntimeException exception) {
+        log.error(exception.getMessage(), exception);
+        throw exception;
     }
 }
