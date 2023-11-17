@@ -73,9 +73,6 @@ public class UserController {
     }
 
     @GetMapping(USER_ID_PATH_VAR)
-    @PreAuthorize(
-            "hasRole('ROLE_EMPLOYEE') or #userId == authentication.principal"
-    )
     public ResponseEntity<UserDTO> getUserById(
             @PathVariable
             @UUID(allowNil = false)
