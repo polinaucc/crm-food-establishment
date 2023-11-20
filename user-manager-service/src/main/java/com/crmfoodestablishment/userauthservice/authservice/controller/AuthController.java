@@ -38,8 +38,8 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<String> refresh(
-            @RequestBody
-            @Pattern(regexp = "/^([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_\\-\\+\\/=]*)/")
+            @RequestParam(name = "refreshToken")
+            @Pattern(regexp = "^([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_\\-\\+\\/=]*)")
             String refreshToken
     ) {
         String accessToken = authService.refresh(refreshToken);

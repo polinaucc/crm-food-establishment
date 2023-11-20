@@ -30,7 +30,7 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public User mapRegisterUserRequestDTOToUser(
+    public void mapRegisterUserRequestDTOToUser(
             RegisterUserRequestDTO dto,
             User user
     ) {
@@ -45,12 +45,10 @@ public class UserMapperImpl implements UserMapper {
         user.getPersonalInfo().setBirthday(dto.getBirthday());
         user.getPersonalInfo().setMale(dto.getIsMale());
         user.getPersonalInfo().setAddress(dto.getAddress());
-
-        return user;
     }
 
     @Override
-    public User mapUpdateUserRequestDTOToUser(
+    public void mapUpdateUserRequestDTOToUser(
             UpdateUserRequestDTO dto,
             User user
     ) {
@@ -65,7 +63,5 @@ public class UserMapperImpl implements UserMapper {
         user.getPersonalInfo().setBirthday(dto.getBirthday());
         user.getPersonalInfo().setMale(dto.getIsMale());
         user.getPersonalInfo().setAddress(dto.getAddress());
-
-        return user;
     }
 }

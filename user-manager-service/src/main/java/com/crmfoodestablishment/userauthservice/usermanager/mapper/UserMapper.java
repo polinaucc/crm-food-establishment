@@ -9,12 +9,12 @@ public interface UserMapper {
 
     UserDTO mapUserToUserDTO(User user);
 
-    User mapRegisterUserRequestDTOToUser(
+    void mapRegisterUserRequestDTOToUser(
             RegisterUserRequestDTO dto,
             User user
     );
 
-    User mapUpdateUserRequestDTOToUser(
+    void mapUpdateUserRequestDTOToUser(
             UpdateUserRequestDTO dto,
             User user
     );

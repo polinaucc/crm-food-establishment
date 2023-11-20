@@ -33,8 +33,9 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.findByEmail(credentials.getEmail()).ifPresentOrElse(
                 foundUser -> {
-                    if (!foundUser.getPassword().equals(
-                            passwordEncoder.encode(credentials.getPassword())
+                    if (!passwordEncoder.matches(
+                            credentials.getPassword(),
+                            foundUser.getPassword()
                     )) {
                         logAndThrowException(
                                 new InvalidUserCredentialsException("Wrong password")
