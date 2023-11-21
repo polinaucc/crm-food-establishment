@@ -1,6 +1,6 @@
-package com.crmfoodestablishment.userauthservice.usermanager.repository;
+package com.crmfoodestablishment.usermanager.crud.repository;
 
-import com.crmfoodestablishment.userauthservice.usermanager.entity.User;
+import com.crmfoodestablishment.usermanager.crud.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

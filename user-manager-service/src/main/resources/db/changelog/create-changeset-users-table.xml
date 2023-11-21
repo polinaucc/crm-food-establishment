@@ -36,12 +36,6 @@
             <column name="address" type="varchar(1024)"/>
         </createTable>
 
-        <createSequence
-                sequenceName="users_seq"
-                startValue="1"
-                incrementBy="50"
-        />
-
         <addUniqueConstraint
                 columnNames="uuid"
                 constraintName="users_uuid_key"

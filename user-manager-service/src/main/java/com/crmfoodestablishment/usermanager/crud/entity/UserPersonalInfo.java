@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.userauthservice.usermanager.entity;
+package com.crmfoodestablishment.usermanager.crud.entity;
 
 import jakarta.persistence.Embeddable;
 import lombok.Getter;

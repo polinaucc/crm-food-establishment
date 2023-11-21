@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.userauthservice.usermanager.entity;
+package com.crmfoodestablishment.usermanager.crud.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,8 +15,7 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @SequenceGenerator(name="users_seq", sequenceName = "users_seq")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
     private Long id;
 
