@@ -1,6 +1,6 @@
 package com.crmfoodestablishment.coreservice.controller;
 
-import com.crmfoodestablishment.coreservice.dto.DishDto;
+import com.crmfoodestablishment.coreservice.dto.CreateDishDto;
 import com.crmfoodestablishment.coreservice.service.DishService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/dishes")
+@RequestMapping("api/dishes")
 @RequiredArgsConstructor
 @Validated
 public class DishController {
 
     private final DishService dishService;
 
-    @PostMapping("/{menu_id}")
-    public List<DishDto> createDishes(@PathVariable(name = "menu_id") Integer id, @RequestBody List<@Valid DishDto> dishesDto) {
+    @PostMapping("/{menuId}")
+    public List<CreateDishDto> createDishes(@PathVariable(name = "menuId") Integer id, @RequestBody List<@Valid CreateDishDto> dishesDto) {
         return dishService.addDishes(id, dishesDto);
     }
 }

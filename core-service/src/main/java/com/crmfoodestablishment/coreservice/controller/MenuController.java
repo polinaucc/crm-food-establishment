@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/menu")
+@RequestMapping("api/menu")
 @RequiredArgsConstructor
 public class MenuController {
 
@@ -25,18 +25,18 @@ public class MenuController {
         return menuService.findAllMenu();
     }
 
-    @GetMapping("/{id}")
-    public MenuDto getMenu(@PathVariable(name = "id") UUID uuid) {
+    @GetMapping("/{uuid}")
+    public MenuDto getMenu(@PathVariable(name = "uuid") UUID uuid) {
         return menuService.findByMenuUuid(uuid);
     }
 
-    @PutMapping("/{id}")
-    public MenuDto updateMenu(@PathVariable(name = "id") UUID uuid, @Valid @RequestBody MenuDto menuDto) {
+    @PutMapping("/{uuid}")
+    public MenuDto updateMenu(@PathVariable(name = "uuid") UUID uuid, @Valid @RequestBody MenuDto menuDto) {
         return menuService.update(uuid, menuDto);
     }
 
-    @DeleteMapping("/{id}")
-    public UUID deleteMenu(@PathVariable(name = "id") UUID uuid) {
+    @DeleteMapping("/{uuid}")
+    public UUID deleteMenu(@PathVariable(name = "uuid") UUID uuid) {
         return menuService.deleteMenu(uuid);
     }
 }

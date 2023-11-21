@@ -3,17 +3,17 @@ package com.crmfoodestablishment.coreservice.dto;
 import com.crmfoodestablishment.coreservice.entity.Season;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.util.List;
 import java.util.UUID;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Getter
+@Setter
 public class MenuDto {
 
     private UUID uuid;
@@ -27,5 +27,5 @@ public class MenuDto {
     @NotNull(message = "The season must not be null.")
     private Season season;
 
-    private List<DishDto> dishes;
+    private List<CreateDishDto> dishes;
 }

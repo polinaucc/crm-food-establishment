@@ -3,13 +3,13 @@ package com.crmfoodestablishment.coreservice.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-
 import java.math.BigDecimal;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DishDto {
+@Setter
+@Getter
+public class CreateDishDto {
 
     @NotBlank(message = "Field name cannot be blank")
     private String name;

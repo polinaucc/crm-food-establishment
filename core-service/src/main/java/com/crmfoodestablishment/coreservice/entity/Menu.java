@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Getter
+@Setter
 public class Menu {
 
     @Id
@@ -36,3 +36,5 @@ public class Menu {
     @OneToMany(mappedBy = "menu", orphanRemoval = true)
     private List<Dish> dishes;
 }
+
+

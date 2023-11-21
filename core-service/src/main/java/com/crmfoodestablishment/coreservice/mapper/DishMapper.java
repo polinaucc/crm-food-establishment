@@ -1,23 +1,23 @@
 package com.crmfoodestablishment.coreservice.mapper;
 
-import com.crmfoodestablishment.coreservice.dto.DishDto;
+import com.crmfoodestablishment.coreservice.dto.CreateDishDto;
 import com.crmfoodestablishment.coreservice.entity.Dish;
 import com.crmfoodestablishment.coreservice.entity.Menu;
 import org.mapstruct.*;
 import java.util.List;
 
-@Mapper(
-        unmappedTargetPolicy = ReportingPolicy.IGNORE
-)
+@Mapper
 public interface DishMapper {
 
-    List<DishDto> mapDishToDishDto(List<Dish> dish);
+    List<CreateDishDto> mapDishToDishDto(List<Dish> dish);
 
-    @Mapping(target = "menu", ignore = true)
-    List<Dish> mapDishDtoToDish(List<DishDto> dishDto, @Context Menu menu);
+    @Mapping(target = "menu", source = "menu")
+    List<Dish> mapDishDtoToDish(List<CreateDishDto> dishDto, @Context Menu menu);
 
-    @AfterMapping
-    default void setMenu(@MappingTarget Dish dish, @Context Menu menu) {
+    @ObjectFactory
+    default Dish createDish(CreateDishDto dishDto, @Context Menu menu) {
+        Dish dish = new Dish();
         dish.setMenu(menu);
+        return dish;
     }
 }
