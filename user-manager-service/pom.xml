@@ -10,9 +10,9 @@
     </parent>
 
     <groupId>com.crm-food-establishment</groupId>
-    <artifactId>user-auth-service</artifactId>
+    <artifactId>user-manager</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>user-auth-service</name>
+    <name>user-manager</name>
     <description>
         Service that manages user information along with authentication operations
     </description>
