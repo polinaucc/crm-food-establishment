@@ -6,16 +6,16 @@
                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <changeSet id="create_users_table" author="Sasha_M">
         <createTable  tableName="users">
-            <column name="id" type="bigint">
-                <constraints primaryKey="true" nullable="false"/>
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
             </column>
             <column name="uuid" type="uuid">
                 <constraints nullable="false"/>
             </column>
-            <column name="email" type="varchar(255)">
+            <column name="email" type="varchar(64)">
                 <constraints nullable="false"/>
             </column>
-            <column name="password" type="varchar(255)">
+            <column name="password" type="varchar(32)">
                 <constraints nullable="false"/>
             </column>
             <column name="role" type="varchar(255)">
