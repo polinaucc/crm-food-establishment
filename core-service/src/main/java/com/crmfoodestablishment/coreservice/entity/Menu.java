@@ -36,5 +36,3 @@ public class Menu {
     @OneToMany(mappedBy = "menu", orphanRemoval = true)
     private List<Dish> dishes;
 }
-
-

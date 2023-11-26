@@ -62,7 +62,7 @@ class MenuControllerTest {
     }
 
     @Test
-    void shouldGet400BadRequestWhenRequestContainNullValue() throws Exception {
+    void shouldThrow400BadRequestWhenRequestContainNullValue() throws Exception {
         MenuDto menuDto = new MenuDto();
         menuDto.setName(null);
         menuDto.setComment("new summer menu");
@@ -75,37 +75,37 @@ class MenuControllerTest {
     }
 
     @Test
-    void whenValidInputThenMapsToBusinessModel() throws Exception {
+    void shouldGetValidInputThenMapsToBusinessModel() throws Exception {
         MenuDto menuDto = createMenuDto();
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/menu")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(menuDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk());
-        ArgumentCaptor<MenuDto> menuCaptor = ArgumentCaptor.forClass(MenuDto.class);
+        ArgumentCaptor<MenuDto> argumentCaptor = ArgumentCaptor.forClass(MenuDto.class);
 
-        verify(menuService, times(1)).addMenu(menuCaptor.capture());
-        assertThat(menuCaptor.getValue().getName()).isEqualTo("summer menu");
-        assertThat(menuCaptor.getValue().getComment()).isEqualTo("new summer menu");
-        assertThat(menuCaptor.getValue().getSeason().name()).isEqualTo(Season.SUMMER.name());
+        verify(menuService, times(1)).addMenu(argumentCaptor.capture());
+        MenuDto menuCaptorValue = argumentCaptor.getValue();
+        assertThat(menuCaptorValue.getName()).isEqualTo(menuDto.getName());
+        assertThat(menuCaptorValue.getComment()).isEqualTo(menuDto.getComment());
+        assertThat(menuCaptorValue.getSeason()).isEqualTo(menuDto.getSeason());
     }
 
     @Test
-    void whenValidInputThenReturnMenuDto() throws Exception {
+    void shouldGetValidInputThenReturnMenuDto() throws Exception {
         MenuDto menuDto = createMenuDto();
         MenuDto expectedMenuDto = new MenuDto();
         expectedMenuDto.setUuid(menuDto.getUuid());
 
         when(menuService.addMenu(any(MenuDto.class))).thenReturn(menuDto.getUuid());
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/menu")
+        String actualResponseBody = mockMvc.perform(MockMvcRequestBuilders.post("/api/menu")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(menuDto)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
-        String actualResponseBody = mvcResult.getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString();
 
-        assertThat(actualResponseBody).isEqualToIgnoringWhitespace(
-                objectMapper.writeValueAsString(expectedMenuDto.getUuid()));
+        assertThat(actualResponseBody).isEqualToIgnoringWhitespace(objectMapper
+                .writeValueAsString(expectedMenuDto.getUuid()));
     }
 
     @Test
@@ -135,7 +135,7 @@ class MenuControllerTest {
 
         when(menuService.findByMenuUuid(any(UUID.class))).thenReturn(menuDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/menu/{uuid}", menuDto.getUuid())
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/menu/{id}", menuDto.getUuid())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -159,7 +159,7 @@ class MenuControllerTest {
 
         when(menuService.update(any(UUID.class), any())).thenReturn(responseMenu);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/menu/{uuid}", menuDto.getUuid())
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/menu/{id}", menuDto.getUuid())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestMenu)))
                 .andExpect(MockMvcResultMatchers.status().isOk());
@@ -171,7 +171,7 @@ class MenuControllerTest {
 
         when(menuService.deleteMenu(any(UUID.class))).thenReturn(menuDto.getUuid());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/menu/{uuid}", menuDto.getUuid())
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/menu/{id}", menuDto.getUuid())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }

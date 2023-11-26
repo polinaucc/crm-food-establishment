@@ -7,6 +7,7 @@ import com.crmfoodestablishment.coreservice.mapper.MenuMapper;
 import com.crmfoodestablishment.coreservice.repository.MenuRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -53,11 +54,16 @@ class MenuServiceTest {
         MenuDto menuDto = createMenuDto();
 
         when(menuRepository.existsByName(anyString())).thenReturn(false);
+        ArgumentCaptor<Menu> argumentCaptor = ArgumentCaptor.forClass(Menu.class);
         when(menuRepository.save(any())).thenReturn(menu);
         UUID uuid = menuService.addMenu(menuDto);
 
-        verify(menuRepository, times(1)).save(any());
+        verify(menuRepository, times(1)).save(argumentCaptor.capture());
         assertNotNull(uuid);
+        Menu menuCaptorValue = argumentCaptor.getValue();
+        assertEquals(menuDto.getName(), menuCaptorValue.getName());
+        assertEquals(menuDto.getComment(), menuCaptorValue.getComment());
+        assertEquals(menuDto.getSeason(), menuCaptorValue.getSeason());
     }
 
     @Test

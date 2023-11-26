@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class Dish {

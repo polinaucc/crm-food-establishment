@@ -7,6 +7,7 @@ import com.crmfoodestablishment.coreservice.repository.MenuRepository;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +46,7 @@ public class MenuService {
         return menuMapper.mapMenuToMenuDto(foundMenu);
     }
 
+    @Transactional
     public MenuDto update(UUID uuid, MenuDto menuDto) {
         return menuRepository.getMenuByUuid(uuid)
                 .map(existingMenu -> {

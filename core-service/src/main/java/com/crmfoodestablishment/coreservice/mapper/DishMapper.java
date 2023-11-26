@@ -8,7 +8,6 @@ import java.util.List;
 
 @Mapper
 public interface DishMapper {
-
     List<CreateDishDto> mapDishToDishDto(List<Dish> dish);
 
     @Mapping(target = "menu", source = "menu")

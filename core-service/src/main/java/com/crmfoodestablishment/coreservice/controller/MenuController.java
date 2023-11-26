@@ -25,18 +25,18 @@ public class MenuController {
         return menuService.findAllMenu();
     }
 
-    @GetMapping("/{uuid}")
-    public MenuDto getMenu(@PathVariable(name = "uuid") UUID uuid) {
+    @GetMapping("/{id}")
+    public MenuDto getMenu(@PathVariable(name = "id") UUID uuid) {
         return menuService.findByMenuUuid(uuid);
     }
 
-    @PutMapping("/{uuid}")
-    public MenuDto updateMenu(@PathVariable(name = "uuid") UUID uuid, @Valid @RequestBody MenuDto menuDto) {
+    @PutMapping("/{id}")
+    public MenuDto updateMenu(@PathVariable(name = "id") UUID uuid, @Valid @RequestBody MenuDto menuDto) {
         return menuService.update(uuid, menuDto);
     }
 
-    @DeleteMapping("/{uuid}")
-    public UUID deleteMenu(@PathVariable(name = "uuid") UUID uuid) {
+    @DeleteMapping("/{id}")
+    public UUID deleteMenu(@PathVariable(name = "id") UUID uuid) {
         return menuService.deleteMenu(uuid);
     }
 }
