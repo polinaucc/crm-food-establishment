@@ -120,6 +120,7 @@ class UserControllerTest {
         );
 
         response.andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.userUuid", is(
                         registerUserResponseDTO.getUserUuid().toString()
                 )))
