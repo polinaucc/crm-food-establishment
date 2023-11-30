@@ -17,13 +17,18 @@ import java.util.Optional;
 import java.util.UUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.anyString;
 
 @ExtendWith(MockitoExtension.class)
-class MenuServiceTest {
+class MenuServiceImplTest {
     @InjectMocks
-    private MenuService menuService;
+    private MenuServiceImpl menuServiceImpl;
 
     @Mock
     private MenuRepository menuRepository;
@@ -56,7 +61,7 @@ class MenuServiceTest {
         when(menuRepository.existsByName(anyString())).thenReturn(false);
         ArgumentCaptor<Menu> argumentCaptor = ArgumentCaptor.forClass(Menu.class);
         when(menuRepository.save(any())).thenReturn(menu);
-        UUID uuid = menuService.addMenu(menuDto);
+        UUID uuid = menuServiceImpl.addMenu(menuDto);
 
         verify(menuRepository, times(1)).save(argumentCaptor.capture());
         assertNotNull(uuid);
@@ -72,7 +77,7 @@ class MenuServiceTest {
 
         when(menuRepository.existsByName(anyString())).thenReturn(true);
 
-        assertThatThrownBy(() -> menuService.addMenu(menuDto))
+        assertThatThrownBy(() -> menuServiceImpl.addMenu(menuDto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Menu " + menuDto.getName() + " is available");
     }
@@ -84,7 +89,7 @@ class MenuServiceTest {
 
         when(menuRepository.existsByName(anyString())).thenReturn(false);
         when(menuRepository.save(any())).thenReturn(menu);
-        menuService.addMenu(menuDto);
+        menuServiceImpl.addMenu(menuDto);
 
         assertThat(menu.getName()).isEqualTo(menuDto.getName());
         assertThat(menu.getComment()).isEqualTo(menuDto.getComment());
@@ -96,7 +101,7 @@ class MenuServiceTest {
         Menu menu = createMenu();
 
         when(menuRepository.getMenuByUuid(any(UUID.class))).thenReturn(Optional.of(menu));
-        MenuDto menuDto = menuService.findByMenuUuid(menu.getUuid());
+        MenuDto menuDto = menuServiceImpl.findByMenuUuid(menu.getUuid());
 
         assertNotNull(menuDto);
         assertEquals(menu.getUuid(), menuDto.getUuid());
@@ -108,7 +113,7 @@ class MenuServiceTest {
 
         when(menuRepository.getMenuByUuid(any(UUID.class))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> menuService.findByMenuUuid(uuid))
+        assertThatThrownBy(() -> menuServiceImpl.findByMenuUuid(uuid))
                 .isInstanceOf(MenuNotFoundException.class)
                 .hasMessage("Menu with uuid " + uuid + " is not found");
     }
@@ -123,9 +128,15 @@ class MenuServiceTest {
         menu2.setSeason(Season.WINTER);
 
         when(menuRepository.findAll()).thenReturn(Arrays.asList(menu, menu2));
-        List<MenuDto> allMenu = menuService.findAllMenu();
+        List<MenuDto> allMenuDtos = menuServiceImpl.findAllMenu();
 
-        assertEquals(2, allMenu.size());
+        assertEquals(2, allMenuDtos.size());
+        assertEquals(menu.getName(), allMenuDtos.get(0).getName());
+        assertEquals(menu.getComment(), allMenuDtos.get(0).getComment());
+        assertEquals(menu.getSeason(), allMenuDtos.get(0).getSeason());
+        assertEquals(menu2.getName(), allMenuDtos.get(1).getName());
+        assertEquals(menu2.getComment(), allMenuDtos.get(1).getComment());
+        assertEquals(menu2.getSeason(), allMenuDtos.get(1).getSeason());
     }
 
     @Test
@@ -138,7 +149,7 @@ class MenuServiceTest {
         menuDto.setSeason(Season.WINTER);
 
         when(menuRepository.getMenuByUuid(any(UUID.class))).thenReturn(Optional.of(menu));
-        MenuDto updatedMenuDto = menuService.update(menu.getUuid(), menuDto);
+        MenuDto updatedMenuDto = menuServiceImpl.update(menu.getUuid(), menuDto);
 
         assertThat(updatedMenuDto.getUuid()).isEqualTo(menu.getUuid());
         assertThat(updatedMenuDto.getName()).isEqualTo(menuDto.getName());
@@ -151,7 +162,7 @@ class MenuServiceTest {
         Menu menu = createMenu();
 
         when(menuRepository.getMenuByUuid(any(UUID.class))).thenReturn(Optional.of(menu));
-        UUID deleteMenuUuid = menuService.deleteMenu(menu.getUuid());
+        UUID deleteMenuUuid = menuServiceImpl.deleteMenu(menu.getUuid());
 
         verify(menuRepository, times(1)).delete(menu);
         assertThat(deleteMenuUuid).isEqualTo(menu.getUuid());

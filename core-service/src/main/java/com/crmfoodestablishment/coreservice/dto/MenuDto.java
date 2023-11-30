@@ -18,13 +18,12 @@ public class MenuDto {
 
     private UUID uuid;
 
-    @NotNull(message = "The name must not be null.")
-    @NotBlank
+    @NotBlank(message = "Field name cannot be blank")
     private String name;
 
     private String comment;
 
-    @NotNull(message = "The season must not be null.")
+    @NotNull(message = "Field season cannot be null")
     private Season season;
 
     private List<CreateDishDto> dishes;

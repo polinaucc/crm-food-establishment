@@ -9,7 +9,6 @@ import com.crmfoodestablishment.coreservice.repository.MenuRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import static org.mockito.ArgumentMatchers.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,17 +16,18 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class DishServiceTest {
+class DishServiceImplTest {
 
     @InjectMocks
-    private DishService dishService;
+    private DishServiceImpl dishServiceImpl;
 
     @Mock
     private DishRepository dishRepository;
@@ -65,7 +65,7 @@ class DishServiceTest {
 
         when(menuRepository.getMenuById(menuId)).thenReturn(Optional.of(existingMenu));
         ArgumentCaptor<List<Dish>> argumentCaptor = ArgumentCaptor.forClass(List.class);
-        dishService.addDishes(menuId, dishDtoList);
+        dishServiceImpl.addDishes(menuId, dishDtoList);
 
         verify(dishRepository, times(1)).saveAll(argumentCaptor.capture());
         List<Dish> dishCaptorValue = argumentCaptor.getValue();
@@ -85,7 +85,7 @@ class DishServiceTest {
 
         when(menuRepository.getMenuById(anyInt())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> dishService.addDishes(menuId, dishDtoList))
+        assertThatThrownBy(() -> dishServiceImpl.addDishes(menuId, dishDtoList))
                 .isInstanceOf(MenuNotFoundException.class)
                 .hasMessage("Menu with id " + menuId + " not exist");
     }

@@ -2,27 +2,29 @@ package com.crmfoodestablishment.coreservice.controller;
 
 import com.crmfoodestablishment.coreservice.dto.MenuDto;
 import com.crmfoodestablishment.coreservice.entity.Season;
-import com.crmfoodestablishment.coreservice.service.MenuService;
+import com.crmfoodestablishment.coreservice.service.MenuServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.mockito.ArgumentCaptor;
-import static org.mockito.Mockito.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @WebMvcTest(MenuController.class)
 @ExtendWith(MockitoExtension.class)
@@ -31,11 +33,8 @@ class MenuControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @InjectMocks
-    private MenuController menuController;
-
     @MockBean
-    private MenuService menuService;
+    private MenuServiceImpl menuServiceImpl;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -53,25 +52,32 @@ class MenuControllerTest {
     void shouldCreateMenu() throws Exception {
         MenuDto menuDto = createMenuDto();
 
-        when(menuService.addMenu(any(MenuDto.class))).thenReturn(menuDto.getUuid());
+        when(menuServiceImpl.addMenu(any(MenuDto.class))).thenReturn(menuDto.getUuid());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/menu")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(menuDto)))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$").value(menuDto.getUuid().toString()));
     }
 
     @Test
-    void shouldThrow400BadRequestWhenRequestContainNullValue() throws Exception {
+    void shouldThrow400BadRequestWhenRequestDtosNotValid() throws Exception {
         MenuDto menuDto = new MenuDto();
         menuDto.setName(null);
         menuDto.setComment("new summer menu");
         menuDto.setSeason(Season.SUMMER);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/menu")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(menuDto)))
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(menuDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.currentTime").isNotEmpty())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Validation failed"))
+                .andExpect(jsonPath("$.errors['name']").value("Field name cannot be blank"));
     }
 
     @Test
@@ -81,31 +87,14 @@ class MenuControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/menu")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(menuDto)))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isCreated());
         ArgumentCaptor<MenuDto> argumentCaptor = ArgumentCaptor.forClass(MenuDto.class);
 
-        verify(menuService, times(1)).addMenu(argumentCaptor.capture());
+        verify(menuServiceImpl, times(1)).addMenu(argumentCaptor.capture());
         MenuDto menuCaptorValue = argumentCaptor.getValue();
         assertThat(menuCaptorValue.getName()).isEqualTo(menuDto.getName());
         assertThat(menuCaptorValue.getComment()).isEqualTo(menuDto.getComment());
         assertThat(menuCaptorValue.getSeason()).isEqualTo(menuDto.getSeason());
-    }
-
-    @Test
-    void shouldGetValidInputThenReturnMenuDto() throws Exception {
-        MenuDto menuDto = createMenuDto();
-        MenuDto expectedMenuDto = new MenuDto();
-        expectedMenuDto.setUuid(menuDto.getUuid());
-
-        when(menuService.addMenu(any(MenuDto.class))).thenReturn(menuDto.getUuid());
-        String actualResponseBody = mockMvc.perform(MockMvcRequestBuilders.post("/api/menu")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(menuDto)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        assertThat(actualResponseBody).isEqualToIgnoringWhitespace(objectMapper
-                .writeValueAsString(expectedMenuDto.getUuid()));
     }
 
     @Test
@@ -117,7 +106,7 @@ class MenuControllerTest {
         menuDto2.setSeason(Season.WINTER);
 
         List<MenuDto> menuDtoList = List.of(menuDto, menuDto2);
-        when(menuService.findAllMenu()).thenReturn(menuDtoList);
+        when(menuServiceImpl.findAllMenu()).thenReturn(menuDtoList);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/menu")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -133,7 +122,7 @@ class MenuControllerTest {
     void shouldGetMenuByUuid() throws Exception {
         MenuDto menuDto = createMenuDto();
 
-        when(menuService.findByMenuUuid(any(UUID.class))).thenReturn(menuDto);
+        when(menuServiceImpl.findByMenuUuid(any(UUID.class))).thenReturn(menuDto);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/menu/{id}", menuDto.getUuid())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -153,26 +142,32 @@ class MenuControllerTest {
         requestMenu.setComment("new winter menu");
         requestMenu.setSeason(Season.WINTER);
         MenuDto responseMenu = new MenuDto();
+        responseMenu.setUuid(menuDto.getUuid());
         responseMenu.setName("winter menu");
-        requestMenu.setComment("new winter menu");
-        requestMenu.setSeason(Season.WINTER);
+        responseMenu.setComment("new winter menu");
+        responseMenu.setSeason(Season.WINTER);
 
-        when(menuService.update(any(UUID.class), any())).thenReturn(responseMenu);
+        when(menuServiceImpl.update(any(UUID.class), any())).thenReturn(responseMenu);
 
         mockMvc.perform(MockMvcRequestBuilders.put("/api/menu/{id}", menuDto.getUuid())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestMenu)))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.uuid").value(menuDto.getUuid().toString()))
+                .andExpect(jsonPath("$.name").value(responseMenu.getName()))
+                .andExpect(jsonPath("$.comment").value(responseMenu.getComment()))
+                .andExpect(jsonPath("$.season").value(responseMenu.getSeason().name()));
     }
 
     @Test
     void shouldDeleteMenuByUuid() throws Exception {
         MenuDto menuDto = createMenuDto();
 
-        when(menuService.deleteMenu(any(UUID.class))).thenReturn(menuDto.getUuid());
+        when(menuServiceImpl.deleteMenu(any(UUID.class))).thenReturn(menuDto.getUuid());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/menu/{id}", menuDto.getUuid())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/menu/{id}", menuDto.getUuid()))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(jsonPath("$").value(menuDto.getUuid().toString()));
     }
 }

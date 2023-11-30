@@ -2,7 +2,11 @@ package com.crmfoodestablishment.coreservice.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
+import lombok.Getter;
 import java.math.BigDecimal;
 
 @AllArgsConstructor
@@ -15,6 +19,7 @@ public class CreateDishDto {
     private String name;
 
     @NotNull(message = "Field price cannot be null")
+    @PositiveOrZero(message = "Price cannot be negative")
     private BigDecimal price;
 
     @NotBlank(message = "Field ingredients cannot be blank")

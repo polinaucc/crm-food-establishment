@@ -1,8 +1,19 @@
 package com.crmfoodestablishment.coreservice.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import jakarta.persistence.CascadeType;
 import java.math.BigDecimal;
+import jakarta.persistence.GenerationType;
 import java.util.List;
 
 @Entity
@@ -28,7 +39,6 @@ public class Dish {
 
     @ManyToOne
     @JoinColumn(name = "menu_id",
-            nullable = false,
             referencedColumnName = "id")
     private Menu menu;
 
