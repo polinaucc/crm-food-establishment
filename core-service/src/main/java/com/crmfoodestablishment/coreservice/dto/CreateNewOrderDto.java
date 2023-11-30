@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.coreservice.dto.order;
+package com.crmfoodestablishment.coreservice.dto;
 
 import com.crmfoodestablishment.coreservice.entity.DeliveryMethod;
 import jakarta.validation.Valid;
@@ -10,9 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -39,11 +37,4 @@ public class CreateNewOrderDto {
     @NotNull(message = "Delivery details cannot be a null, please set first name at least")
     @Valid
     private DeliveryDetailsDto deliveryDetails;
-
-    @Getter
-    @Setter
-    public static class DishInOrderDto {
-        private UUID uuid;
-        private Short amount;
-    }
 }

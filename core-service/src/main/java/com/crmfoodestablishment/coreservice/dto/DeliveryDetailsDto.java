@@ -1,13 +1,15 @@
-package com.crmfoodestablishment.coreservice.dto.order;
+package com.crmfoodestablishment.coreservice.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@EqualsAndHashCode
 public class DeliveryDetailsDto {
 
     @NotNull(message = "First name must be written")

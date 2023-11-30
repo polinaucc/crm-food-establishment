@@ -1,6 +1,6 @@
-package com.crmfoodestablishment.coreservice.web;
+package com.crmfoodestablishment.coreservice.controller;
 
-import com.crmfoodestablishment.coreservice.dto.order.CreateNewOrderDto;
+import com.crmfoodestablishment.coreservice.dto.CreateNewOrderDto;
 import com.crmfoodestablishment.coreservice.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
-
-
 import java.util.UUID;
 
 @RestController
-@RequestMapping("order-api/v1")
+@RequestMapping("order-api")
 @RequiredArgsConstructor
 public class OrderController {
 

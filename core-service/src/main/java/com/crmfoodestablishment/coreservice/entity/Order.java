@@ -1,18 +1,18 @@
 package com.crmfoodestablishment.coreservice.entity;
 
-
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,6 +39,11 @@ public class Order {
         totalPrice = dishes.stream()
                 .map(dishInOrder -> dishInOrder.getDish().getPrice().multiply(BigDecimal.valueOf(dishInOrder.getAmount())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @PreUpdate
+    public void changeDate() {
+        this.modificationDate = LocalDateTime.now();
     }
 
     @Id
@@ -101,13 +105,11 @@ public class Order {
         this.deliveryDetails.setOrder(this);
     }
 
-    public void setOrderStatus(OrderStatus orderStatus) {
-        this.orderStatus = orderStatus;
-        this.modificationDate = LocalDateTime.now();
-    }
-
     public void addDish(Dish dish, Short amount) {
         DishInOrder dishInOrder = new DishInOrder(this, dish, amount);
+        if (dish.getOrders() == null) {
+            dish.setOrders(new ArrayList<>());
+        }
         dishes.add(dishInOrder);
         dish.getOrders().add(dishInOrder);
     }

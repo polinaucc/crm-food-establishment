@@ -1,6 +1,5 @@
 package com.crmfoodestablishment.coreservice.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -13,6 +12,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,6 +25,10 @@ import lombok.Setter;
 public class DishInOrder {
     @EmbeddedId
     private DishOrderId dishOrderId;
+
+    @Column(name = "uuid", nullable = false, unique = true, updatable = false)
+    @JdbcTypeCode(SqlTypes.UUID)
+    private UUID uuid;
 
     @Column(name = "amount", nullable = false)
     private Short amount;

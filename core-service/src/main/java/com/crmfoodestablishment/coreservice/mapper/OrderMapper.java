@@ -1,6 +1,6 @@
-package com.crmfoodestablishment.coreservice.service;
+package com.crmfoodestablishment.coreservice.mapper;
 
-import com.crmfoodestablishment.coreservice.dto.order.CreateNewOrderDto;
+import com.crmfoodestablishment.coreservice.dto.CreateNewOrderDto;
 import com.crmfoodestablishment.coreservice.entity.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

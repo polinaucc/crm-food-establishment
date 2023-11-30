@@ -99,27 +99,4 @@
             </column>
         </createTable>
     </changeSet>
-
-    <changeSet id="5" author="ygoway">
-        <comment>Create a delivery details table with all the appropriate fields.</comment>
-        <createTable tableName="delivery_details">
-            <column name="order_id" type="int">
-                <constraints
-                        foreignKeyName="fk_order_id" references="client_order(id)"
-                        primaryKey="true"
-                        primaryKeyName="order_id"
-                        nullable="false"/>
-            </column>
-            <column name="uuid" type="uuid">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="first_name" type="varchar(64)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="last_name" type="varchar(64)"/>
-            <column name="phone_number" type="varchar(20)"/>
-            <column name="address" type="varchar(1024)"/>
-        </createTable>
-    </changeSet>
-
 </databaseChangeLog>
