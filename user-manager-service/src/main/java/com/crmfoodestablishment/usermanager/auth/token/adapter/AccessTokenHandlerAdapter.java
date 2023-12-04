@@ -23,10 +23,10 @@ public class AccessTokenHandlerAdapter extends JwtHandlerAdapter<AccessToken> {
                         UUID.fromString(
                                 jws.getBody().getSubject()
                         ),
-                        jws.getBody().get(
+                        Role.valueOf(jws.getBody().get(
                                 "role",
-                                Role.class
-                        )
+                                String.class
+                        ))
                 )
         );
     }

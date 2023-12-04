@@ -22,13 +22,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static com.crmfoodestablishment.usermanager.auth.service.KeyUtils.convertStringTokenToPrivateKey;
+import static com.crmfoodestablishment.usermanager.auth.service.KeyUtils.convertStringTokenToPublicKey;
 import static com.crmfoodestablishment.usermanager.auth.service.TimeUtils.convertLocalDateTimeToDate;
 
 @Service
@@ -55,7 +54,7 @@ public class JwtServiceImpl implements JwtService {
 
         this.jwtProperties = jwtProperties;
 
-        this.refreshTokenSecretKey = convertStringTokenToPrivateKey(
+        refreshTokenSecretKey = convertStringTokenToPrivateKey(
                 jwtProperties.refreshToken().secretKey(),
                 keyFactory
         );
@@ -68,7 +67,7 @@ public class JwtServiceImpl implements JwtService {
                 .build();
         refreshTokenHandlerAdapter = new RefreshTokenHandlerAdapter();
 
-        this.accessTokenSecretKey = convertStringTokenToPrivateKey(
+        accessTokenSecretKey = convertStringTokenToPrivateKey(
                 jwtProperties.accessToken().secretKey(),
                 keyFactory
         );
@@ -122,7 +121,7 @@ public class JwtServiceImpl implements JwtService {
                         user.getUuid(),
                         token,
                         jwtProperties.refreshToken().expirationTime(),
-                        TimeUnit.SECONDS
+                        TimeUnit.MINUTES
                 );
 
         log.info("Issued refresh token for user: " + user.getEmail());
@@ -191,23 +190,5 @@ public class JwtServiceImpl implements JwtService {
         }
 
         return parsedRefreshToken;
-    }
-
-    private PrivateKey convertStringTokenToPrivateKey(
-            String token,
-            KeyFactory keyFactory
-    ) throws InvalidKeySpecException {
-        byte[] decodedRefreshTokenSecretKey = Base64.getDecoder().decode(token);
-        var tokenSecretKeySpec = new PKCS8EncodedKeySpec(decodedRefreshTokenSecretKey);
-        return keyFactory.generatePrivate(tokenSecretKeySpec);
-    }
-
-    private PublicKey convertStringTokenToPublicKey(
-            String token,
-            KeyFactory keyFactory
-    ) throws InvalidKeySpecException {
-        byte[] decodedRefreshTokenPublicKey = Base64.getDecoder().decode(token);
-        var tokenPublicKeySpec = new X509EncodedKeySpec(decodedRefreshTokenPublicKey);
-        return keyFactory.generatePublic(tokenPublicKeySpec);
     }
 }
