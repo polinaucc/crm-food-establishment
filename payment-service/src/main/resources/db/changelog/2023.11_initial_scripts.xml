@@ -11,7 +11,7 @@
                 <constraints primaryKey="true"/>
             </column>
 
-            <column name="order_id" type="uuid">
+            <column name="uuid" type="uuid">
                 <constraints nullable="false" unique="true"/>
             </column>
 
