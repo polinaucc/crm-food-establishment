@@ -6,6 +6,7 @@ import com.crmfoodestablishment.usermanager.crud.dto.UserDTO;
 import com.crmfoodestablishment.usermanager.crud.entity.Role;
 import com.crmfoodestablishment.usermanager.crud.entity.User;
 import com.crmfoodestablishment.usermanager.crud.entity.UserPersonalInfo;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

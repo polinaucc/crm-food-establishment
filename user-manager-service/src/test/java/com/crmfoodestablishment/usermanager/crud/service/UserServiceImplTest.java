@@ -14,6 +14,7 @@ import com.crmfoodestablishment.usermanager.crud.exception.NotFoundException;
 import com.crmfoodestablishment.usermanager.crud.mapper.UserMapper;
 import com.crmfoodestablishment.usermanager.crud.mapper.UserMapperImpl;
 import com.crmfoodestablishment.usermanager.crud.repository.UserRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -9,6 +9,7 @@ import com.crmfoodestablishment.usermanager.crud.entity.Role;
 import com.crmfoodestablishment.usermanager.crud.exception.InvalidArgumentException;
 import com.crmfoodestablishment.usermanager.crud.exception.NotFoundException;
 import com.crmfoodestablishment.usermanager.crud.service.UserService;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(value = UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
