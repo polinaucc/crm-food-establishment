@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.usermanager.crud.entity;
+package com.crm.food.establishment.user.manager.entity;
 
 import jakarta.persistence.Embeddable;
 import lombok.Getter;

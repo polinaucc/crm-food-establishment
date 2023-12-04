@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.usermanager.crud.entity;
+package com.crm.food.establishment.user.manager.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -42,9 +42,9 @@ public class User {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof User teacher)) return false;
+        if (!(o instanceof User user)) return false;
 
-        return getUuid().equals(teacher.getUuid());
+        return getUuid().equals(user.getUuid());
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.usermanager.crud.entity;
+package com.crm.food.establishment.user.manager.entity;
 
 public enum Role {
     CLIENT,
