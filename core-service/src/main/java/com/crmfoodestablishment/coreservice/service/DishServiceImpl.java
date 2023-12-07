@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,13 +23,19 @@ public class DishServiceImpl implements DishService  {
     private final DishMapper dishMapper = Mappers.getMapper(DishMapper.class);
 
     @Override
-    public List<CreateDishDto> addDishes(Integer menuId, List<CreateDishDto> dishDto) {
-        Menu menu = menuRepository.getMenuById(menuId)
+    public List<CreateDishDto> addDishes(UUID menuId, List<CreateDishDto> dishDtos) {
+        Menu menu = menuRepository.getMenuByUuid(menuId)
                 .orElseThrow(() -> (new MenuNotFoundException("Menu with id " + menuId + " not exist")));
 
-        List<Dish> dishesToSave = dishMapper.mapDishDtoToDish(dishDto, menu);
-        List<Dish> savedDishes = dishRepository.saveAll(dishesToSave);
+        for (CreateDishDto dishDto: dishDtos) {
+            if (dishRepository.existsByName(dishDto.getName())) {
+                throw new IllegalArgumentException("Dish " + dishDto.getName() + " already exists");
+            }
+        }
 
+        List<Dish> dishesToSave = dishMapper.mapDishDtoToDish(dishDtos, menu);
+
+        List<Dish> savedDishes = dishRepository.saveAll(dishesToSave);
         return dishMapper.mapDishToDishDto(savedDishes);
     }
 }

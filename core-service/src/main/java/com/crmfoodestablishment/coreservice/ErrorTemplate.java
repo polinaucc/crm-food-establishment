@@ -3,16 +3,12 @@ package com.crmfoodestablishment.coreservice;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 
 @AllArgsConstructor
 @Setter
 @Getter
 public class ErrorTemplate {
-
-    private LocalDateTime currentTime;
-    private int status;
-    private String error;
-    private Map<String, String> errors;
+    private String title;
+    private List<String> errors;
 }

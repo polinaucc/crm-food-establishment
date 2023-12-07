@@ -1,8 +1,9 @@
 package com.crmfoodestablishment.coreservice.controller;
 
 import com.crmfoodestablishment.coreservice.dto.CreateDishDto;
-import com.crmfoodestablishment.coreservice.service.DishServiceImpl;
+import com.crmfoodestablishment.coreservice.service.DishService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -17,9 +18,8 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.UUID;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -36,20 +36,26 @@ class DishControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private DishServiceImpl dishServiceImpl;
+    private DishService dishService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
-    void shouldCreateDishes() throws Exception {
-        int menuId = 1;
-        List<CreateDishDto> dishesDto = Arrays.asList(
+    private List<CreateDishDto> dishesDto;
+
+    @BeforeEach
+    public void setUpData() {
+        dishesDto = Arrays.asList(
                 new CreateDishDto("barbecue", BigDecimal.valueOf(150.0), "meat, spices"),
                 new CreateDishDto("soup", BigDecimal.valueOf(50.0), "water, salt, potato, tomato")
         );
+    }
 
-        when(dishServiceImpl.addDishes(eq(menuId), anyList()))
+    @Test
+    void createDishes_ShouldSuccessfullyCreateDishes() throws Exception {
+        UUID menuId = UUID.randomUUID();
+
+        when(dishService.addDishes(eq(menuId), anyList()))
                 .thenReturn(dishesDto);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/dishes/{menuId}", menuId)
@@ -66,48 +72,34 @@ class DishControllerTest {
     }
 
     @Test
-    void shouldThrow400BadRequestWhenRequestDtosNotValid() throws Exception {
-        int menuId = 1;
-        List<CreateDishDto> dishesDto = Arrays.asList(
-                new CreateDishDto(null, BigDecimal.valueOf(150.0), "meat, spices")
-        );
+    void createDishes_ShouldThrow400BadRequestWhenRequestDtosNotValid() throws Exception {
+        UUID menuId = UUID.randomUUID();
+        dishesDto.get(0).setName(null);
 
-        when(dishServiceImpl.addDishes(eq(menuId), anyList())).thenReturn(Collections.emptyList());
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/dishes/{menuId}", menuId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dishesDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.currentTime").isNotEmpty())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.error").value("Validation failed"))
-                .andExpect(jsonPath("$.errors['createDishes.dishesDto[0].name']").value("Field name cannot be blank"));
-    }
-
-    @Test
-    void shouldGetValidInputThenMapsToBusinessModel() throws Exception {
-        int menuId = 1;
-        List<CreateDishDto> dishesDto = Arrays.asList(
-                new CreateDishDto("barbecue", BigDecimal.valueOf(150.0), "meat, spices"),
-                new CreateDishDto("soup", BigDecimal.valueOf(50.0), "water, salt, potato, tomato")
-        );
+        when(dishService.addDishes(eq(menuId), anyList())).thenReturn(Collections.emptyList());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/dishes/{menuId}", menuId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dishesDto)))
-                .andExpect(status().isCreated());
-        ArgumentCaptor<List<CreateDishDto>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.title").value("Validation exception"))
+                .andExpect(jsonPath("$.errors[0]").value("[createDishes.dishesDto[0].name: 'Field name cannot be blank']"));
+    }
 
-        verify(dishServiceImpl, times(1)).addDishes(eq(menuId), argumentCaptor.capture());
-        List<CreateDishDto> dishCaptorValue = argumentCaptor.getValue();
-        assertThat(dishCaptorValue.size()).isEqualTo(2);
-        for (int i = 0; i < dishCaptorValue.size(); i++) {
-            CreateDishDto actualDishDto = dishCaptorValue.get(i);
-            CreateDishDto expectedDishDto = dishesDto.get(i);
-            assertEquals(expectedDishDto.getName(), actualDishDto.getName());
-            assertEquals(expectedDishDto.getPrice(), actualDishDto.getPrice());
-            assertEquals(expectedDishDto.getIngredients(), actualDishDto.getIngredients());
-        }
+    @Test
+    void createDishes_ShouldSaveMenuWithCorrectValues() throws Exception {
+        UUID MenuId = UUID.randomUUID();
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/dishes/{menuId}", MenuId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dishesDto)))
+                .andExpect(status().isCreated());
+        ArgumentCaptor<List<CreateDishDto>> dishesArgumentCaptor = ArgumentCaptor.forClass(List.class);
+
+        verify(dishService).addDishes(eq(MenuId), dishesArgumentCaptor.capture());
+        List<CreateDishDto> actualDishes = dishesArgumentCaptor.getValue();
+        assertThat(actualDishes.size()).isEqualTo(2);
+        assertThat(actualDishes).isEqualTo(dishesDto);
     }
 }

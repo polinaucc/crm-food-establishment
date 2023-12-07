@@ -12,7 +12,7 @@ public interface MenuService {
 
     MenuDto findByMenuUuid(UUID uuid);
 
-    MenuDto update(UUID uuid, MenuDto menuDto);
+    MenuDto updateMenu(UUID uuid, MenuDto menuDto);
 
     UUID deleteMenu(UUID uuid);
 }

@@ -7,7 +7,6 @@ import com.crmfoodestablishment.coreservice.repository.MenuRepository;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,15 +16,12 @@ public class MenuServiceImpl implements MenuService {
 
     private final MenuRepository menuRepository;
     private final MenuMapper menuMapper = Mappers.getMapper(MenuMapper.class);
-
-    private MenuNotFoundException throwMenuNotFoundException(UUID uuid) {
-        return new MenuNotFoundException("Menu with uuid " + uuid + " is not found");
-    }
+    private final static String MENU_NOT_FOUND_ERROR_MESSAGE = "Menu with uuid %s is not found";
 
     @Override
     public UUID addMenu(MenuDto menuDto) {
         if (menuRepository.existsByName(menuDto.getName())) {
-            throw new IllegalArgumentException("Menu " + menuDto.getName() + " is available");
+            throw new IllegalArgumentException("Menu " + menuDto.getName() + " already exists");
         }
         Menu menuToSave = menuMapper.mapMenuDtoToMenu(menuDto);
         Menu savedMenu = menuRepository.save(menuToSave);
@@ -44,28 +40,32 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public MenuDto findByMenuUuid(UUID uuid) {
         Menu foundMenu = menuRepository.getMenuByUuid(uuid)
-                .orElseThrow(() -> throwMenuNotFoundException(uuid));
+                .orElseThrow(() -> new MenuNotFoundException(String
+                        .format(MENU_NOT_FOUND_ERROR_MESSAGE, uuid)));
 
         return menuMapper.mapMenuToMenuDto(foundMenu);
     }
 
     @Override
-    @Transactional
-    public MenuDto update(UUID uuid, MenuDto menuDto) {
-        return menuRepository.getMenuByUuid(uuid)
-                .map(existingMenu -> {
-                    existingMenu.setName(menuDto.getName());
-                    existingMenu.setComment(menuDto.getComment());
-                    existingMenu.setSeason(menuDto.getSeason());
-                    return menuMapper.mapMenuToMenuDto(existingMenu);
-                }).orElseThrow(() -> throwMenuNotFoundException(uuid));
+    public MenuDto updateMenu(UUID uuid, MenuDto menuDto) {
+        Menu existingMenu = menuRepository.getMenuByUuid(uuid)
+                .orElseThrow(() -> new MenuNotFoundException(String
+                        .format(MENU_NOT_FOUND_ERROR_MESSAGE, uuid)));
+
+        existingMenu.setName(menuDto.getName());
+        existingMenu.setComment(menuDto.getComment());
+        existingMenu.setSeason(menuDto.getSeason());
+
+        Menu savedMenu = menuRepository.save(existingMenu);
+        return menuMapper.mapMenuToMenuDto(savedMenu);
     }
 
     @Override
     public UUID deleteMenu(UUID uuid) {
         menuRepository
                 .delete(menuRepository.getMenuByUuid(uuid)
-                        .orElseThrow(() -> throwMenuNotFoundException(uuid)));
+                        .orElseThrow(() -> new MenuNotFoundException(String
+                                .format(MENU_NOT_FOUND_ERROR_MESSAGE, uuid))));
 
         return uuid;
     }

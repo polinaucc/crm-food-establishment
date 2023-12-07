@@ -1,7 +1,7 @@
 package com.crmfoodestablishment.coreservice.controller;
 
 import com.crmfoodestablishment.coreservice.dto.MenuDto;
-import com.crmfoodestablishment.coreservice.service.MenuServiceImpl;
+import com.crmfoodestablishment.coreservice.service.MenuService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,35 +22,35 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MenuController {
 
-    private final MenuServiceImpl menuServiceImpl;
+    private final MenuService menuService;
 
     @PostMapping
     public ResponseEntity<UUID> createMenu(@Valid @RequestBody MenuDto menuDto) {
-        UUID uuid = menuServiceImpl.addMenu(menuDto);
+        UUID uuid = menuService.addMenu(menuDto);
         return new ResponseEntity<>(uuid, HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<MenuDto>> getAllMenuList() {
-        List<MenuDto> allMenuDtos = menuServiceImpl.findAllMenu();
+        List<MenuDto> allMenuDtos = menuService.findAllMenu();
         return new ResponseEntity<>(allMenuDtos, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MenuDto> getMenu(@PathVariable(name = "id") UUID uuid) {
-        MenuDto menuDtoByUuid = menuServiceImpl.findByMenuUuid(uuid);
+        MenuDto menuDtoByUuid = menuService.findByMenuUuid(uuid);
         return new ResponseEntity<>(menuDtoByUuid, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<MenuDto> updateMenu(@PathVariable(name = "id") UUID uuid, @Valid @RequestBody MenuDto menuDto) {
-        MenuDto updatedMenuDto = menuServiceImpl.update(uuid, menuDto);
+        MenuDto updatedMenuDto = menuService.updateMenu(uuid, menuDto);
         return new ResponseEntity<>(updatedMenuDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<UUID> deleteMenu(@PathVariable(name = "id") UUID uuid) {
-        UUID uuidByDeletedMenu = menuServiceImpl.deleteMenu(uuid);
+        UUID uuidByDeletedMenu = menuService.deleteMenu(uuid);
         return new ResponseEntity<>(uuidByDeletedMenu, HttpStatus.OK);
     }
 }
