@@ -44,7 +44,7 @@ public class UserController {
     @PutMapping(USER_ID_PATH_VAR)
     public ResponseEntity<Void> updateUser(
             @PathVariable
-            @UUID(allowNil = false)
+            @UUID
             String userId,
             @RequestBody
             @Valid
@@ -61,7 +61,7 @@ public class UserController {
     @DeleteMapping(USER_ID_PATH_VAR)
     public ResponseEntity<Void> deleteUser(
             @PathVariable
-            @UUID(allowNil = false)
+            @UUID
             String userId
     ) {
         userService.delete(
@@ -74,7 +74,7 @@ public class UserController {
     @GetMapping(USER_ID_PATH_VAR)
     public ResponseEntity<UserDTO> getUserById(
             @PathVariable
-            @UUID(allowNil = false)
+            @UUID
             String userId
     ) {
         UserDTO userResponsePayload = userService.getById(

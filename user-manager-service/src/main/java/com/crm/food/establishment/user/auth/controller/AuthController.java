@@ -52,7 +52,7 @@ public class AuthController {
     @PostMapping("/logout/{userUuid}")
     public ResponseEntity<Void> logout(
             @PathVariable
-            @UUID(allowNil = false)
+            @UUID
             String userUuid
     ) {
         authService.logout(
