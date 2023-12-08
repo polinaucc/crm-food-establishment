@@ -6,7 +6,7 @@ public class InvalidArgumentException extends RuntimeException {
         super(message);
     }
 
-    public static String readableName() {
-        return "Invalid argument exception";
+    public static String errorCode() {
+        return "invalid.argument";
     }
 }

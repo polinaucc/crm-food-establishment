@@ -1,7 +1,6 @@
 package com.crm.food.establishment.user.auth.controller;
 
 import com.crm.food.establishment.user.ApiErrorInfo;
-
 import com.crm.food.establishment.user.auth.exception.InvalidTokenException;
 import com.crm.food.establishment.user.auth.exception.InvalidUserCredentialsException;
 
@@ -19,12 +18,12 @@ public class AuthControllerAdvice {
     public ResponseEntity<ApiErrorInfo> handleInvalidToken(
             InvalidTokenException exception
     ) {
-        ApiErrorInfo errorInfo = mapApiErrorInfo(
-                InvalidTokenException.readableName(),
-                exception
-        );
+        ApiErrorInfo errorInfo = ApiErrorInfo.builder()
+                .code(InvalidTokenException.errorCode())
+                .description(exception.getMessage())
+                .build();
 
-        return new ResponseEntity<>(errorInfo, errorInfo.getStatus());
+        return new ResponseEntity<>(errorInfo, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(value = {
@@ -33,22 +32,11 @@ public class AuthControllerAdvice {
     public ResponseEntity<ApiErrorInfo> handleInvalidUserCredentials(
             InvalidUserCredentialsException exception
     ) {
-        ApiErrorInfo errorInfo = mapApiErrorInfo(
-                InvalidUserCredentialsException.readableName(),
-                exception
-        );
-
-        return new ResponseEntity<>(errorInfo, errorInfo.getStatus());
-    }
-
-    private ApiErrorInfo mapApiErrorInfo(
-            String title,
-            RuntimeException exception
-    ) {
-        return ApiErrorInfo.builder()
-                .title(title)
-                .status(HttpStatus.UNAUTHORIZED)
+        ApiErrorInfo errorInfo = ApiErrorInfo.builder()
+                .code(InvalidUserCredentialsException.errorCode())
                 .description(exception.getMessage())
                 .build();
+
+        return new ResponseEntity<>(errorInfo, HttpStatus.UNAUTHORIZED);
     }
 }

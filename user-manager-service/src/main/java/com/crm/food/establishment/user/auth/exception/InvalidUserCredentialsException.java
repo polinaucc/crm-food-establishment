@@ -6,7 +6,7 @@ public class InvalidUserCredentialsException extends RuntimeException {
         super(message);
     }
 
-    public static String readableName() {
-        return "Invalid user credentials exception";
+    public static String errorCode() {
+        return "invalid.user.credentials";
     }
 }

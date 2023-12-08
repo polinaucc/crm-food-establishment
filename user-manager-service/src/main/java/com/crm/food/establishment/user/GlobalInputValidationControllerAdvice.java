@@ -10,28 +10,26 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.List;
+
 @RestControllerAdvice
 @Slf4j
 public class GlobalInputValidationControllerAdvice {
 
     @ExceptionHandler(value = {MethodArgumentNotValidException.class})
-    public ResponseEntity<ApiErrorInfo> handleMethodArgumentNotValid(
+    public ResponseEntity<List<ApiErrorInfo>> handleMethodArgumentNotValid(
             MethodArgumentNotValidException exception
     ) {
         log.error(exception.getMessage(), exception);
 
-        ApiErrorInfo errorInfo = ApiErrorInfo.builder()
-                .title(InvalidArgumentException.readableName())
-                .status(HttpStatus.BAD_REQUEST)
-                .description(
-                        MethodArgumentNotValidException.errorsToStringList(exception
-                                .getBindingResult()
-                                .getAllErrors()
-                        ).toString()
-                )
-                .build();
+        List<ApiErrorInfo> errorInfos = exception.getFieldErrors().stream()
+                .map(error -> new ApiErrorInfo(
+                        InvalidArgumentException.errorCode(),
+                        error.getField() + ": " + error.getDefaultMessage()
+                ))
+                .toList();
 
-        return new ResponseEntity<>(errorInfo, errorInfo.getStatus());
+        return new ResponseEntity<>(errorInfos, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = {ConstraintViolationException.class})
@@ -41,11 +39,10 @@ public class GlobalInputValidationControllerAdvice {
         log.error(exception.getMessage(), exception);
 
         ApiErrorInfo errorInfo = ApiErrorInfo.builder()
-                .title(InvalidArgumentException.readableName())
-                .status(HttpStatus.BAD_REQUEST)
+                .code(InvalidArgumentException.errorCode())
                 .description(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorInfo, errorInfo.getStatus());
+        return new ResponseEntity<>(errorInfo, HttpStatus.BAD_REQUEST);
     }
 }

@@ -17,12 +17,11 @@ public class UserControllerAdvice {
             InvalidArgumentException exception
     ) {
         ApiErrorInfo errorInfo = ApiErrorInfo.builder()
-                .title(InvalidArgumentException.readableName())
-                .status(HttpStatus.BAD_REQUEST)
+                .code(InvalidArgumentException.errorCode())
                 .description(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorInfo, errorInfo.getStatus());
+        return new ResponseEntity<>(errorInfo, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = {NotFoundException.class})
@@ -30,11 +29,10 @@ public class UserControllerAdvice {
             NotFoundException exception
     ) {
         ApiErrorInfo errorInfo = ApiErrorInfo.builder()
-                .title(NotFoundException.readableName())
-                .status(HttpStatus.NOT_FOUND)
+                .code(NotFoundException.errorCode())
                 .description(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorInfo, errorInfo.getStatus());
+        return new ResponseEntity<>(errorInfo, HttpStatus.NOT_FOUND);
     }
 }

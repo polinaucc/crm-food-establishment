@@ -6,7 +6,7 @@ public class InvalidTokenException extends RuntimeException{
         super(message);
     }
 
-    public static String readableName() {
-        return "Invalid token exception";
+    public static String errorCode() {
+        return "invalid.token";
     }
 }

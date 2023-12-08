@@ -6,7 +6,7 @@ public class NotFoundException extends RuntimeException {
         super(message);
     }
 
-    public static String readableName() {
-        return "Not found exception";
+    public static String errorCode() {
+        return "not.found";
     }
 }
