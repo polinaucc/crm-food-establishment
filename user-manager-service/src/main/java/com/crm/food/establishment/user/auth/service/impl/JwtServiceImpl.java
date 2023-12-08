@@ -87,7 +87,7 @@ public class JwtServiceImpl implements JwtService {
     public String issueAccessToken(User user) {
         LocalDateTime issuedTime = LocalDateTime.now();
         LocalDateTime expirationTime = issuedTime.plusMinutes(
-                jwtProperties.accessToken().expirationTime()
+                jwtProperties.accessToken().expirationTimeInMinutes()
         );
 
         String token = Jwts.builder()
@@ -106,7 +106,7 @@ public class JwtServiceImpl implements JwtService {
     public String issueRefreshToken(User user) {
         LocalDateTime issuedTime = LocalDateTime.now();
         LocalDateTime expirationTime = issuedTime.plusMinutes(
-                jwtProperties.refreshToken().expirationTime()
+                jwtProperties.refreshToken().expirationTimeInMinutes()
         );
 
         String token = Jwts.builder()
@@ -120,7 +120,7 @@ public class JwtServiceImpl implements JwtService {
                 .set(
                         user.getUuid(),
                         token,
-                        jwtProperties.refreshToken().expirationTime(),
+                        jwtProperties.refreshToken().expirationTimeInMinutes(),
                         TimeUnit.MINUTES
                 );
 
