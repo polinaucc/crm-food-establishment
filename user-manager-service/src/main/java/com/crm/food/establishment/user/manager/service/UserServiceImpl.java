@@ -1,5 +1,6 @@
 package com.crm.food.establishment.user.manager.service;
 
+import com.crm.food.establishment.user.auth.service.AuthService;
 import com.crm.food.establishment.user.manager.exception.InvalidArgumentException;
 import com.crm.food.establishment.user.manager.exception.NotFoundException;
 import com.crm.food.establishment.user.manager.repository.UserRepository;
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final AuthService authService;
     private final UserMapper userMapper;
 
     @Override
@@ -100,6 +102,7 @@ public class UserServiceImpl implements UserService {
             log.info("Fired " + userToDeleteRole.name() + ": " + userUuid);
         } else if (userToDeleteRole == Role.CLIENT) {
             userRepository.delete(userToDelete.get());
+            authService.logout(userToDelete.get().getUuid());
 
             log.info("Deleted user: " + userUuid);
         }
