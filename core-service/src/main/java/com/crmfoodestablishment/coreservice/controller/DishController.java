@@ -24,8 +24,10 @@ public class DishController {
     private final DishService dishService;
 
     @PostMapping("/{menuId}")
-    public ResponseEntity<List<CreateDishDto>> createDishes(@PathVariable(name = "menuId") UUID menuId, @RequestBody List<@Valid CreateDishDto> dishesDto) {
-        List<CreateDishDto> createdDishDtos = dishService.addDishes(menuId, dishesDto);
+    public ResponseEntity<List<CreateDishDto>> createDishes(@PathVariable(name = "menuId") String menuId,
+                                                            @RequestBody List<@Valid CreateDishDto> dishesDto) {
+        List<CreateDishDto> createdDishDtos = dishService
+                .addDishes(UUID.fromString(menuId), dishesDto);
         return new ResponseEntity<>(createdDishDtos, HttpStatus.CREATED);
     }
 }

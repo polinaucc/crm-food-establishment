@@ -21,8 +21,9 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public UUID addMenu(MenuDto menuDto) {
         if (menuRepository.existsByName(menuDto.getName())) {
-            throw new IllegalArgumentException("Menu " + menuDto.getName() + " already exists");
+            throw new IllegalArgumentException("Menu with name " + menuDto.getName() + " already exists");
         }
+
         Menu menuToSave = menuMapper.mapMenuDtoToMenu(menuDto);
         Menu savedMenu = menuRepository.save(menuToSave);
 
@@ -62,10 +63,9 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public UUID deleteMenu(UUID uuid) {
-        menuRepository
-                .delete(menuRepository.getMenuByUuid(uuid)
-                        .orElseThrow(() -> new MenuNotFoundException(String
-                                .format(MENU_NOT_FOUND_ERROR_MESSAGE, uuid))));
+        menuRepository.delete(menuRepository.getMenuByUuid(uuid)
+                .orElseThrow(() -> new MenuNotFoundException(String
+                        .format(MENU_NOT_FOUND_ERROR_MESSAGE, uuid))));
 
         return uuid;
     }

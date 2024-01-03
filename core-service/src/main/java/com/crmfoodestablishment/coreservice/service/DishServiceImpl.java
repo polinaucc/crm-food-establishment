@@ -14,24 +14,25 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class DishServiceImpl implements DishService  {
+public class DishServiceImpl implements DishService {
 
     private final DishRepository dishRepository;
-
     private final MenuRepository menuRepository;
-
     private final DishMapper dishMapper = Mappers.getMapper(DishMapper.class);
 
     @Override
     public List<CreateDishDto> addDishes(UUID menuId, List<CreateDishDto> dishDtos) {
         Menu menu = menuRepository.getMenuByUuid(menuId)
-                .orElseThrow(() -> (new MenuNotFoundException("Menu with id " + menuId + " not exist")));
+                .orElseThrow(() ->
+                        (new MenuNotFoundException
+                                ("Menu with uuid " + menuId + " is not found")));
 
-        for (CreateDishDto dishDto: dishDtos) {
-            if (dishRepository.existsByName(dishDto.getName())) {
-                throw new IllegalArgumentException("Dish " + dishDto.getName() + " already exists");
-            }
-        }
+        dishDtos.stream().filter(dishDto -> dishRepository.existsByName(dishDto.getName()))
+                .findAny()
+                .ifPresent(existingDishDto -> {
+                    throw new IllegalArgumentException(
+                            "Dish with name " + existingDishDto.getName() + " already exists");
+                });
 
         List<Dish> dishesToSave = dishMapper.mapDishDtoToDish(dishDtos, menu);
 

@@ -20,19 +20,17 @@ public class GlobalExceptionHandler {
         String title = "Validation exception";
         List<String> errors = new ArrayList<>();
 
-        if (ex instanceof MethodArgumentNotValidException) {
-            MethodArgumentNotValidException validationException = (MethodArgumentNotValidException) ex;
+        if (ex instanceof MethodArgumentNotValidException validationException) {
             List<FieldError> fieldErrors = validationException.getBindingResult().getFieldErrors();
-            for (FieldError fieldError : fieldErrors) {
+            for (FieldError fieldError: fieldErrors) {
                 String field = fieldError.getField();
                 String message = fieldError.getDefaultMessage();
                 errors.add(String.format("[%s: '%s']", field, message));
             }
 
-        } else if (ex instanceof ConstraintViolationException) {
-            ConstraintViolationException validationException = (ConstraintViolationException) ex;
+        } else if (ex instanceof ConstraintViolationException validationException) {
             Set<ConstraintViolation<?>> violations = validationException.getConstraintViolations();
-            for (ConstraintViolation<?> violation : violations) {
+            for (ConstraintViolation<?> violation: violations) {
                 String field = violation.getPropertyPath().toString();
                 String message = violation.getMessage();
                 errors.add(String.format("[%s: '%s']", field, message));

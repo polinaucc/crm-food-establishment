@@ -37,20 +37,21 @@ public class MenuController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MenuDto> getMenu(@PathVariable(name = "id") UUID uuid) {
-        MenuDto menuDtoByUuid = menuService.findByMenuUuid(uuid);
+    public ResponseEntity<MenuDto> getMenu(@PathVariable(name = "id") String uuid) {
+        MenuDto menuDtoByUuid = menuService.findByMenuUuid(UUID.fromString(uuid));
         return new ResponseEntity<>(menuDtoByUuid, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MenuDto> updateMenu(@PathVariable(name = "id") UUID uuid, @Valid @RequestBody MenuDto menuDto) {
-        MenuDto updatedMenuDto = menuService.updateMenu(uuid, menuDto);
+    public ResponseEntity<MenuDto> updateMenu(@PathVariable(name = "id") String uuid,
+                                              @Valid @RequestBody MenuDto menuDto) {
+        MenuDto updatedMenuDto = menuService.updateMenu(UUID.fromString(uuid), menuDto);
         return new ResponseEntity<>(updatedMenuDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<UUID> deleteMenu(@PathVariable(name = "id") UUID uuid) {
-        UUID uuidByDeletedMenu = menuService.deleteMenu(uuid);
+    public ResponseEntity<UUID> deleteMenu(@PathVariable(name = "id") String uuid) {
+        UUID uuidByDeletedMenu = menuService.deleteMenu(UUID.fromString(uuid));
         return new ResponseEntity<>(uuidByDeletedMenu, HttpStatus.OK);
     }
 }
