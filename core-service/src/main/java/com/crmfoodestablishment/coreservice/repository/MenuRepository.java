@@ -8,6 +8,5 @@ import java.util.UUID;
 public interface MenuRepository extends JpaRepository<Menu, UUID> {
 
     boolean existsByName(String name);
-
     Optional<Menu> getMenuByUuid(UUID uuid);
 }

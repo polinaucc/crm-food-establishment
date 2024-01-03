@@ -1,6 +1,15 @@
 package com.crmfoodestablishment.coreservice.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -8,10 +17,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@EqualsAndHashCode
+@Getter
+@Setter
 public class Menu {
 
     @Id
@@ -33,6 +43,19 @@ public class Menu {
     @Column(name = "season", nullable = false, length = 32)
     private Season season;
 
-    @OneToMany(mappedBy = "menu")
+    @OneToMany(mappedBy = "menu",
+            orphanRemoval = true,
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.REMOVE
+            )
     private List<Dish> dishes;
+
+    public void addDish(Dish dish) {
+        dishes.add(dish);
+        dish.setMenu(this);
+    }
+    public void removeDish(Dish dish) {
+        dishes.remove(dish);
+        dish.setMenu(null);
+    }
 }
