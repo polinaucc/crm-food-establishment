@@ -45,12 +45,12 @@ class JwtServiceImplTest {
     @Mock
     private ValueOperations<UUID, String> valueOperations;
 
-    private PrivateKey accessTokenSecretKey;
+    private PrivateKey accessTokenPrivateKey;
     private JwtParser accessTokenParser;
     private AccessTokenHandlerAdapter accessTokenHandlerAdapter;
     private Long accessTokenExpirationTime;
 
-    private PrivateKey refreshTokenSecretKey;
+    private PrivateKey refreshTokenPrivateKey;
     private JwtParser refreshTokenParser;
     private RefreshTokenHandlerAdapter refreshTokenHandlerAdapter;
     private Long refreshTokenExpirationTime;
@@ -61,88 +61,82 @@ class JwtServiceImplTest {
     void setUp() throws NoSuchAlgorithmException, InvalidKeySpecException {
         JwtProperties jwtProperties = new JwtProperties(
                 new AccessTokenProperties(
-                        "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAorqA+wc6p4Em2j/Zte/o67q2eGgmB4MYyqCJWJTcaCCRZ2CBisLknmDolna51CKVzKjLM65WC7IyD8qqcHwq6QCGDDIQd9/9DfzkPruuS9CTeyez4xyGpEsStFWKPGcm9EaWxlhDMs1VZJ6Lp48yV9ETCY8rPz3PVkPL/oa3lrO7T1ts4mQa2Sq4Yy6TmtkPw9QxCvD+qYm4GfJjnAtPrRNkYEAfibYwqltnm3HA1QHcoQXrh2zvVxxZxQbTvHIW6CCD2TCyt0gXezr0A/NThlq3zI0vMO5EHO2mN5EKZ3fVYjmLeZj0RzZvb0MBu/2NWBgui3/dckA6v4Y4/8z4JwIDAQAB",
-                        "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCiuoD7BzqngSbaP9m17+jrurZ4aCYHgxjKoIlYlNxoIJFnYIGKwuSeYOiWdrnUIpXMqMszrlYLsjIPyqpwfCrpAIYMMhB33/0N/OQ+u65L0JN7J7PjHIakSxK0VYo8Zyb0RpbGWEMyzVVknounjzJX0RMJjys/Pc9WQ8v+hreWs7tPW2ziZBrZKrhjLpOa2Q/D1DEK8P6pibgZ8mOcC0+tE2RgQB+JtjCqW2ebccDVAdyhBeuHbO9XHFnFBtO8chboIIPZMLK3SBd7OvQD81OGWrfMjS8w7kQc7aY3kQpnd9ViOYt5mPRHNm9vQwG7/Y1YGC6Lf91yQDq/hjj/zPgnAgMBAAECggEACjSEDjof1Y1l8F38u0o2Y0IsW1S8vc/c6Cg1NNbxE56nP8JvnVInoD8XlwgPE1yv5EvZon4Wa1lbhl4BXliLIF2mCnHBUqM7bXsknUKL5blI5npQ77dEQl1q6OBMcQlPCha7MekrHa5+4naG75UtZRB5jynpXmfz7scFrgqozMyTED1efGfNiA9RDrdPKcmwQD50HUL6tv6JWox9gfhO76EwV9WirY9L8Ptybi03FZ7Z1/c+joSWwVKqgyAkUmreUFaJ+1tUztHFhsUBOv9rNAStkmdJhCId3iH6njJ1iYZtMpzqwFtT1Z7a+lAcSddFDl5LQT1bphJcH11/b6A2MQKBgQDcIW2v7lzGefBweGmyOaQyhmtjpmAxlyG0z0NiPMeBEP6pm3yIUPUX5V1l1wwOpU5egsQVcoU1cyyxmVKrKwDfoGCNd8ENgXs6tyZxEJU78rYlvhCb5MNSeSi+XVQuxNf3ppcd0T8m/GyVD5EXHBPhveM63aOaTqGyecv9+emgmwKBgQC9Ppg8KFTxd/cQ2m1P7us9CqnurADLdD5iJlFScPdDFycLLgfTUQw+/xT3E8Xp0abRx/vq5n4CBjro9lhhtn3AnEhZ7AFjDUcMUc/+5t6j4eIC2nxUzCDadBEZLEPZxILLmt1EWB696RRPpmKmXGvLZC6fPzNIx866/b9JxwABZQKBgAj8KFD9BrZnNcQxdgb7SVNynyGDIfwEMjECILr6xh3jhrF/kjayLz7ZctV8UJascqVy6vQBJ6TF3bYmDvTDnZaDIk3D7JJTjacY4K3Ownie8IZb2quyS7KrFVmnz47VJAeMujBSYSSDOx9eckqiL8GQEZ1OfKYIvZreU9A7CikvAoGBAK9x1oT/BzEN/Pmc5vbSEzh2KHDi+aGlVSh9Satam4GRd1sAA7U/UFEe/vrJVBSfjz6xXrW5llyeFgNgTzPXkeH9gX4MNIT2DEY5mtFAjGv2wCfREq8yx8p/DFMAHK9JZdEI89WmtGlwKqplINQGntDjQe3VE+CHjPsCwFLPsQuZAoGAKZMMLv/F9Rih2DtQoQCpm2buYadi+aaMAc4byzVJL8L89oHHdr41IkuImrtT8iJjCH1mLiJuqbqDnVBS4wluCHra/O3og7XpkUoeGy6VpsPLSsOoIkUT1qU+v3B+QOovOytutNv3CeQ+arZevMwVMbRmRqFn/aiJVf52IEvHpj0=",
+                        "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjEsl997Iv0aB2QfIT71j2uxXF/bZ7Eq/zYbfIomLAPuy2qXayIVZBWJsGFWRBIgnEMXSNg97pcclLwPUFwIOQhW1IR+GucdgDLAkQtFtPaQPgOVGPKICBDxhXC8UaovwAIK7PaO8qciXiIXCffvVob/ZhonpXikKIhL0BYhAI8nRB0M3Q5GJqTuYHNmJG6e0Zvok8VdzHR+uD8idSxeCCOe9gR/J2BzSKs4TQI5Z1n4oOwLVhfbtgsKNrsasozRAHMbYGDq7VV/Ip+bJ8ktYk8c1/ndVj0PsISB9Mmc3zIPYY28j0KwD/6r6BUbAneOwZHw/w8feQ/SGNP2l91kr1QIDAQAB",
+                        "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCMSyX33si/RoHZB8hPvWPa7FcX9tnsSr/Nht8iiYsA+7LapdrIhVkFYmwYVZEEiCcQxdI2D3ulxyUvA9QXAg5CFbUhH4a5x2AMsCRC0W09pA+A5UY8ogIEPGFcLxRqi/AAgrs9o7ypyJeIhcJ9+9Whv9mGieleKQoiEvQFiEAjydEHQzdDkYmpO5gc2Ykbp7Rm+iTxV3MdH64PyJ1LF4II572BH8nYHNIqzhNAjlnWfig7AtWF9u2Cwo2uxqyjNEAcxtgYOrtVX8in5snyS1iTxzX+d1WPQ+whIH0yZzfMg9hjbyPQrAP/qvoFRsCd47BkfD/Dx95D9IY0/aX3WSvVAgMBAAECggEAAl4xrbLcHDpiQ68EHFsb0zH3sFxcG5xmtgnc50t/W0y5nUN9DghjfcSbrXd4Q1Am/1Cky9Z2uvrBr772oU10FH0i+a77X6mz/ygpRzAbZ2scUIvOI9ovgtx1X5BzMu8vZbAkh+r6arqLhY7jFFb1U/hrLABU6OAeydTHEKGBmk5YgAFvmlYVOXNMuX65lMHTXZ0I76fQhR8Te707PxQq5ewmN6mqphPE+3UZbtPSx0lOpP2/s+GeudnUqK+DZNbZzpaUWwNTL4nVTPKj5+dGV/qsX1tUhnxpPmI9TyYUT5BoVFh0eFZOLeoGfoNsj3xFDuh0C8IRZs3kjvMD7Uo5IQKBgQC2N2xBy8n1W33dJdfBDQdUcXdu93kFvqCADheyYPo9/0XCfV1IS4MgsZOdBMnuOdWKcXheRC3BDxqNy8hpOCKyMLxOLlbA3+lq3sNdxXjIkJcNStb1qwatLt0ZkFYf2EraR82is5EVcKpQZ1C4H3lTNBBxsvamZ6wizm8f3GH68QKBgQDFGf08QtD6DEeLffsXSZXkvJoS479zv48zhspqtSzkg25W29OPTSs/tjrVmXnCfQx0rZADjO0FOyybSb8uKSuOcAViFhcnz+iTX7J65juws3TjsKXq6GGQ18S2vgS4r/o4/KFuan5J4k779WIh5RgKwkvg1vjVOUm7Q8lfz2hXJQKBgQCJwMKFx1OJur4fVsGSP5BABXu+FzaV4jQiOwUtJGVqQzbwvqerxPJ/399xgDJMd8p43CmcUjyozAtOETYUXYzVW0SwchXBwEUNNxVJKcWTEsQvF1oE5WOpv1kFP3nsny6PcGMEUm4nYEJRgJmkaJ7nCOA5pIsU6CFZOukFlC06cQKBgEGbuA6yEwvYwIvvQIBs7yc3nHXDN7xYvFsjeAdzDWF3WmgxPkfKISZRC16EeuJBa77+8xwrcc42908tiiTccXI1WaVfww9uhnVf+nIsZxwXcEZGS8RY2/kxyXom4D113m3PshCmBCml2jLGaIbt0kXqjQVnqWaYbjGWi9aHnKy9AoGAfV9PV2ticYxs15a1OJnIyiOEakh3R/zuq4G4f4EH6H9BStrjqDGUNRq428gBsZtpiEcFu8l0g4bes7yln7ld4QabllVIug28mtUraK3s2mCLHAtzx2L4jGSsPBAO5sSBp3WFQ1rzCs9LsONj8KNy9jfGA7BOKzHWzjsY4cIcvLA=",
                         100000000L
                 ),
                 new RefreshTokenProperties(
-                        "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtF2wlWsXpK/zxWeIsfJqEKl6I9wYZbBcZmmT9hkyO4y+6xnopFmQQOpY0dCXjx77ChaeKSYQhrb1uZbCl+tE0G7XgueoppEUASIOjwjI1X+2a6Ai1zvWC2OoJQqorW/J64xhSh6Dv/IOMOCBM2drbQDqbnBmHkDleAjZTSwVqJpVKfRMGre6lcVCvVWl+tVKhgeVGNx8qood3tiH05jpphT/X8EA7kh+oQhcG92f+VTqsnol/S1xN828CW9lQ1nWe2ZW7zZ09mxoqheIkQ6IWIgJ7Si6qY/CzHt667RlMxxy/2X9Wf+IU7tDWaKRHnloXRcqFJud+3R+r81z4PceSwIDAQAB",
-                        "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC0XbCVaxekr/PFZ4ix8moQqXoj3BhlsFxmaZP2GTI7jL7rGeikWZBA6ljR0JePHvsKFp4pJhCGtvW5lsKX60TQbteC56imkRQBIg6PCMjVf7ZroCLXO9YLY6glCqitb8nrjGFKHoO/8g4w4IEzZ2ttAOpucGYeQOV4CNlNLBWomlUp9Ewat7qVxUK9VaX61UqGB5UY3Hyqih3e2IfTmOmmFP9fwQDuSH6hCFwb3Z/5VOqyeiX9LXE3zbwJb2VDWdZ7ZlbvNnT2bGiqF4iRDohYiAntKLqpj8LMe3rrtGUzHHL/Zf1Z/4hTu0NZopEeeWhdFyoUm537dH6vzXPg9x5LAgMBAAECggEASaU9rmzpXQHJJ+/j5UDFpSMGL7E1NwRBXkG6vBBCrgUEiYttLfoyCAeIF7ezwqkUOOTOVJ/pvI/lGo/fydczJGY10goUF1sCj4nf5vBfzKkWi7B5uWeBuOnKpMFK6XJNQMPzj6eRBSVpPPTWXG5cc0gd8NUtJSo7Z/04+SVIfKxDIkEDzCRjB2qrUE9UY6LApDJ7bAaCEfG2bNp+OkN8fuD0cK746eG0EXuUP5znYnzRGxb+KAZMMGRfj0+GuJPhsdwPh/5Zv4QDrEeGUDbuxV1u4TePltaqSqmxrKHtlqkFnf70bj8e2xm8Az6ATioDhWkY2DeajZZztZgJKndglQKBgQDBIkBlqTvkR55DmAKFvAvBq8BdOrJ6JLnsTXQqwpYi1EGmIkOHE7RnMk2VDnYilFtFa/6vy1EmvH+TRVwUreTiUKiklNF1sbHBHPNIJNx/iX51rKr4ZD/1kLHv2y5KJXnGTFm10Lmsu9qhe8UQ7TGzi0XTuctIOskI+MjX697VlQKBgQDvE4B4GEDfBIP8zpPLf7+gKFiV3r+THTyr8I/0EwSO7+OvelST0vKrGi65Q9FzWH0cOUZF9s9+Ul+kkRf84Qcp7Ljyp7a0OBHi+NirSP4QP7Am7o2Vg5CHWbi7NyOK7ORyoR/DQW5o98EITCeeRf0roQ4d7C4ktj8uXbXmyb9sXwKBgQCWJxL59sDhkeyxkJUldDWPtQAxe1kXLUZ/ORh/xhkDqxH/H9RwSBmRwcIfiMa/y6fKKVQxSFknTJXC4cHdMfUpHpx+mFTgs+4GvYNHK6FiZnsy8bNaulYfjQdJ+5XZf5lVWjbE7Cnu6X3o3lkv97kUZcs7+M7asRlrKEC93lu4oQKBgChGAL46V7M574IGyp7dRkqUgVe9zkfaBP5x584V5g6uGozU7qp4PqjUIErVQdNMdMbsXwoqKYn+Fl6CkqfmwG4vknhOCFkTmO/DO7ye7y2NjP8B8JffMdmbI6NmBnbAsTseKVubCh5knf/n1ES1RZCz8MzZnGxSxxHod1wJYFXBAoGAenWYuwvDp4oEm8hDkR1fzAaRkX2ysVz+a4O/eglILrgrgE14JGBPnYwSLjf6hullStmUG6fOG3I6e5poRgHHRy0Z5FQLzqvrTOvfUK022DE3MUz4kKxKdRP7Yy5+KRr4LHHghGBy4j+GfNoBi89ys4bi8GJVlfaAr75QXsb0vKM=",
+                        "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoY5kDqcJCeNfcKViZDrbKT/5PxsTfhrjhCVC7PBhxzluQme6spTzj5zAvFXaTHl9rQHRW1Dae38lf9gg3EI5IJT7fb7qGHE3IUA4CKiNwwJiYpTj5ObEiTtH4Jvr4wI8zi9gebx5/7CtKTM6/YH7fvgPMFJdAyZL3vWp4Uozz3poT6Rmgbw53leE/BrnuqMtKUgXUuRHGBYlN/ilh9ftJQiRBnilBf/fLKVxvPfpb3DQP7k/tvzRuSUY2NXpwxijX9Rtnxu/tICTfh8wXzJOoXceXt1Wvwcy0/lxYavFcJxjPAUADQLm3S40nyFAfVfPEjrWkl3op09qG8Cu5U3TDwIDAQAB",
+                        "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQChjmQOpwkJ419wpWJkOtspP/k/GxN+GuOEJULs8GHHOW5CZ7qylPOPnMC8VdpMeX2tAdFbUNp7fyV/2CDcQjkglPt9vuoYcTchQDgIqI3DAmJilOPk5sSJO0fgm+vjAjzOL2B5vHn/sK0pMzr9gft++A8wUl0DJkve9anhSjPPemhPpGaBvDneV4T8Gue6oy0pSBdS5EcYFiU3+KWH1+0lCJEGeKUF/98spXG89+lvcNA/uT+2/NG5JRjY1enDGKNf1G2fG7+0gJN+HzBfMk6hdx5e3Va/BzLT+XFhq8VwnGM8BQANAubdLjSfIUB9V88SOtaSXeinT2obwK7lTdMPAgMBAAECggEAEkyIZ80ircnhHbzAiXLN2n0XtGlS4BCX9E1WKHP310gu2tBYqhv1/y51pD94iPtP3AtIf+EyG2qPlaH7jYc7ZPCLEIynLlqQhdskyFJIha3ySpFBGO8h6XCwrQUW3FvSBawBxPgvZ2Hx0yithgO1jVr35B9yz/BZXVPnyJAOO0dHfLMQO0ptIGc7Fw3wrwFDsIoQJfUPRDoMe5edkQJrOHqmvx7PYA8vEQefGe4IiIVvGYRhJkHyrpvY80nGGtgJgNejT7b1V6slZUqPGVs/Su7IgBNkvvyAJwpcj+s7AaFyXJCJ+Ct2hwg61B+oNI21snG8VJ8yR/OLRrG2TcXIVQKBgQDX4g6ZMfOW/IGnpbxCkbrjjz/s6bmO7JaAixLdlGPpztvExCT2wglJyM4FIkRNLoFbz+YoX+x8AqnY+IYGVsIa4vYVFJk1PDKwYuKZG7UmlIRpyl3bDdmXEjhDXlzGfEH3HoqnHxE5w+r46s0FZNKhEreUQdFx3zXae1JlYx7rEwKBgQC/k+jZIlSmKg4qDH4YMRx574tVuDV0S808mHplTa0sJMEbCNAOkXJnSRcz5pimGnvhVfXXmqSLDlFf/XZ4mkCHu7Q89mu4Y+fijQ+11sTz1OSnhqe/KGg8lXY4Ma1gfMuhdbcj8HbCTuFmQp2Ydgid6Ft2pywj837tOI63VOwblQKBgBCJREz/woTiOpw42b7Pot0jb+YZ0RjdjnmyLXPDlhOmwLbFv38XRdbdBsrl4Q14bng16I9XKaomGhSAlOOPabbdg7QBq+qj/c39BRZtROb7oVjpI19QJEaqIp0mcTzS78qaEEzU2GDwXONMOQAcxPWJlX5JvF1Yl6twntMdUJT5AoGAIwXaQp/JE9uKXVuNTcTkrNIDCfe0Jf+ZlKNXdN+fcfuCJfwVdSRX4tP03vMgIvWigg5h9Dl8LUO/0qmWl/OzKl1BVQfDp6D0CnG5Vofd16mq54lxbzvm2nSEeT9zr7kAzRKlGXfjbiBXiodRIkcpyhxpZCappiTkpl95j8CBrYUCgYEAwdLy4LcFrMtsvnT8uSTL9up69kb+nipP3NMv6Q3Z6eLre4GXS3TtHHWk70y/NMyy+oSNkdXPtsOiicKWZVQcu+I61oH9NkMwdhMO6LxY4mJnC6fvUg9gMk1jKy4fiN/sjiJCYdXZT2+hTZgYTt5Y1eNT7+At/7H1vW15ADQB08Q=",
                         1000000000L
                 )
         );
 
-        jwtService = new JwtServiceImpl(
-                jwtProperties,
-                refreshTokenRedisTemplate
-        );
+        jwtService = new JwtServiceImpl(jwtProperties, refreshTokenRedisTemplate);
 
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-
-        accessTokenSecretKey = KeyUtils.convertStringTokenToPrivateKey(
+        accessTokenPrivateKey = KeyUtils.convertBase64PrivateKeyToJavaPrivateKey(
                 jwtProperties.accessToken().secretKey(),
                 keyFactory
         );
         accessTokenParser = Jwts.parserBuilder()
-                .setSigningKey(accessTokenSecretKey)
+                .setSigningKey(KeyUtils.convertBase64PublicKeyToJavaPublicKey(
+                        jwtProperties.accessToken().publicKey(),
+                        keyFactory
+                ))
                 .build();
         accessTokenHandlerAdapter = new AccessTokenHandlerAdapter();
-        accessTokenExpirationTime = jwtProperties.accessToken().expirationTime();
+        accessTokenExpirationTime = jwtProperties.accessToken().expirationTimeInMinutes();
 
-        refreshTokenSecretKey = KeyUtils.convertStringTokenToPrivateKey(
+        refreshTokenPrivateKey = KeyUtils.convertBase64PrivateKeyToJavaPrivateKey(
                 jwtProperties.refreshToken().secretKey(),
                 keyFactory
         );
         refreshTokenParser = Jwts.parserBuilder()
-                .setSigningKey(KeyUtils.convertStringTokenToPublicKey(
+                .setSigningKey(KeyUtils.convertBase64PublicKeyToJavaPublicKey(
                         jwtProperties.refreshToken().publicKey(),
                         keyFactory
                 ))
                 .build();
         refreshTokenHandlerAdapter = new RefreshTokenHandlerAdapter();
-        refreshTokenExpirationTime = jwtProperties.refreshToken().expirationTime();
+        refreshTokenExpirationTime = jwtProperties.refreshToken().expirationTimeInMinutes();
     }
 
     @Test
-    void issueAccessToken_ReturnsValidAccessToken() {
-        User user = new User(UUID.randomUUID());
-        user.setRole(Role.CLIENT);
-        user.setEmail("test@gmail.com");
+    void issueAccessToken_ShouldReturnValidAccessToken() {
+        User inputUser = new User(UUID.randomUUID());
+        inputUser.setRole(Role.CLIENT);
+        inputUser.setEmail("test@gmail.com");
+        LocalDateTime expectedIat = LocalDateTime.now().withSecond(0).withNano(0);
 
-        String accessToken = jwtService.issueAccessToken(user);
+        String accessToken = jwtService.issueAccessToken(inputUser);
 
         AccessToken parsedAccessToken = accessTokenParser.parse(
                 accessToken,
                 accessTokenHandlerAdapter
         );
-        assertEquals(user.getUuid(), parsedAccessToken.claims().sub());
-        assertEquals(user.getRole(), parsedAccessToken.claims().role());
+
+        assertEquals(expectedIat, parsedAccessToken.claims().iat());
         assertEquals(
-                LocalDateTime.now()
-                        .withNano(0),
-                parsedAccessToken.claims().iat()
-        );
-        assertEquals(
-                LocalDateTime.now()
-                        .plusMinutes(accessTokenExpirationTime)
-                        .withNano(0),
+                expectedIat.plusMinutes(accessTokenExpirationTime),
                 parsedAccessToken.claims().exp()
         );
+        assertEquals(inputUser.getUuid(), parsedAccessToken.claims().sub());
+        assertEquals(inputUser.getRole(), parsedAccessToken.claims().role());
     }
 
     @Test
-    void issueRefreshToken_ReturnsValidRefreshToken_And_SafesToRedis() {
-        User user = new User(UUID.randomUUID());
-        user.setEmail("test@gmail.com");
+    void issueRefreshToken_ShouldReturnValidRefreshToken_And_SafeItToRedis() {
+        User inputUser = new User(UUID.randomUUID());
+        inputUser.setEmail("test@gmail.com");
 
-        when(refreshTokenRedisTemplate.opsForValue())
-                .thenReturn(valueOperations);
+        when(refreshTokenRedisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        String refreshToken = jwtService.issueRefreshToken(user);
+        String refreshToken = jwtService.issueRefreshToken(inputUser);
 
         verify(valueOperations, times(1))
                 .set(
-                        user.getUuid(),
+                        inputUser.getUuid(),
                         refreshToken,
                         refreshTokenExpirationTime,
                         TimeUnit.MINUTES
@@ -152,10 +146,8 @@ class JwtServiceImplTest {
                 refreshToken,
                 refreshTokenHandlerAdapter
         );
-        assertEquals(user.getUuid(), parsedAccessToken.claims().sub());
         assertEquals(
-                LocalDateTime.now()
-                        .withNano(0),
+                LocalDateTime.now().withNano(0),
                 parsedAccessToken.claims().iat()
         );
         assertEquals(
@@ -164,18 +156,18 @@ class JwtServiceImplTest {
                         .withNano(0),
                 parsedAccessToken.claims().exp()
         );
+        assertEquals(inputUser.getUuid(), parsedAccessToken.claims().sub());
     }
 
     @Test
-    void issueTokenPair_ReturnsTokenPair() {
-        User user = new User(UUID.randomUUID());
-        user.setRole(Role.CLIENT);
-        user.setEmail("test@gmail.com");
+    void issueTokenPair_ShouldReturnTokenPair() {
+        User inputUser = new User(UUID.randomUUID());
+        inputUser.setRole(Role.CLIENT);
+        inputUser.setEmail("test@gmail.com");
 
-        when(refreshTokenRedisTemplate.opsForValue())
-                .thenReturn(valueOperations);
+        when(refreshTokenRedisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        TokenPair refreshToken = jwtService.issueTokenPair(user);
+        TokenPair refreshToken = jwtService.issueTokenPair(inputUser);
 
         assertNotNull(refreshToken);
         assertNotNull(refreshToken.getRefreshToken());
@@ -183,129 +175,120 @@ class JwtServiceImplTest {
     }
 
     @Test
-    void invalidateRefreshToken_DeletesTokenInRedis() {
-        UUID testUuid = UUID.randomUUID();
+    void invalidateRefreshToken_ShouldDeleteRefreshTokenInRedis() {
+        UUID inputUuid = UUID.randomUUID();
 
-        jwtService.invalidateRefreshToken(testUuid);
+        jwtService.invalidateRefreshToken(inputUuid);
 
-        verify(refreshTokenRedisTemplate, times(1))
-                .delete(testUuid);
+        verify(refreshTokenRedisTemplate, times(1)).delete(inputUuid);
     }
 
     @Test
-    void parseAccessToken_ValidatesInputString() {
-        assertThrows(
+    void parseAccessToken_ShouldValidateInputString() {
+        InvalidTokenException thrownException = assertThrows(
                 InvalidTokenException.class,
-                () -> jwtService.parseAccessToken("testToken")
+                () -> jwtService.parseAccessToken("invalidToken")
         );
+        assertEquals("Given invalid access token", thrownException.getMessage());
     }
 
     @Test
-    void parseAccessToken_ValidatesExpirationTime() {
+    void parseAccessToken_ShouldValidateExpirationTime() {
         User user = new User(UUID.randomUUID());
         user.setRole(Role.CLIENT);
-        user.setEmail("test@gmail.com");
         LocalDateTime issuedTime = LocalDateTime.now();
         LocalDateTime expirationTime = issuedTime.minusMinutes(60);
 
-        String testToken = Jwts.builder()
+        String expiredToken = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
                 .setExpiration(convertLocalDateTimeToDate(expirationTime))
                 .setSubject(user.getUuid().toString())
                 .claim("role", user.getRole())
-                .signWith(accessTokenSecretKey, SignatureAlgorithm.RS256)
+                .signWith(accessTokenPrivateKey, SignatureAlgorithm.RS256)
                 .compact();
 
-        assertThrows(
+        InvalidTokenException thrownException = assertThrows(
                 InvalidTokenException.class,
-                () -> jwtService.parseAccessToken(testToken)
+                () -> jwtService.parseAccessToken(expiredToken)
         );
+        assertEquals("Given access token has expired", thrownException.getMessage());
     }
 
     @Test
-    void parseAccessToken_CorrectlyParesesAccessToken() {
-        User user = new User(UUID.randomUUID());
-        user.setRole(Role.CLIENT);
-        user.setEmail("test@gmail.com");
+    void parseAccessToken_ShouldReturnCorrectlyParsedAccessToken() {
+        User inputUser = new User(UUID.randomUUID());
+        inputUser.setRole(Role.CLIENT);
         LocalDateTime issuedTime = LocalDateTime.now();
-        LocalDateTime expirationTime = issuedTime.plusMinutes(
-                accessTokenExpirationTime
-        );
+        LocalDateTime expirationTime = issuedTime.plusMinutes(accessTokenExpirationTime);
 
-        String testToken = Jwts.builder()
+        String inputToken = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
                 .setExpiration(convertLocalDateTimeToDate(expirationTime))
-                .setSubject(user.getUuid().toString())
-                .claim("role", user.getRole())
-                .signWith(accessTokenSecretKey, SignatureAlgorithm.RS256)
+                .setSubject(inputUser.getUuid().toString())
+                .claim("role", inputUser.getRole())
+                .signWith(accessTokenPrivateKey, SignatureAlgorithm.RS256)
                 .compact();
 
-        AccessToken accessToken = jwtService.parseAccessToken(testToken);
+        AccessToken parsedToken = jwtService.parseAccessToken(inputToken);
 
-        assertEquals(user.getUuid(), accessToken.claims().sub());
-        assertEquals(user.getRole(), accessToken.claims().role());
-        assertEquals(issuedTime.withNano(0), accessToken.claims().iat());
-        assertEquals(expirationTime.withNano(0), accessToken.claims().exp());
+        assertEquals(issuedTime.withNano(0), parsedToken.claims().iat());
+        assertEquals(expirationTime.withNano(0), parsedToken.claims().exp());
+        assertEquals(inputUser.getUuid(), parsedToken.claims().sub());
+        assertEquals(inputUser.getRole(), parsedToken.claims().role());
     }
 
     @Test
-    void parseRefreshToken_ValidatesInputString() {
-        assertThrows(
+    void parseRefreshToken_ShouldValidateInputString() {
+        InvalidTokenException thrownException = assertThrows(
                 InvalidTokenException.class,
-                () -> jwtService.parseRefreshToken("testToken")
+                () -> jwtService.parseRefreshToken("invalidToken")
         );
+        assertEquals( "Given invalid refresh token", thrownException.getMessage());
     }
 
     @Test
-    void parseRefreshToken_ValidatesExpirationTime() {
-        User user = new User(UUID.randomUUID());
-        user.setEmail("test@gmail.com");
+    void parseRefreshToken_ShouldValidateExpirationTime() {
+        User inputUser = new User(UUID.randomUUID());
         LocalDateTime issuedTime = LocalDateTime.now();
-        LocalDateTime expirationTime = issuedTime.plusMinutes(
-                refreshTokenExpirationTime
-        );
+        LocalDateTime expirationTime = issuedTime.plusMinutes(refreshTokenExpirationTime);
 
-        String testToken = Jwts.builder()
+        String expiredToken = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
                 .setExpiration(convertLocalDateTimeToDate(expirationTime))
-                .setSubject(user.getUuid().toString())
-                .signWith(refreshTokenSecretKey, SignatureAlgorithm.RS256)
+                .setSubject(inputUser.getUuid().toString())
+                .signWith(refreshTokenPrivateKey, SignatureAlgorithm.RS256)
                 .compact();
 
-        when(refreshTokenRedisTemplate.hasKey(user.getUuid()))
-                .thenReturn(false);
+        when(refreshTokenRedisTemplate.hasKey(inputUser.getUuid())).thenReturn(false);
 
-        assertThrows(
+        InvalidTokenException thrownException = assertThrows(
                 InvalidTokenException.class,
-                () -> jwtService.parseRefreshToken(testToken)
+                () -> jwtService.parseRefreshToken(expiredToken)
         );
-        verify(refreshTokenRedisTemplate, times(1))
-                .hasKey(user.getUuid());
+        assertEquals( "Given refresh token has expired", thrownException.getMessage());
+        verify(refreshTokenRedisTemplate, times(1)).hasKey(inputUser.getUuid());
     }
 
     @Test
-    void parseRefreshToken_CorrectlyParesesRefreshToken() {
-        User user = new User(UUID.randomUUID());
-        user.setEmail("test@gmail.com");
+    void parseRefreshToken_ShouldReturnCorrectlyParsedRefreshToken() {
+        User inputUser = new User(UUID.randomUUID());
         LocalDateTime issuedTime = LocalDateTime.now();
-        LocalDateTime expirationTime = issuedTime.plusMinutes(
-                refreshTokenExpirationTime
-        );
+        LocalDateTime expirationTime = issuedTime.plusMinutes(refreshTokenExpirationTime);
 
-        String testToken = Jwts.builder()
+        String validToken = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
                 .setExpiration(convertLocalDateTimeToDate(expirationTime))
-                .setSubject(user.getUuid().toString())
-                .signWith(refreshTokenSecretKey, SignatureAlgorithm.RS256)
+                .setSubject(inputUser.getUuid().toString())
+                .signWith(refreshTokenPrivateKey, SignatureAlgorithm.RS256)
                 .compact();
 
-        when(refreshTokenRedisTemplate.hasKey(user.getUuid()))
-                .thenReturn(true);
+        when(refreshTokenRedisTemplate.hasKey(inputUser.getUuid())).thenReturn(true);
 
-        RefreshToken accessToken = jwtService.parseRefreshToken(testToken);
+        RefreshToken parsedToken = jwtService.parseRefreshToken(validToken);
 
-        assertEquals(user.getUuid(), accessToken.claims().sub());
-        assertEquals(issuedTime.withNano(0), accessToken.claims().iat());
-        assertEquals(expirationTime.withNano(0), accessToken.claims().exp());
+        assertEquals(issuedTime.withNano(0), parsedToken.claims().iat());
+        assertEquals(expirationTime.withNano(0), parsedToken.claims().exp());
+        assertEquals(inputUser.getUuid(), parsedToken.claims().sub());
+        verify(refreshTokenRedisTemplate, times(1)).hasKey(inputUser.getUuid());
     }
 }
