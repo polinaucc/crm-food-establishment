@@ -17,13 +17,11 @@ import java.util.List;
 public class GlobalInputValidationControllerAdvice {
 
     @ExceptionHandler(value = {MethodArgumentNotValidException.class})
-    public ResponseEntity<List<ApiErrorInfo>> handleMethodArgumentNotValid(
+    public ResponseEntity<List<ApiErrorDTO>> handleMethodArgumentNotValid(
             MethodArgumentNotValidException exception
     ) {
-        log.error(exception.getMessage(), exception);
-
-        List<ApiErrorInfo> errorInfos = exception.getFieldErrors().stream()
-                .map(error -> new ApiErrorInfo(
+        List<ApiErrorDTO> errorInfos = exception.getFieldErrors().stream()
+                .map(error -> new ApiErrorDTO(
                         InvalidArgumentException.errorCode(),
                         error.getField() + ": " + error.getDefaultMessage()
                 ))
@@ -33,12 +31,10 @@ public class GlobalInputValidationControllerAdvice {
     }
 
     @ExceptionHandler(value = {ConstraintViolationException.class})
-    public ResponseEntity<ApiErrorInfo> handleConstraintViolationException(
+    public ResponseEntity<ApiErrorDTO> handleConstraintViolationException(
             ConstraintViolationException exception
     ) {
-        log.error(exception.getMessage(), exception);
-
-        ApiErrorInfo errorInfo = ApiErrorInfo.builder()
+        ApiErrorDTO errorInfo = ApiErrorDTO.builder()
                 .code(InvalidArgumentException.errorCode())
                 .description(exception.getMessage())
                 .build();
