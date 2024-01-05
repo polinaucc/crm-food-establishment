@@ -34,17 +34,17 @@ public class UserMapperImpl implements UserMapper {
             RegisterUserRequestDTO dto,
             User user
     ) {
-        user.setEmail(dto.getEmail());
+        user.setEmail(dto.email());
         user.setPassword(
-                passwordEncoder.encode(dto.getPassword())
+                passwordEncoder.encode(dto.password())
         );
-        user.setRole(dto.getRole());
+        user.setRole(dto.role());
         user.setPersonalInfo(new UserPersonalInfo());
-        user.getPersonalInfo().setFirstName(dto.getFirstName());
-        user.getPersonalInfo().setLastName(dto.getLastName());
-        user.getPersonalInfo().setBirthday(dto.getBirthday());
-        user.getPersonalInfo().setMale(dto.getIsMale());
-        user.getPersonalInfo().setAddress(dto.getAddress());
+        user.getPersonalInfo().setFirstName(dto.firstName());
+        user.getPersonalInfo().setLastName(dto.lastName());
+        user.getPersonalInfo().setBirthday(dto.birthday());
+        user.getPersonalInfo().setMale(dto.isMale());
+        user.getPersonalInfo().setAddress(dto.address());
     }
 
     @Override
@@ -52,16 +52,16 @@ public class UserMapperImpl implements UserMapper {
             UpdateUserRequestDTO dto,
             User user
     ) {
-        user.setEmail(dto.getEmail());
+        user.setEmail(dto.email());
         user.setPassword(
-                passwordEncoder.encode(dto.getPassword())
+                passwordEncoder.encode(dto.password())
         );
-        user.setRole(dto.getRole());
+        user.setRole(dto.role());
         user.setPersonalInfo(new UserPersonalInfo());
-        user.getPersonalInfo().setFirstName(dto.getFirstName());
-        user.getPersonalInfo().setLastName(dto.getLastName());
-        user.getPersonalInfo().setBirthday(dto.getBirthday());
-        user.getPersonalInfo().setMale(dto.getIsMale());
-        user.getPersonalInfo().setAddress(dto.getAddress());
+        user.getPersonalInfo().setFirstName(dto.firstName());
+        user.getPersonalInfo().setLastName(dto.lastName());
+        user.getPersonalInfo().setBirthday(dto.birthday());
+        user.getPersonalInfo().setMale(dto.isMale());
+        user.getPersonalInfo().setAddress(dto.address());
     }
 }

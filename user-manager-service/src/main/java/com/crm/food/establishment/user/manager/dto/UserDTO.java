@@ -1,43 +1,30 @@
 package com.crm.food.establishment.user.manager.dto;
 
 import com.crm.food.establishment.user.manager.entity.Role;
-import lombok.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserDTO {
-
-    private UUID uuid;
-
-    private String email;
-
-    private Role role;
-
-    private String firstName;
-
-    private String lastName;
-
-    private boolean isMale;
-
-    private LocalDate birthday;
-
-    private String address;
-
+public record UserDTO (
+        UUID uuid,
+        String email,
+        Role role,
+        String firstName,
+        String lastName,
+        boolean isMale,
+        LocalDate birthday,
+        String address
+) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UserDTO teacher)) return false;
+        if (!(o instanceof UserDTO userDTO)) return false;
 
-        return getUuid().equals(teacher.getUuid());
+        return uuid.equals(userDTO.uuid);
     }
 
     @Override
     public int hashCode() {
-        return getUuid().hashCode();
+        return uuid != null ? uuid.hashCode() : 0;
     }
 }

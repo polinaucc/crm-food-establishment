@@ -10,9 +10,9 @@ import java.util.UUID;
 
 public interface UserService {
 
-    RegisterUserResponseDTO register(RegisterUserRequestDTO creationData);
+    RegisterUserResponseDTO register(RegisterUserRequestDTO creationDTO);
 
-    void update(UUID userUuid, UpdateUserRequestDTO updatedData);
+    void update(UUID userUuid, UpdateUserRequestDTO updateDTO);
 
     void delete(UUID userUuid);
 

@@ -2,46 +2,44 @@ package com.crm.food.establishment.user.manager.dto;
 
 import com.crm.food.establishment.user.manager.entity.Role;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-//TODO write validation messages
-@Getter
-@Setter
-public class RegisterUserRequestDTO {
+public record RegisterUserRequestDTO (
+        @NotNull
+        @Email(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
+        String email,
 
-    @NotNull
-    @Email(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
-    private String email;
+        @NotBlank
+        String password,
 
-    @NotBlank
-    private String password;
+        @NotNull
+        Role role,
 
-    @NotNull
-    private Role role;
+        @NotBlank
+        @Size(max = 32)
+        String firstName,
 
-    @NotBlank
-    @Size(max = 32)
-    private String firstName;
+        @NotBlank
+        @Size(max = 32)
+        String lastName,
 
-    @NotBlank
-    @Size(max = 32)
-    private String lastName;
+        @NotNull
+        Boolean isMale,
 
-    @NotNull
-    private Boolean isMale;
+        @NotNull
+        @Past
+        @JsonFormat(
+                shape = JsonFormat.Shape.STRING,
+                pattern = "yyyy-MM-dd"
+        )
+        LocalDate birthday,
 
-    @NotNull
-    @Past
-    @JsonFormat(
-            shape = JsonFormat.Shape.STRING,
-            pattern = "yyyy-MM-dd"
-    )
-    private LocalDate birthday;
-
-    @Size(max = 1024)
-    private String address;
-}
+        @Size(max = 1024)
+        String address
+) {}

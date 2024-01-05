@@ -34,75 +34,58 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public RegisterUserResponseDTO register(
-            RegisterUserRequestDTO creationData
-    ) {
-        User savedUser = createUser(creationData);
-        TokenPair tokenPair = jwtService.issueTokenPair(savedUser);
+    public RegisterUserResponseDTO register(RegisterUserRequestDTO creationDTO) {
+        User savedUser = createUser(creationDTO);
+        TokenPair issuedTokenPair = jwtService.issueTokenPair(savedUser);
 
         log.info("User: " + savedUser.getEmail() + " registered");
 
-        return new RegisterUserResponseDTO(
-                savedUser.getUuid(),
-                tokenPair
-        );
+        return new RegisterUserResponseDTO(savedUser.getUuid(), issuedTokenPair);
     }
 
     @Override
-    public void update(
-            UUID userUuid,
-            UpdateUserRequestDTO updatedData
-    ) {
+    public void update(UUID userUuid, UpdateUserRequestDTO updateDTO) {
         AtomicReference<User> userToUpdate = new AtomicReference<>();
 
-        userRepository.findByEmail(updatedData.getEmail()).ifPresent(
+        userRepository.findByEmail(updateDTO.email()).ifPresent(
                 foundUser -> {
                     if (foundUser.getUuid().equals(userUuid)) {
                         userToUpdate.set(foundUser);
                     } else {
-                        logAndThrowException(
-                                new InvalidArgumentException("Given already occupied email")
-                        );
+                        throw new InvalidArgumentException("Given already occupied email");
                     }
                 }
         );
 
         if (userToUpdate.get() == null) {
-            userRepository.findByUuid(userUuid).ifPresentOrElse(
-                    userToUpdate::set,
-                    this::logAndThrowNotFoundException
+            userToUpdate.set(
+                    userRepository
+                        .findByUuid(userUuid)
+                        .orElseThrow(() -> new NotFoundException("No such users found"))
             );
         }
 
-        userMapper.mapUpdateUserRequestDTOToUser(
-                updatedData,
-                userToUpdate.get()
-        );
+        userMapper.mapUpdateUserRequestDTOToUser(updateDTO, userToUpdate.get());
 
         userRepository.save(userToUpdate.get());
         log.info("Updated user: " + userUuid);
     }
 
     @Override
-    public void delete(
-            UUID userUuid
-    ) {
-        AtomicReference<User> userToDelete = new AtomicReference<>();
-        userRepository.findByUuid(userUuid).ifPresentOrElse(
-                userToDelete::set,
-                this::logAndThrowNotFoundException
-        );
+    public void delete(UUID userUuid) {
+        User userToDelete = userRepository
+                .findByUuid(userUuid)
+                .orElseThrow(() -> new NotFoundException("No such users found"));
 
-        Role userToDeleteRole = userToDelete.get().getRole();
+        Role userToDeleteRole = userToDelete.getRole();
         if (userToDeleteRole == Role.ADMIN || userToDeleteRole == Role.EMPLOYEE) {
-            userToDelete.get().setRole(Role.CLIENT);
-
-            userRepository.save(userToDelete.get());
+            userToDelete.setRole(Role.CLIENT);
+            userRepository.save(userToDelete);
 
             log.info("Fired " + userToDeleteRole.name() + ": " + userUuid);
         } else if (userToDeleteRole == Role.CLIENT) {
-            userRepository.delete(userToDelete.get());
-            authService.logout(userToDelete.get().getUuid());
+            userRepository.delete(userToDelete);
+            authService.logout(userToDelete.getUuid());
 
             log.info("Deleted user: " + userUuid);
         }
@@ -110,16 +93,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getById(UUID userUuid) {
-        AtomicReference<UserDTO> userDTO = new AtomicReference<>();
+        User foundUser = userRepository
+                .findByUuid(userUuid)
+                .orElseThrow(() -> new NotFoundException("No such users found"));
 
-        userRepository.findByUuid(userUuid).ifPresentOrElse(
-                foundUser -> userDTO.set(
-                        userMapper.mapUserToUserDTO(foundUser)
-                ),
-                this::logAndThrowNotFoundException
-        );
-
-        return userDTO.get();
+        return userMapper.mapUserToUserDTO(foundUser);
     }
 
     @Override
@@ -131,42 +109,24 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
-    private User createUser(
-            RegisterUserRequestDTO creationData
-    ) {
-        Optional<User> user = userRepository.findByEmail(creationData.getEmail());
-        User userToRegister = null;
+    private User createUser(RegisterUserRequestDTO creationData) {
+        Optional<User> user = userRepository.findByEmail(creationData.email());
+        User userToRegister;
 
         if (
                 user.isPresent()
                 && user.get().getRole() == Role.CLIENT
-                && (creationData.getRole() == Role.ADMIN || creationData.getRole() == Role.EMPLOYEE)
+                && (creationData.role() == Role.ADMIN || creationData.role() == Role.EMPLOYEE)
         ) {
             userToRegister = user.get();
         } else if (user.isEmpty()) {
             userToRegister = new User(UUID.randomUUID());
         } else {
-            logAndThrowException(
-                    new InvalidArgumentException("Given already occupied email")
-            );
+            throw new InvalidArgumentException("Given already occupied email");
         }
 
-        userMapper.mapRegisterUserRequestDTOToUser(
-                creationData,
-                userToRegister
-        );
+        userMapper.mapRegisterUserRequestDTOToUser(creationData, userToRegister);
 
         return userRepository.save(userToRegister);
-    }
-
-    private void logAndThrowException(RuntimeException exception) {
-        log.error(exception.getMessage(), exception);
-        throw exception;
-    }
-
-    private void logAndThrowNotFoundException() {
-        var error = new NotFoundException("No such users found");
-        log.error(error.getMessage(), error);
-        throw error;
     }
 }
