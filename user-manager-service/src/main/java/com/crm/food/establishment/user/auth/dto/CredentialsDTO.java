@@ -2,17 +2,12 @@ package com.crm.food.establishment.user.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
-public class CredentialsDTO {
+public record CredentialsDTO (
+        @Email
+        @NotBlank
+        String email,
 
-    @Email
-    @NotBlank
-    private String email;
-
-    @NotBlank
-    private String password;
-}
+        @NotBlank
+        String password
+) {}

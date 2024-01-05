@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
@@ -29,58 +28,33 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public TokenPair login(CredentialsDTO credentials) {
-        AtomicReference<User> user = new AtomicReference<>();
+        User foundUser = userRepository
+                .findByEmail(credentials.email())
+                .orElseThrow(() -> new InvalidUserCredentialsException("Wrong email"));
+        if (!passwordEncoder.matches(credentials.password(), foundUser.getPassword())) {
+            throw new InvalidUserCredentialsException("Wrong password");
+        }
 
-        userRepository.findByEmail(credentials.getEmail()).ifPresentOrElse(
-                foundUser -> {
-                    if (!passwordEncoder.matches(
-                            credentials.getPassword(),
-                            foundUser.getPassword()
-                    )) {
-                        logAndThrowException(
-                                new InvalidUserCredentialsException("Wrong password")
-                        );
-                    } else {
-                        user.set(foundUser);
-                    }
-                },
-                () -> logAndThrowException(
-                        new InvalidUserCredentialsException("Wrong email")
-                )
-        );
-
-        TokenPair tokenPair = jwtService.issueTokenPair(user.get());
-
-        log.info("User: " + user.get().getEmail() + " logged");
-        return tokenPair;
+        log.info("User: " + foundUser.getEmail() + " logged");
+        return jwtService.issueTokenPair(foundUser);
     }
 
+    //TODO implement maximum number of access tokens for one user
     @Override
     public String refresh(String refreshToken) {
-        //TODO implement maximum number of access tokens for one user
-
         RefreshToken parsedRefreshToken = jwtService.parseRefreshToken(refreshToken);
 
-        AtomicReference<User> user = new AtomicReference<>();
-        userRepository.findByUuid(parsedRefreshToken.claims().sub()).ifPresentOrElse(
-                user::set,
-                () -> logAndThrowException(
-                        new InvalidTokenException("Invalid subject: no such user with that id")
-                )
-        );
+        User foundUser = userRepository
+                .findByUuid(parsedRefreshToken.claims().sub())
+                .orElseThrow(() -> new InvalidTokenException("Invalid subject: no such user with that id"));
 
-        log.info("User: " + user.get().getUuid() + " refreshed access token");
-        return jwtService.issueAccessToken(user.get());
+        log.info("User: " + foundUser.getUuid() + " refreshed access token");
+        return jwtService.issueAccessToken(foundUser);
     }
 
     @Override
     public void logout(UUID userUuid) {
         jwtService.invalidateRefreshToken(userUuid);
         log.info("User: " + userUuid + " logged out");
-    }
-
-    private void logAndThrowException(RuntimeException exception) {
-        log.error(exception.getMessage(), exception);
-        throw exception;
     }
 }
