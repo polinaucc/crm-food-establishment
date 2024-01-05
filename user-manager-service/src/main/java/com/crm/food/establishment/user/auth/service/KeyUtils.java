@@ -10,21 +10,21 @@ import java.util.Base64;
 
 public class KeyUtils {
 
-    public static PrivateKey convertStringTokenToPrivateKey(
-            String token,
+    public static PrivateKey convertBase64PrivateKeyToJavaPrivateKey(
+            String base64PrivateKey,
             KeyFactory keyFactory
     ) throws InvalidKeySpecException {
-        byte[] decodedRefreshTokenSecretKey = Base64.getDecoder().decode(token);
-        var tokenSecretKeySpec = new PKCS8EncodedKeySpec(decodedRefreshTokenSecretKey);
-        return keyFactory.generatePrivate(tokenSecretKeySpec);
+        byte[] decodedBase64PrivateKey = Base64.getDecoder().decode(base64PrivateKey);
+        var pkcs8PrivateKeySpec = new PKCS8EncodedKeySpec(decodedBase64PrivateKey);
+        return keyFactory.generatePrivate(pkcs8PrivateKeySpec);
     }
 
-    public static PublicKey convertStringTokenToPublicKey(
-            String token,
+    public static PublicKey convertBase64PublicKeyToJavaPublicKey(
+            String base64PublicKey,
             KeyFactory keyFactory
     ) throws InvalidKeySpecException {
-        byte[] decodedRefreshTokenPublicKey = Base64.getDecoder().decode(token);
-        var tokenPublicKeySpec = new X509EncodedKeySpec(decodedRefreshTokenPublicKey);
-        return keyFactory.generatePublic(tokenPublicKeySpec);
+        byte[] decodedBase64PublicKey = Base64.getDecoder().decode(base64PublicKey);
+        var x509PublicKeySpec = new X509EncodedKeySpec(decodedBase64PublicKey);
+        return keyFactory.generatePublic(x509PublicKeySpec);
     }
 }
