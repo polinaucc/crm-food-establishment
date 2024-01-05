@@ -1,6 +1,6 @@
 package com.crm.food.establishment.user.manager.controller;
 
-import com.crm.food.establishment.user.ApiErrorInfo;
+import com.crm.food.establishment.user.ApiErrorDTO;
 import com.crm.food.establishment.user.manager.exception.InvalidArgumentException;
 import com.crm.food.establishment.user.manager.exception.NotFoundException;
 
@@ -12,27 +12,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class UserControllerAdvice {
 
-    @ExceptionHandler(value = {InvalidArgumentException.class})
-    public ResponseEntity<ApiErrorInfo> handleInvalidArguments(
-            InvalidArgumentException exception
-    ) {
-        ApiErrorInfo errorInfo = ApiErrorInfo.builder()
+    @ExceptionHandler({InvalidArgumentException.class})
+    public ResponseEntity<ApiErrorDTO> handleInvalidArguments(InvalidArgumentException exception) {
+        ApiErrorDTO errorDTO = ApiErrorDTO.builder()
                 .code(InvalidArgumentException.errorCode())
                 .description(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorInfo, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorDTO, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {NotFoundException.class})
-    public ResponseEntity<ApiErrorInfo> handleNotFound(
-            NotFoundException exception
-    ) {
-        ApiErrorInfo errorInfo = ApiErrorInfo.builder()
+    @ExceptionHandler({NotFoundException.class})
+    public ResponseEntity<ApiErrorDTO> handleNotFound(NotFoundException exception) {
+        ApiErrorDTO errorDTO = ApiErrorDTO.builder()
                 .code(NotFoundException.errorCode())
                 .description(exception.getMessage())
                 .build();
 
-        return new ResponseEntity<>(errorInfo, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorDTO, HttpStatus.NOT_FOUND);
     }
 }
