@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.coreservice.entity;
+package com.crm.food.establishment.core.entity;
 
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Column;

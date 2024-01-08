@@ -1,18 +1,19 @@
-package com.crmfoodestablishment.coreservice.entity;
+package com.crm.food.establishment.core.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.PrePersist;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,8 +56,8 @@ public class Order {
 
     @PrePersist
     public void sumOrder() {
-        totalPrice = orders.stream().map(DishInOrder -> DishInOrder.getDish().getPrice()
-                .multiply(BigDecimal.valueOf(DishInOrder.getCount())))
+        totalPrice = orders.stream().map(dishInOrder -> dishInOrder.getDish().getPrice()
+                .multiply(BigDecimal.valueOf(dishInOrder.getCount())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

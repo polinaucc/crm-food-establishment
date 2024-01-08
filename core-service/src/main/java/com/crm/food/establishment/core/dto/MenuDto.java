@@ -1,8 +1,7 @@
-package com.crmfoodestablishment.coreservice.dto;
+package com.crm.food.establishment.core.dto;
 
-import com.crmfoodestablishment.coreservice.entity.Season;
+import com.crm.food.establishment.core.entity.Season;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,7 @@
-package com.crmfoodestablishment.coreservice.controller;
+package com.crm.food.establishment.core.controller;
 
-import com.crmfoodestablishment.coreservice.dto.MenuDto;
-import com.crmfoodestablishment.coreservice.service.MenuService;
+import com.crm.food.establishment.core.service.MenuService;
+import com.crm.food.establishment.core.dto.MenuDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

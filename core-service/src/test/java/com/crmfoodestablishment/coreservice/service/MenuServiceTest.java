@@ -1,10 +1,13 @@
 package com.crmfoodestablishment.coreservice.service;
 
-import com.crmfoodestablishment.coreservice.dto.MenuDto;
-import com.crmfoodestablishment.coreservice.entity.Menu;
-import com.crmfoodestablishment.coreservice.entity.Season;
-import com.crmfoodestablishment.coreservice.mapper.MenuMapper;
-import com.crmfoodestablishment.coreservice.repository.MenuRepository;
+import com.crm.food.establishment.core.dto.MenuDto;
+import com.crm.food.establishment.core.entity.Menu;
+import com.crm.food.establishment.core.entity.Season;
+import com.crm.food.establishment.core.mapper.MenuMapper;
+import com.crm.food.establishment.core.repository.MenuRepository;
+import com.crm.food.establishment.core.service.MenuNotFoundException;
+import com.crm.food.establishment.core.service.MenuServiceImpl;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -105,7 +108,8 @@ class MenuServiceTest {
         when(menuRepository.findAll()).thenReturn(Arrays.asList(menu, menu2));
         List<MenuDto> responseMenuDtos = menuServiceImpl.findAllMenu();
 
-        assertThat(responseMenuDtos.size()).isEqualTo(2);
+        Assertions.assertThat(responseMenuDtos).hasSize(2);
+        //TODO: this comparising migtht be changed - compare lists
         assertThat(responseMenuDtos.get(0)).usingRecursiveComparison()
                 .isEqualTo(menu);
         assertThat(responseMenuDtos.get(1)).usingRecursiveComparison()

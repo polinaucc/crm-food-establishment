@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.coreservice.dto;
+package com.crm.food.establishment.core.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

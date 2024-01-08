@@ -1,6 +1,6 @@
-package com.crmfoodestablishment.coreservice.service;
+package com.crm.food.establishment.core.service;
 
-import com.crmfoodestablishment.coreservice.dto.MenuDto;
+import com.crm.food.establishment.core.dto.MenuDto;
 import java.util.List;
 import java.util.UUID;
 

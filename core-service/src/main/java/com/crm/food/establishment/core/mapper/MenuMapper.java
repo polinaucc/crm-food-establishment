@@ -1,7 +1,7 @@
-package com.crmfoodestablishment.coreservice.mapper;
+package com.crm.food.establishment.core.mapper;
 
-import com.crmfoodestablishment.coreservice.dto.MenuDto;
-import com.crmfoodestablishment.coreservice.entity.Menu;
+import com.crm.food.establishment.core.dto.MenuDto;
+import com.crm.food.establishment.core.entity.Menu;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mapper;
 

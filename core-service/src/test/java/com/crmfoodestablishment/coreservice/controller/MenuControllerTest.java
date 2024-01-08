@@ -1,8 +1,9 @@
 package com.crmfoodestablishment.coreservice.controller;
 
-import com.crmfoodestablishment.coreservice.dto.MenuDto;
-import com.crmfoodestablishment.coreservice.entity.Season;
-import com.crmfoodestablishment.coreservice.service.MenuService;
+import com.crm.food.establishment.core.controller.MenuController;
+import com.crm.food.establishment.core.dto.MenuDto;
+import com.crm.food.establishment.core.entity.Season;
+import com.crm.food.establishment.core.service.MenuService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;

@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.coreservice;
+package com.crm.food.establishment.core;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;

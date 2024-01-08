@@ -1,11 +1,14 @@
 package com.crmfoodestablishment.coreservice.service;
 
-import com.crmfoodestablishment.coreservice.dto.CreateDishDto;
-import com.crmfoodestablishment.coreservice.entity.Dish;
-import com.crmfoodestablishment.coreservice.entity.Menu;
-import com.crmfoodestablishment.coreservice.mapper.DishMapper;
-import com.crmfoodestablishment.coreservice.repository.DishRepository;
-import com.crmfoodestablishment.coreservice.repository.MenuRepository;
+import com.crm.food.establishment.core.dto.CreateDishDto;
+import com.crm.food.establishment.core.entity.Dish;
+import com.crm.food.establishment.core.entity.Menu;
+import com.crm.food.establishment.core.mapper.DishMapper;
+import com.crm.food.establishment.core.repository.DishRepository;
+import com.crm.food.establishment.core.repository.MenuRepository;
+import com.crm.food.establishment.core.service.DishServiceImpl;
+import com.crm.food.establishment.core.service.MenuNotFoundException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,62 +47,65 @@ class DishServiceTest {
     @BeforeEach
     public void setUpData() {
         dishesDto = Arrays.asList(
-                new CreateDishDto("barbecue", BigDecimal.valueOf(150.0), "meat, onion, seasoning"),
-                new CreateDishDto("salad", BigDecimal.valueOf(50.0), "cabbage, salt, potato, cucumber")
+                new CreateDishDto("Pasta", BigDecimal.valueOf(152.50), "Pasta, tomatoes, onion"),
+                new CreateDishDto("Salad", BigDecimal.valueOf(57.00), "Cabbage, salt, potato, cucumber")
         );
     }
 
     @Test
     void addDishes_ShouldAddNewDishes() {
         UUID menuId = UUID.randomUUID();
+
         Menu existingMenu = new Menu();
         existingMenu.setUuid(menuId);
 
-        Dish dish = new Dish();
-        dish.setMenu(existingMenu);
-        dish.setName("barbecue");
-        dish.setPrice(BigDecimal.valueOf(150.0));
-        dish.setIngredients("meat, onion, seasoning");
-
-        Dish dish1 = new Dish();
-        dish1.setMenu(existingMenu);
-        dish1.setName("salad");
-        dish1.setPrice(BigDecimal.valueOf(50.0));
-        dish1.setIngredients("cabbage, salt, potato, cucumber");
-
-        List<Dish> expectedDishes = List.of(dish, dish1);
+        Dish pastaDish = formDish(existingMenu, "Pasta", 152.50, "Pasta, tomatoes, onion");
+        Dish saladDish = formDish(existingMenu, "Salad", 57.00, "Cabbage, salt, potato, cucumber");
+        List<Dish> expectedDishes = List.of(pastaDish, saladDish);
 
         when(menuRepository.getMenuByUuid(menuId)).thenReturn(Optional.of(existingMenu));
         ArgumentCaptor<List<Dish>> dishArgumentCaptor = ArgumentCaptor.forClass(List.class);
-        dishServiceImpl.addDishes(menuId, dishesDto);
+
+        dishServiceImpl.addDishes(menuId.toString(), dishesDto);
 
         verify(dishRepository).saveAll(dishArgumentCaptor.capture());
+
         List<Dish> actualDishes = dishArgumentCaptor.getValue();
         assertThat(actualDishes).isEqualTo(expectedDishes);
+    }
+
+    private static Dish formDish(Menu existingMenu, String name, Double price, String ingredients) {
+        Dish dish = new Dish();
+        dish.setMenu(existingMenu);
+        dish.setName(name);
+        dish.setPrice(BigDecimal.valueOf(price));
+        dish.setIngredients(ingredients);
+        return dish;
     }
 
     @Test
     void addDishes_ShouldGetExceptionWhenMenuIdNotExist() {
         UUID menuId = UUID.randomUUID();
 
-        when(menuRepository.getMenuByUuid(any(UUID.class))).thenReturn(Optional.empty());
+        when(menuRepository.getMenuByUuid(menuId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> dishServiceImpl.addDishes(menuId, dishesDto))
+        assertThatThrownBy(() -> dishServiceImpl.addDishes(menuId.toString(), dishesDto))
                 .isInstanceOf(MenuNotFoundException.class)
-                .hasMessage("Menu with id " + menuId + " not exist");
+                .hasMessage("Menu with uuid [" + menuId + "] is not found");
     }
 
     @Test
     void addDishes_ShouldGetExceptionWhenDishNameExist() {
         UUID menuId = UUID.randomUUID();
+
         Menu existingMenu = new Menu();
         existingMenu.setUuid(menuId);
 
         when(menuRepository.getMenuByUuid(menuId)).thenReturn(Optional.of(existingMenu));
         when(dishRepository.existsByName(dishesDto.get(0).getName())).thenReturn(true);
 
-        assertThatThrownBy(() -> dishServiceImpl.addDishes(menuId, dishesDto))
+        assertThatThrownBy(() -> dishServiceImpl.addDishes(menuId.toString(), dishesDto))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Dish " + dishesDto.get(0).getName() + " already exists");
+                .hasMessage("Dish with name [" + dishesDto.get(0).getName() + "] already exists");
     }
 }

@@ -1,9 +1,9 @@
-package com.crmfoodestablishment.coreservice.service;
+package com.crm.food.establishment.core.service;
 
-import com.crmfoodestablishment.coreservice.dto.MenuDto;
-import com.crmfoodestablishment.coreservice.entity.Menu;
-import com.crmfoodestablishment.coreservice.mapper.MenuMapper;
-import com.crmfoodestablishment.coreservice.repository.MenuRepository;
+import com.crm.food.establishment.core.dto.MenuDto;
+import com.crm.food.establishment.core.entity.Menu;
+import com.crm.food.establishment.core.mapper.MenuMapper;
+import com.crm.food.establishment.core.repository.MenuRepository;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;

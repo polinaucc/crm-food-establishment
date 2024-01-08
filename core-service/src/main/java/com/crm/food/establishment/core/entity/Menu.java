@@ -1,4 +1,4 @@
-package com.crmfoodestablishment.coreservice.entity;
+package com.crm.food.establishment.core.entity;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
