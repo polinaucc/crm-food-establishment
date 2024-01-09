@@ -3,19 +3,14 @@ package com.crm.food.establishment.user.auth.controller;
 import com.crm.food.establishment.user.auth.dto.CredentialsDTO;
 import com.crm.food.establishment.user.auth.service.AuthService;
 import com.crm.food.establishment.user.auth.token.TokenPair;
-import com.crm.food.establishment.user.manager.exception.InvalidArgumentException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -23,12 +18,14 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -44,135 +41,92 @@ class AuthControllerTest {
     @MockBean
     private AuthService authService;
 
-    @Captor
-    ArgumentCaptor<CredentialsDTO> credentialsCaptor;
-
     @Test
-    void login_ValidatesCredentialsDTO() throws Exception {
-        CredentialsDTO credentialsDTO = new CredentialsDTO();
-        credentialsDTO.setEmail("email");
-        credentialsDTO.setPassword(null);
+    void login_ShouldValidateCredentialsDTO() throws Exception {
+        CredentialsDTO invalidCredentials = new CredentialsDTO("email", null);
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_PATH + "/login")
+                post(AuthController.AUTH_LOGIN_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                credentialsDTO
-                        ))
+                        .content(objectMapper.writeValueAsString(invalidCredentials))
         );
 
         response.andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(InvalidArgumentException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.name())))
-                .andExpect(jsonPath("$.description", notNullValue()));
+                .andExpect(jsonPath("$.size()", is(2)));
+        verifyNoInteractions(authService);
     }
 
     @Test
-    void login_ReturnsTokenPair_And_OkStatus() throws Exception {
-        CredentialsDTO credentialsDTO = new CredentialsDTO();
-        credentialsDTO.setEmail("test@gmail.com");
-        credentialsDTO.setPassword("qwerty");
-        TokenPair tokenPair = new TokenPair(
-                "accessToken",
-                "refreshToken"
-        );
-
-        when(authService.login(any()))
-                .thenReturn(tokenPair);
+    void login_ShouldReturnTokenPair_And_OkStatus() throws Exception {
+        CredentialsDTO inputCredentials = new CredentialsDTO("test@gmail.com", "qwerty1234");
+        TokenPair expectedTokenPair = new TokenPair("accessToken", "refreshToken");
+        when(authService.login(inputCredentials)).thenReturn(expectedTokenPair);
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_PATH + "/login")
+                post(AuthController.AUTH_LOGIN_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                credentialsDTO
-                        ))
+                        .content(objectMapper.writeValueAsString(inputCredentials))
+        );
+        TokenPair actualTokenPair = objectMapper.readValue(
+                response.andReturn().getResponse().getContentAsString(),
+                TokenPair.class
         );
 
         response.andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.accessToken", is(tokenPair.getAccessToken())))
-                .andExpect(jsonPath("$.refreshToken", is(tokenPair.getRefreshToken())));
-        verify(authService).login(credentialsCaptor.capture());
-        assertEquals(credentialsDTO.getEmail(), credentialsCaptor.getValue().getEmail());
-        assertEquals(credentialsDTO.getPassword(), credentialsCaptor.getValue().getPassword());
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        assertEquals(expectedTokenPair, actualTokenPair);
+        verify(authService).login(inputCredentials);
     }
 
     @Test
-    void refresh_ValidatesRefreshToken() throws Exception {
-        String refreshToken = "invalid_token";
+    void refresh_ShouldValidateRefreshToken() throws Exception {
+        String invalidRefreshToken = "invalid_token";
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_PATH + "/refresh")
-                        .queryParam("refreshToken", refreshToken)
+                post(AuthController.AUTH_REFRESH_PATH).queryParam("refreshToken", invalidRefreshToken)
         );
 
-        response.andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(InvalidArgumentException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.name())))
-                .andExpect(jsonPath("$.description", notNullValue()));
+        response.andExpect(status().isBadRequest());
+        verifyNoInteractions(authService);
     }
 
     @Test
-    void refresh_ReturnsAccessToken_And_OkStatus() throws Exception {
-        String refreshToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-
-        when(authService.refresh(any()))
-                .thenReturn("accessToken");
+    void refresh_ShouldReturnAccessToken_And_OkStatus() throws Exception {
+        String inputRefreshToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+        String expectedAccessToken = "accessToken";
+        when(authService.refresh(inputRefreshToken)).thenReturn(expectedAccessToken);
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_PATH + "/refresh")
-                        .queryParam("refreshToken", refreshToken)
+                post(AuthController.AUTH_REFRESH_PATH).queryParam("refreshToken", inputRefreshToken)
         );
 
         response.andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.valueOf("text/plain;charset=UTF-8")))
-                .andExpect(content().string("accessToken"));
-        verify(authService, times(1))
-                .refresh(refreshToken);
+                .andExpect(content().string(expectedAccessToken));
+        verify(authService).refresh(inputRefreshToken);
     }
 
     @Test
-    void logout_ValidatesUserUuid() throws Exception {
-        String testUuid = "invalidUuid";
+    void logout_ShouldValidateUserId() throws Exception {
+        String invalidUuid = "invalidUuid";
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_PATH + "/logout/" + testUuid)
+                post(AuthController.AUTH_LOGOUT_PATH.replace("{userId}", invalidUuid))
         );
 
-        response.andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(InvalidArgumentException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.name())))
-                .andExpect(jsonPath("$.description", notNullValue()));
+        response.andExpect(status().isBadRequest());
+        verifyNoInteractions(authService);
     }
 
     @Test
-    void logout_ValidatesNilUserUuid() throws Exception {
-        String testUuid = "00000000-0000-0000-0000-000000000000";
+    void logout_ShouldCallService_And_ReturnOkStatus() throws Exception {
+        UUID inputUuid = UUID.randomUUID();
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_PATH + "/logout/" + testUuid)
-        );
-
-        response.andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(InvalidArgumentException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.name())))
-                .andExpect(jsonPath("$.description", notNullValue()));
-    }
-
-    @Test
-    void logout_ReturnsOkStatus() throws Exception {
-        UUID testUuid = UUID.randomUUID();
-
-        ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_PATH + "/logout/" + testUuid)
+                post(AuthController.AUTH_LOGOUT_PATH.replace("{userId}", inputUuid.toString()))
         );
 
         response.andExpect(status().isOk());
-        verify(authService, times(1))
-                .logout(testUuid);
+        verify(authService).logout(inputUuid);
     }
 }

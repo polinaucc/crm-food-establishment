@@ -1,7 +1,6 @@
 package com.crm.food.establishment.user.manager.mapper;
 
-import com.crm.food.establishment.user.manager.dto.RegisterUserRequestDTO;
-import com.crm.food.establishment.user.manager.dto.UpdateUserRequestDTO;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
 import com.crm.food.establishment.user.manager.dto.UserDTO;
 import com.crm.food.establishment.user.manager.entity.Role;
 import com.crm.food.establishment.user.manager.entity.User;
@@ -18,7 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class UserMapperImplTest {
@@ -37,7 +37,6 @@ class UserMapperImplTest {
         userPersonalInfo.setMale(true);
         userPersonalInfo.setBirthday(LocalDate.now());
         userPersonalInfo.setAddress("Some address");
-
         User user = new User();
         user.setUuid(UUID.randomUUID());
         user.setEmail("test@gmail.com");
@@ -46,77 +45,39 @@ class UserMapperImplTest {
 
         UserDTO userDTO = userMapper.mapUserToUserDTO(user);
 
-        assertEquals(user.getUuid(), userDTO.getUuid());
-        assertEquals(user.getEmail(), userDTO.getEmail());
-        assertEquals(user.getRole(), userDTO.getRole());
-        assertEquals(user.getPersonalInfo().getFirstName(), userDTO.getFirstName());
-        assertEquals(user.getPersonalInfo().getLastName(), userDTO.getLastName());
+        assertEquals(user.getUuid(), userDTO.uuid());
+        assertEquals(user.getEmail(), userDTO.email());
+        assertEquals(user.getRole(), userDTO.role());
+        assertEquals(user.getPersonalInfo().getFirstName(), userDTO.firstName());
+        assertEquals(user.getPersonalInfo().getLastName(), userDTO.lastName());
         assertEquals(user.getPersonalInfo().isMale(), userDTO.isMale());
-        assertEquals(user.getPersonalInfo().getBirthday(), userDTO.getBirthday());
-        assertEquals(user.getPersonalInfo().getAddress(), userDTO.getAddress());
+        assertEquals(user.getPersonalInfo().getBirthday(), userDTO.birthday());
+        assertEquals(user.getPersonalInfo().getAddress(), userDTO.address());
     }
 
     @Test
     void mapRegisterUserRequestDTOToUser() {
-        RegisterUserRequestDTO requestDTO = new RegisterUserRequestDTO();
-        requestDTO.setEmail("test@gmail.com");
-        requestDTO.setPassword("qwerty");
-        requestDTO.setRole(Role.CLIENT);
-        requestDTO.setFirstName("John");
-        requestDTO.setLastName("Dou");
-        requestDTO.setIsMale(true);
-        requestDTO.setBirthday(LocalDate.now());
-        requestDTO.setAddress("Some address");
-
+        UpdateRegisterUserRequestDTO requestDTO = new UpdateRegisterUserRequestDTO(
+                "test@gmail.com",
+                "qwerty1234",
+                Role.CLIENT,
+                "John",
+                "Dou",
+                true,
+                LocalDate.now(),
+                "Some address"
+        );
         User user = new User();
 
-        userMapper.mapRegisterUserRequestDTOToUser(
-                requestDTO,
-                user
-        );
+        userMapper.mapUpdateRegisterUserRequestDTOToUser(requestDTO, user);
 
-        assertEquals(requestDTO.getEmail(), user.getEmail());
-        assertTrue(passwordEncoder.matches(
-                requestDTO.getPassword(),
-                user.getPassword()
-        ));
-        assertEquals(requestDTO.getRole(), user.getRole());
-        assertEquals(requestDTO.getFirstName(), user.getPersonalInfo().getFirstName());
-        assertEquals(requestDTO.getLastName(), user.getPersonalInfo().getLastName());
-        assertEquals(requestDTO.getIsMale(), user.getPersonalInfo().isMale());
-        assertEquals(requestDTO.getBirthday(), user.getPersonalInfo().getBirthday());
-        assertEquals(requestDTO.getAddress(), user.getPersonalInfo().getAddress());
-    }
-
-    @Test
-    void mapUpdateUserRequestDTOToUser() {
-        UpdateUserRequestDTO requestDTO = new UpdateUserRequestDTO();
-        requestDTO.setEmail("test@gmail.com");
-        requestDTO.setPassword("qwerty");
-        requestDTO.setRole(Role.CLIENT);
-        requestDTO.setFirstName("John");
-        requestDTO.setLastName("Dou");
-        requestDTO.setIsMale(true);
-        requestDTO.setBirthday(LocalDate.now());
-        requestDTO.setAddress("Some address");
-
-        User user = new User();
-
-        userMapper.mapUpdateUserRequestDTOToUser(
-                requestDTO,
-                user
-        );
-
-        assertEquals(requestDTO.getEmail(), user.getEmail());
-        assertTrue(passwordEncoder.matches(
-                requestDTO.getPassword(),
-                user.getPassword()
-        ));
-        assertEquals(requestDTO.getRole(), user.getRole());
-        assertEquals(requestDTO.getFirstName(), user.getPersonalInfo().getFirstName());
-        assertEquals(requestDTO.getLastName(), user.getPersonalInfo().getLastName());
-        assertEquals(requestDTO.getIsMale(), user.getPersonalInfo().isMale());
-        assertEquals(requestDTO.getBirthday(), user.getPersonalInfo().getBirthday());
-        assertEquals(requestDTO.getAddress(), user.getPersonalInfo().getAddress());
+        assertEquals(requestDTO.email(), user.getEmail());
+        assertTrue(passwordEncoder.matches(requestDTO.password(), user.getPassword()));
+        assertEquals(requestDTO.role(), user.getRole());
+        assertEquals(requestDTO.firstName(), user.getPersonalInfo().getFirstName());
+        assertEquals(requestDTO.lastName(), user.getPersonalInfo().getLastName());
+        assertEquals(requestDTO.isMale(), user.getPersonalInfo().isMale());
+        assertEquals(requestDTO.birthday(), user.getPersonalInfo().getBirthday());
+        assertEquals(requestDTO.address(), user.getPersonalInfo().getAddress());
     }
 }

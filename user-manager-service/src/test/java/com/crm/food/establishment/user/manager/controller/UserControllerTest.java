@@ -1,15 +1,12 @@
 package com.crm.food.establishment.user.manager.controller;
 
 import com.crm.food.establishment.user.auth.token.TokenPair;
-import com.crm.food.establishment.user.manager.dto.RegisterUserRequestDTO;
 import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDTO;
-import com.crm.food.establishment.user.manager.dto.UpdateUserRequestDTO;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
 import com.crm.food.establishment.user.manager.dto.UserDTO;
 import com.crm.food.establishment.user.manager.entity.Role;
-import com.crm.food.establishment.user.manager.exception.InvalidArgumentException;
-import com.crm.food.establishment.user.manager.exception.NotFoundException;
 import com.crm.food.establishment.user.manager.service.UserService;
-
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -29,14 +25,18 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -52,220 +52,180 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
-    private RegisterUserRequestDTO validRegisterPayload;
-    private RegisterUserRequestDTO invalidRegisterPayload;
-    private UpdateUserRequestDTO validUpdatePayload;
-    private UpdateUserRequestDTO invalidUpdatePayload;
+    private UpdateRegisterUserRequestDTO validUpdateRegisterPayload;
+    private UpdateRegisterUserRequestDTO invalidUpdateRegisterPayload;
+    private UserDTO userDTOSample;
 
     @BeforeEach
-    public void setUpTestData() {
-        validRegisterPayload = new RegisterUserRequestDTO();
-        validRegisterPayload.setEmail("test@gmail.com");
-        validRegisterPayload.setPassword("qwerty");
-        validRegisterPayload.setRole(Role.CLIENT);
-        validRegisterPayload.setFirstName("John");
-        validRegisterPayload.setLastName("Dou");
-        validRegisterPayload.setIsMale(true);
-        validRegisterPayload.setBirthday(LocalDate.now().minusYears(2));
-        validRegisterPayload.setAddress("Some address");
-
-        invalidRegisterPayload = new RegisterUserRequestDTO();
-        invalidRegisterPayload.setEmail("aaaaaaa");
-        invalidRegisterPayload.setPassword("");
-        invalidRegisterPayload.setRole(null);
-        invalidRegisterPayload.setFirstName("");
-        invalidRegisterPayload.setLastName("");
-        invalidRegisterPayload.setIsMale(null);
-        invalidRegisterPayload.setBirthday(LocalDate.now().plusYears(2));
-
-        validUpdatePayload = mapRegisterUserRequestDTOToUpdateUserRequestDTO(
-                validRegisterPayload
+    public void setUp() {
+        validUpdateRegisterPayload = new UpdateRegisterUserRequestDTO(
+                "test@gmail.com",
+                "qwerty1234",
+                Role.CLIENT,
+                "John",
+                "Dou",
+                true,
+                LocalDate.now().minusYears(2),
+                "Some address"
         );
-        invalidUpdatePayload = mapRegisterUserRequestDTOToUpdateUserRequestDTO(
-                invalidRegisterPayload
+        invalidUpdateRegisterPayload = new UpdateRegisterUserRequestDTO(
+                "aaaaaaa",
+                "",
+                null,
+                "",
+                "",
+                null,
+                LocalDate.now().plusYears(2),
+                null
+        );
+        userDTOSample = new UserDTO(
+                UUID.randomUUID(),
+                "test@gmail.com",
+                Role.CLIENT,
+                "John",
+                "Dou",
+                true,
+                LocalDate.now().minusYears(2),
+                "Some address"
         );
     }
 
     @Test
-    public void registerUser_ValidatesInput() throws Exception {
+    public void registerUser_ShouldValidateRequestBody() throws Exception {
         ResultActions response = mockMvc.perform(
                 post(UserController.USER_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                invalidRegisterPayload
-                        ))
+                        .content(objectMapper.writeValueAsString(invalidUpdateRegisterPayload))
         );
 
         response.andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(InvalidArgumentException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.name())))
-                .andExpect(jsonPath("$.description", notNullValue()));
+                .andExpect(jsonPath("$.size()", is(8)));
+        verifyNoInteractions(userService);
     }
 
     @Test
-    public void registerUser_ReturnsRegisterUserResponseDTO() throws Exception {
-        var registerUserResponseDTO = new RegisterUserResponseDTO(
-                UUID.randomUUID(),
-                new TokenPair("", "")
+    public void registerUser_ShouldReturnRegisterUserResponseDTO_And_CreatedStatus() throws Exception {
+        var expectedRegisterUserResponseDTO = new RegisterUserResponseDTO(
+                UUID.randomUUID(), new TokenPair("", "")
         );
-
-        when(userService.register(any()))
-                .thenReturn(registerUserResponseDTO);
+        when(userService.register(validUpdateRegisterPayload)).thenReturn(expectedRegisterUserResponseDTO);
 
         ResultActions response = mockMvc.perform(
                 post(UserController.USER_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validRegisterPayload))
+                        .content(objectMapper.writeValueAsString(validUpdateRegisterPayload))
+        );
+        var actualRegisterUserResponseDTO = objectMapper.readValue(
+                response.andReturn().getResponse().getContentAsString(),
+                RegisterUserResponseDTO.class
         );
 
         response.andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.userUuid", is(
-                        registerUserResponseDTO.getUserUuid().toString()
-                )))
-                .andExpect(jsonPath("$.tokenPair", notNullValue()));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        assertEquals(expectedRegisterUserResponseDTO, actualRegisterUserResponseDTO);
     }
 
     @Test
-    void updateUser_ValidatesPathVariable() throws Exception {
+    void updateUser_ShouldValidateUserId() throws Exception {
         ResultActions response = mockMvc.perform(
-                put(UserController.USER_PATH + "/" + "invalid_UUID")
+                put(UserController.USER_PATH_WITH_ID.replace("{userId}", "invalidUuid"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validUpdatePayload))
+                        .content(objectMapper.writeValueAsString(validUpdateRegisterPayload))
         );
 
-        response.andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(InvalidArgumentException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.name())))
-                .andExpect(jsonPath("$.description", notNullValue()));
+        response.andExpect(status().isBadRequest());
+        verifyNoInteractions(userService);
     }
 
     @Test
-    void updateUser_ValidatesInputData() throws Exception {
+    void updateUser_ShouldValidateRequestBody() throws Exception {
         ResultActions response = mockMvc.perform(
-                put(UserController.USER_PATH + "/" + UUID.randomUUID())
+                put(UserController.USER_PATH_WITH_ID.replace("{userId}", UUID.randomUUID().toString()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidUpdatePayload))
+                        .content(objectMapper.writeValueAsString(invalidUpdateRegisterPayload))
         );
 
-        response.andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(InvalidArgumentException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.name())))
-                .andExpect(jsonPath("$.description", notNullValue()));
+        response.andExpect(status().isBadRequest());
+        verifyNoInteractions(userService);
     }
 
     @Test
-    void updateUser_ReturnsNoContent() throws Exception {
+    void updateUser_ShouldCallService_And_ReturnNoContent() throws Exception {
+        UUID inputUserId = UUID.randomUUID();
+
         ResultActions response = mockMvc.perform(
-                put(UserController.USER_PATH + "/" + UUID.randomUUID())
+                put(UserController.USER_PATH_WITH_ID.replace("{userId}", inputUserId.toString()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(validUpdatePayload))
+                        .content(objectMapper.writeValueAsString(validUpdateRegisterPayload))
         );
 
         response.andExpect(status().isNoContent());
+        verify(userService).update(inputUserId, validUpdateRegisterPayload);
     }
 
     @Test
-    void deleteUser_ValidatesPathVariable() throws Exception {
+    void deleteUser_ShouldValidateUserId() throws Exception {
         ResultActions response = mockMvc.perform(
-                delete(UserController.USER_PATH + "/" + "invalid_UUID")
+                delete(UserController.USER_PATH_WITH_ID.replace("{userId}", "invalidUuid"))
         );
 
-        response.andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(InvalidArgumentException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.name())))
-                .andExpect(jsonPath("$.description", notNullValue()));
+        response.andExpect(status().isBadRequest());
+        verifyNoInteractions(userService);
     }
 
     @Test
-    void deleteUser_ReturnsNoContent() throws Exception {
+    void deleteUser_ShouldCallService_And_ReturnsNoContent() throws Exception {
+        UUID inputUserId = UUID.randomUUID();
+
         ResultActions response = mockMvc.perform(
-                delete(UserController.USER_PATH + "/" + UUID.randomUUID())
+                delete(UserController.USER_PATH_WITH_ID.replace("{userId}", inputUserId.toString()))
         );
 
         response.andExpect(status().isNoContent());
+        verify(userService).delete(inputUserId);
     }
 
     @Test
-    void getUserById_ValidatesPathVariable() throws Exception {
+    void getUserById_ShouldValidateUserId() throws Exception {
         ResultActions response = mockMvc.perform(
-                get(UserController.USER_PATH + "/" + "invalid_UUID")
+                get(UserController.USER_PATH_WITH_ID.replace("{userId}", "invalidUuid"))
         );
 
-        response.andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(InvalidArgumentException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.name())))
-                .andExpect(jsonPath("$.description", notNullValue()));
+        response.andExpect(status().isBadRequest());
+        verifyNoInteractions(userService);
     }
 
     @Test
-    void getUserById_ReturnsUserDTO() throws Exception {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUuid(UUID.randomUUID());
-
-        when(userService.getById(any()))
-                .thenReturn(userDTO);
+    void getUserById_ShouldReturnUserDTO_And_OkStatus() throws Exception {
+        when(userService.getById(userDTOSample.uuid())).thenReturn(userDTOSample);
 
         ResultActions response = mockMvc.perform(
-                get(UserController.USER_PATH + "/" + userDTO.getUuid())
+                get(UserController.USER_PATH_WITH_ID.replace("{userId}", userDTOSample.uuid().toString()))
         );
-
-        response.andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.uuid", is(
-                        userDTO.getUuid().toString()
-                )));
-    }
-
-    @Test
-    void listUsers() throws Exception {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUuid(UUID.randomUUID());
-
-        when(userService.listAll())
-                .thenReturn(List.of(userDTO, userDTO));
-
-        ResultActions response = mockMvc.perform(
-                get(UserController.USER_PATH)
+        var actualUserDTO = objectMapper.readValue(
+                response.andReturn().getResponse().getContentAsString(),
+                UserDTO.class
         );
 
         response.andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.size()", is(2)));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        assertEquals(userDTOSample, actualUserDTO);
+        verify(userService).getById(userDTOSample.uuid());
     }
 
     @Test
-    void correctlyHandlesNotFoundException() throws Exception {
-        when(userService.getById(any())).thenThrow(new NotFoundException("some message"));
+    void listUsers_ShouldReturnUserDTOList_And_OkStatus() throws Exception {
+        List<UserDTO> expectedUserDTOList = List.of(userDTOSample, userDTOSample);
+        when(userService.listAll()).thenReturn(expectedUserDTOList);
 
-        ResultActions response = mockMvc.perform(
-                get(UserController.USER_PATH + "/" + UUID.randomUUID())
+        ResultActions response = mockMvc.perform(get(UserController.USER_PATH));
+        List<UserDTO> actualUserDTOList = objectMapper.readValue(
+                response.andReturn().getResponse().getContentAsString(),
+                new TypeReference<>() {}
         );
 
-        response.andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(NotFoundException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.NOT_FOUND.name())))
-                .andExpect(jsonPath("$.description", notNullValue()));
-    }
-
-    private UpdateUserRequestDTO mapRegisterUserRequestDTOToUpdateUserRequestDTO(
-            RegisterUserRequestDTO registerUserRequestDTO
-    ) {
-        var responseDTO = new UpdateUserRequestDTO();
-        responseDTO.setEmail(registerUserRequestDTO.getEmail());
-        responseDTO.setPassword(registerUserRequestDTO.getPassword());
-        responseDTO.setRole(registerUserRequestDTO.getRole());
-        responseDTO.setFirstName(registerUserRequestDTO.getFirstName());
-        responseDTO.setLastName(registerUserRequestDTO.getLastName());
-        responseDTO.setIsMale(registerUserRequestDTO.getIsMale());
-        responseDTO.setBirthday(registerUserRequestDTO.getBirthday());
-        responseDTO.setAddress(registerUserRequestDTO.getAddress());
-        return responseDTO;
+        response.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        assertIterableEquals(expectedUserDTOList, actualUserDTOList);
     }
 }

@@ -1,9 +1,10 @@
 package com.crm.food.establishment.user.manager.controller;
 
+import com.crm.food.establishment.user.ApiErrorDTO;
 import com.crm.food.establishment.user.manager.exception.InvalidArgumentException;
 import com.crm.food.establishment.user.manager.exception.NotFoundException;
 import com.crm.food.establishment.user.manager.service.UserService;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -11,15 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -29,42 +30,49 @@ class UserControllerAdviceTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @MockBean
     private UserService userService;
 
     @Test
-    void handleInvalidArguments() throws Exception {
-        InvalidArgumentException testException = new InvalidArgumentException("InvalidArgumentException");
+    void handleInvalidArguments_ShouldComposeDTO_And_ReturnBadRequestStatus() throws Exception {
+        InvalidArgumentException expectedException = new InvalidArgumentException("InvalidArgumentException");
+        ApiErrorDTO expectedErrorDTO = new ApiErrorDTO(
+                InvalidArgumentException.errorCode(),
+                expectedException.getMessage()
+        );
+        when(userService.listAll()).thenThrow(expectedException);
 
-        when(userService.listAll())
-                .thenThrow(testException);
-
-        ResultActions response = mockMvc.perform(
-                get(UserController.USER_PATH)
+        ResultActions response = mockMvc.perform(get(UserController.USER_PATH));
+        ApiErrorDTO actualErrorDTO = objectMapper.readValue(
+                response.andReturn().getResponse().getContentAsString(),
+                ApiErrorDTO.class
         );
 
         response.andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(InvalidArgumentException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.BAD_REQUEST.name())))
-                .andExpect(jsonPath("$.description", is(testException.getMessage())));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        assertEquals(expectedErrorDTO, actualErrorDTO);
     }
 
     @Test
-    void handleNotFound() throws Exception {
-        NotFoundException testException = new NotFoundException("NotFoundException");
+    void handleNotFound_ShouldComposeDTO_And_ReturnNotFoundStatus() throws Exception {
+        NotFoundException expectedException = new NotFoundException("NotFoundException");
+        ApiErrorDTO expectedErrorDTO = new ApiErrorDTO(
+                NotFoundException.errorCode(),
+                expectedException.getMessage()
+        );
+        when(userService.listAll()).thenThrow(expectedException);
 
-        when(userService.listAll())
-                .thenThrow(testException);
-
-        ResultActions response = mockMvc.perform(
-                get(UserController.USER_PATH)
+        ResultActions response = mockMvc.perform(get(UserController.USER_PATH));
+        ApiErrorDTO actualErrorDTO = objectMapper.readValue(
+                response.andReturn().getResponse().getContentAsString(),
+                ApiErrorDTO.class
         );
 
         response.andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.title", is(NotFoundException.readableName())))
-                .andExpect(jsonPath("$.status", is(HttpStatus.NOT_FOUND.name())))
-                .andExpect(jsonPath("$.description", is(testException.getMessage())));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        assertEquals(expectedErrorDTO, actualErrorDTO);
     }
 }

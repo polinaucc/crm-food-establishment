@@ -10,6 +10,7 @@ import com.crm.food.establishment.user.auth.token.TokenPair;
 import com.crm.food.establishment.user.manager.entity.User;
 import com.crm.food.establishment.user.manager.repository.UserRepository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,9 +21,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {
@@ -39,82 +41,22 @@ class AuthServiceImplTest {
     @InjectMocks
     private AuthServiceImpl authService;
 
-    @Test
-    void login_ValidatesEmail() {
-        CredentialsDTO credentials = new CredentialsDTO();
-        credentials.setEmail("test@gmail.com");
+    private CredentialsDTO credentialsSample;
+    private User userSample;
+    private RefreshToken refreshTokenSample;
+    private String refreshTokenAsString;
 
-        when(userRepository.findByEmail(any()))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                InvalidUserCredentialsException.class,
-                () -> authService.login(credentials)
+    @BeforeEach
+    void setUp() {
+        credentialsSample = new CredentialsDTO(
+                "test@gmail.com",
+                "qwerty"
         );
-        verify(userRepository, times(1))
-                .findByEmail(credentials.getEmail());
-    }
 
-    @Test
-    void login_ValidatesPassword() {
-        CredentialsDTO credentials = new CredentialsDTO();
-        credentials.setEmail("test@gmail.com");
-        credentials.setPassword("qwerty");
-        User user = new User();
-        user.setPassword("qwerty1");
+        userSample = new User(UUID.randomUUID());
+        userSample.setPassword("qwerty123");
 
-        when(userRepository.findByEmail(any()))
-                .thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(any(), any()))
-                .thenReturn(false);
-
-        assertThrows(
-                InvalidUserCredentialsException.class,
-                () -> authService.login(credentials)
-        );
-        verify(userRepository, times(1))
-                .findByEmail(credentials.getEmail());
-        verify(passwordEncoder, times(1))
-                .matches(
-                        credentials.getPassword(),
-                        user.getPassword()
-                );
-    }
-
-    @Test
-    void login_ReturnTokenPair() {
-        CredentialsDTO credentials = new CredentialsDTO();
-        credentials.setEmail("test@gmail.com");
-        credentials.setPassword("qwerty");
-        User user = new User();
-        user.setPassword("qwerty1");
-
-        when(userRepository.findByEmail(any()))
-                .thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(any(), any()))
-                .thenReturn(true);
-        when(jwtService.issueTokenPair(any()))
-                .thenReturn(new TokenPair("", ""));
-
-        TokenPair tokenPair = authService.login(credentials);
-
-        assertNotNull(tokenPair);
-        assertEquals("", tokenPair.getAccessToken());
-        assertEquals("", tokenPair.getRefreshToken());
-        verify(userRepository, times(1))
-                .findByEmail(credentials.getEmail());
-        verify(passwordEncoder, times(1))
-                .matches(
-                        credentials.getPassword(),
-                        user.getPassword()
-                );
-        verify(jwtService, times(1))
-                .issueTokenPair(user);
-    }
-
-    @Test
-    void refresh_ValidatesRefreshTokenSubject() {
-        RefreshToken refreshToken = new RefreshToken(
+        refreshTokenSample = new RefreshToken(
                 null,
                 new RefreshTokenClaims(
                         null,
@@ -122,59 +64,81 @@ class AuthServiceImplTest {
                         UUID.randomUUID()
                 )
         );
-
-        when(jwtService.parseRefreshToken(any()))
-                .thenReturn(refreshToken);
-        when(userRepository.findByUuid(any()))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                InvalidTokenException.class,
-                () -> authService.refresh("refreshToken")
-        );
-        verify(jwtService, times(1))
-                .parseRefreshToken("refreshToken");
-        verify(userRepository, times(1))
-                .findByUuid(refreshToken.claims().sub());
+        refreshTokenAsString = "refreshToken";
     }
 
     @Test
-    void refresh_ReturnsAccessToken() {
-        RefreshToken refreshToken = new RefreshToken(
-                null,
-                new RefreshTokenClaims(
-                        null,
-                        null,
-                        UUID.randomUUID()
-                )
-        );
-        User user = new User(UUID.randomUUID());
+    void login_ShouldValidateEmail() {
+        when(userRepository.findByEmail(credentialsSample.email())).thenReturn(Optional.empty());
 
-        when(jwtService.parseRefreshToken(any()))
-                .thenReturn(refreshToken);
-        when(userRepository.findByUuid(any()))
-                .thenReturn(Optional.of(user));
-        when(jwtService.issueAccessToken(user))
-                .thenReturn("accessToken");
+        assertThatThrownBy(() -> authService.login(credentialsSample))
+                .isInstanceOf(InvalidUserCredentialsException.class)
+                .hasMessage("Wrong email");
+        verify(userRepository).findByEmail(credentialsSample.email());
+    }
 
-        String accessToken = authService.refresh("refreshToken");
+    @Test
+    void login_ShouldValidatePassword() {
+        when(userRepository.findByEmail(credentialsSample.email())).thenReturn(Optional.of(userSample));
+        when(passwordEncoder.matches(credentialsSample.password(), userSample.getPassword())).thenReturn(false);
 
-        assertEquals("accessToken", accessToken);
-        verify(jwtService, times(1))
-                .parseRefreshToken("refreshToken");
-        verify(userRepository, times(1))
-                .findByUuid(refreshToken.claims().sub());
-        verify(jwtService, times(1))
-                .issueAccessToken(user);
+        assertThatThrownBy(() -> authService.login(credentialsSample))
+                .isInstanceOf(InvalidUserCredentialsException.class)
+                .hasMessage("Wrong password");
+        verify(userRepository).findByEmail(credentialsSample.email());
+        verify(passwordEncoder).matches(credentialsSample.password(), userSample.getPassword());
+    }
+
+    @Test
+    void login_ShouldReturnTokenPair() {
+        TokenPair expectedTokenPair = new TokenPair("access","refresh");
+
+        when(userRepository.findByEmail(credentialsSample.email())).thenReturn(Optional.of(userSample));
+        when(passwordEncoder.matches(credentialsSample.password(), userSample.getPassword())).thenReturn(true);
+        when(jwtService.issueTokenPair(userSample)).thenReturn(expectedTokenPair);
+
+        TokenPair actualTokenPair = authService.login(credentialsSample);
+
+        assertEquals(expectedTokenPair, actualTokenPair);
+        verify(userRepository).findByEmail(credentialsSample.email());
+        verify(passwordEncoder).matches(credentialsSample.password(), userSample.getPassword());
+        verify(jwtService).issueTokenPair(userSample);
+    }
+
+    @Test
+    void refresh_ShouldValidateRefreshTokenSubject() {
+        when(jwtService.parseRefreshToken(refreshTokenAsString)).thenReturn(refreshTokenSample);
+        when(userRepository.findByUuid(refreshTokenSample.claims().sub())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.refresh(refreshTokenAsString))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessage("Invalid subject: no users with id + " + refreshTokenSample.claims().sub());
+        verify(jwtService).parseRefreshToken(refreshTokenAsString);
+        verify(userRepository).findByUuid(refreshTokenSample.claims().sub());
+    }
+
+    @Test
+    void refresh_ShouldReturnAccessToken() {
+        String expectedAccessToken = "accessToken";
+
+        when(jwtService.parseRefreshToken(refreshTokenAsString)).thenReturn(refreshTokenSample);
+        when(userRepository.findByUuid(refreshTokenSample.claims().sub())).thenReturn(Optional.of(userSample));
+        when(jwtService.issueAccessToken(userSample)).thenReturn(expectedAccessToken);
+
+        String actualAccessToken = authService.refresh(refreshTokenAsString);
+
+        assertEquals(expectedAccessToken, actualAccessToken);
+        verify(jwtService).parseRefreshToken(refreshTokenAsString);
+        verify(userRepository).findByUuid(refreshTokenSample.claims().sub());
+        verify(jwtService).issueAccessToken(userSample);
     }
 
     @Test
     void logout_InvalidatesAssociatedRefreshToken() {
-        UUID testUuid = UUID.randomUUID();
+        UUID inputUuid = UUID.randomUUID();
 
-        authService.logout(testUuid);
+        authService.logout(inputUuid);
 
-        verify(jwtService, times(1))
-                .invalidateRefreshToken(testUuid);
+        verify(jwtService).invalidateRefreshToken(inputUuid);
     }
 }

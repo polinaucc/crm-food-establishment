@@ -6,7 +6,9 @@ import com.crm.food.establishment.user.auth.config.jwt.JwtProperties;
 import com.crm.food.establishment.user.auth.config.jwt.RefreshTokenProperties;
 import com.crm.food.establishment.user.auth.exception.InvalidTokenException;
 import com.crm.food.establishment.user.auth.token.AccessToken;
+import com.crm.food.establishment.user.auth.token.AccessTokenClaims;
 import com.crm.food.establishment.user.auth.token.RefreshToken;
+import com.crm.food.establishment.user.auth.token.RefreshTokenClaims;
 import com.crm.food.establishment.user.auth.token.TokenPair;
 import com.crm.food.establishment.user.auth.token.adapter.AccessTokenHandlerAdapter;
 import com.crm.food.establishment.user.auth.token.adapter.RefreshTokenHandlerAdapter;
@@ -33,8 +35,11 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.crm.food.establishment.user.auth.service.TimeUtils.convertLocalDateTimeToDate;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class JwtServiceImplTest {
@@ -56,6 +61,8 @@ class JwtServiceImplTest {
     private Long refreshTokenExpirationTime;
 
     private JwtServiceImpl jwtService;
+
+    private User userSample;
 
     @BeforeEach
     void setUp() throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -100,195 +107,166 @@ class JwtServiceImplTest {
                 .build();
         refreshTokenHandlerAdapter = new RefreshTokenHandlerAdapter();
         refreshTokenExpirationTime = jwtProperties.refreshToken().expirationTimeInMinutes();
+
+        userSample = new User(UUID.randomUUID());
+        userSample.setRole(Role.CLIENT);
+        userSample.setEmail("test@gmail.com");
     }
 
     @Test
     void issueAccessToken_ShouldReturnValidAccessToken() {
-        User inputUser = new User(UUID.randomUUID());
-        inputUser.setRole(Role.CLIENT);
-        inputUser.setEmail("test@gmail.com");
-        LocalDateTime expectedIat = LocalDateTime.now().withSecond(0).withNano(0);
+        LocalDateTime issuedTime = LocalDateTime.now().withSecond(0).withNano(0);
+        LocalDateTime expirationTime = issuedTime.plusMinutes(accessTokenExpirationTime);
+        AccessTokenClaims expectedAccessTokenClaims = new AccessTokenClaims(
+                issuedTime,
+                expirationTime,
+                userSample.getUuid(),
+                userSample.getRole()
+        );
 
-        String accessToken = jwtService.issueAccessToken(inputUser);
-
-        AccessToken parsedAccessToken = accessTokenParser.parse(
-                accessToken,
+        String issuedAccessToken = jwtService.issueAccessToken(userSample);
+        AccessToken actualAccessToken = accessTokenParser.parse(
+                issuedAccessToken,
                 accessTokenHandlerAdapter
         );
 
-        assertEquals(expectedIat, parsedAccessToken.claims().iat());
-        assertEquals(
-                expectedIat.plusMinutes(accessTokenExpirationTime),
-                parsedAccessToken.claims().exp()
-        );
-        assertEquals(inputUser.getUuid(), parsedAccessToken.claims().sub());
-        assertEquals(inputUser.getRole(), parsedAccessToken.claims().role());
+        assertEquals(expectedAccessTokenClaims, actualAccessToken.claims());
     }
 
     @Test
     void issueRefreshToken_ShouldReturnValidRefreshToken_And_SafeItToRedis() {
-        User inputUser = new User(UUID.randomUUID());
-        inputUser.setEmail("test@gmail.com");
-
+        LocalDateTime issuedTime = LocalDateTime.now().withSecond(0).withNano(0);
+        LocalDateTime expirationTime = issuedTime.plusMinutes(refreshTokenExpirationTime);
+        RefreshTokenClaims expectedRefreshTokenClaims = new RefreshTokenClaims(
+                issuedTime,
+                expirationTime,
+                userSample.getUuid()
+        );
         when(refreshTokenRedisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        String refreshToken = jwtService.issueRefreshToken(inputUser);
-
-        verify(valueOperations, times(1))
-                .set(
-                        inputUser.getUuid(),
-                        refreshToken,
-                        refreshTokenExpirationTime,
-                        TimeUnit.MINUTES
-                );
-
-        RefreshToken parsedAccessToken = refreshTokenParser.parse(
-                refreshToken,
+        String issuedRefreshToken = jwtService.issueRefreshToken(userSample);
+        RefreshToken actualRefreshToken = refreshTokenParser.parse(
+                issuedRefreshToken,
                 refreshTokenHandlerAdapter
         );
-        assertEquals(
-                LocalDateTime.now().withNano(0),
-                parsedAccessToken.claims().iat()
+
+        verify(valueOperations).set(
+                userSample.getUuid(),
+                issuedRefreshToken,
+                refreshTokenExpirationTime,
+                TimeUnit.MINUTES
         );
-        assertEquals(
-                LocalDateTime.now()
-                        .plusMinutes(refreshTokenExpirationTime)
-                        .withNano(0),
-                parsedAccessToken.claims().exp()
-        );
-        assertEquals(inputUser.getUuid(), parsedAccessToken.claims().sub());
+        assertEquals(expectedRefreshTokenClaims, actualRefreshToken.claims());
     }
 
     @Test
     void issueTokenPair_ShouldReturnTokenPair() {
-        User inputUser = new User(UUID.randomUUID());
-        inputUser.setRole(Role.CLIENT);
-        inputUser.setEmail("test@gmail.com");
-
         when(refreshTokenRedisTemplate.opsForValue()).thenReturn(valueOperations);
 
-        TokenPair refreshToken = jwtService.issueTokenPair(inputUser);
+        TokenPair issuedTokenPair = jwtService.issueTokenPair(userSample);
 
-        assertNotNull(refreshToken);
-        assertNotNull(refreshToken.getRefreshToken());
-        assertNotNull(refreshToken.getAccessToken());
+        assertNotNull(issuedTokenPair);
+        assertNotNull(issuedTokenPair.refreshToken());
+        assertNotNull(issuedTokenPair.accessToken());
     }
 
     @Test
     void invalidateRefreshToken_ShouldDeleteRefreshTokenInRedis() {
-        UUID inputUuid = UUID.randomUUID();
+        jwtService.invalidateRefreshToken(userSample.getUuid());
 
-        jwtService.invalidateRefreshToken(inputUuid);
-
-        verify(refreshTokenRedisTemplate, times(1)).delete(inputUuid);
+        verify(refreshTokenRedisTemplate).delete(userSample.getUuid());
     }
 
     @Test
     void parseAccessToken_ShouldValidateInputString() {
-        InvalidTokenException thrownException = assertThrows(
-                InvalidTokenException.class,
-                () -> jwtService.parseAccessToken("invalidToken")
-        );
-        assertEquals("Given invalid access token", thrownException.getMessage());
+        assertThatThrownBy(() -> jwtService.parseAccessToken("invalidToken"))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessage("Given invalid access token");
     }
 
     @Test
     void parseAccessToken_ShouldValidateExpirationTime() {
-        User user = new User(UUID.randomUUID());
-        user.setRole(Role.CLIENT);
         LocalDateTime issuedTime = LocalDateTime.now();
         LocalDateTime expirationTime = issuedTime.minusMinutes(60);
-
         String expiredToken = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
                 .setExpiration(convertLocalDateTimeToDate(expirationTime))
-                .setSubject(user.getUuid().toString())
-                .claim("role", user.getRole())
+                .setSubject(userSample.getUuid().toString())
+                .claim("role", userSample.getRole())
                 .signWith(accessTokenPrivateKey, SignatureAlgorithm.RS256)
                 .compact();
 
-        InvalidTokenException thrownException = assertThrows(
-                InvalidTokenException.class,
-                () -> jwtService.parseAccessToken(expiredToken)
-        );
-        assertEquals("Given access token has expired", thrownException.getMessage());
+        assertThatThrownBy(() -> jwtService.parseAccessToken(expiredToken))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessage("Given access token has expired");
     }
 
     @Test
     void parseAccessToken_ShouldReturnCorrectlyParsedAccessToken() {
-        User inputUser = new User(UUID.randomUUID());
-        inputUser.setRole(Role.CLIENT);
         LocalDateTime issuedTime = LocalDateTime.now();
         LocalDateTime expirationTime = issuedTime.plusMinutes(accessTokenExpirationTime);
-
-        String inputToken = Jwts.builder()
+        String validAccessToken = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
                 .setExpiration(convertLocalDateTimeToDate(expirationTime))
-                .setSubject(inputUser.getUuid().toString())
-                .claim("role", inputUser.getRole())
+                .setSubject(userSample.getUuid().toString())
+                .claim("role", userSample.getRole())
                 .signWith(accessTokenPrivateKey, SignatureAlgorithm.RS256)
                 .compact();
+        AccessToken expectedAccessToken = accessTokenParser.parse(
+                validAccessToken,
+                accessTokenHandlerAdapter
+        );
 
-        AccessToken parsedToken = jwtService.parseAccessToken(inputToken);
+        AccessToken parsedAccessToken = jwtService.parseAccessToken(validAccessToken);
 
-        assertEquals(issuedTime.withNano(0), parsedToken.claims().iat());
-        assertEquals(expirationTime.withNano(0), parsedToken.claims().exp());
-        assertEquals(inputUser.getUuid(), parsedToken.claims().sub());
-        assertEquals(inputUser.getRole(), parsedToken.claims().role());
+        assertEquals(expectedAccessToken, parsedAccessToken);
     }
 
     @Test
     void parseRefreshToken_ShouldValidateInputString() {
-        InvalidTokenException thrownException = assertThrows(
-                InvalidTokenException.class,
-                () -> jwtService.parseRefreshToken("invalidToken")
-        );
-        assertEquals( "Given invalid refresh token", thrownException.getMessage());
+        assertThatThrownBy(() -> jwtService.parseRefreshToken("invalidToken"))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessage("Given invalid refresh token");
     }
 
     @Test
     void parseRefreshToken_ShouldValidateExpirationTime() {
-        User inputUser = new User(UUID.randomUUID());
         LocalDateTime issuedTime = LocalDateTime.now();
         LocalDateTime expirationTime = issuedTime.plusMinutes(refreshTokenExpirationTime);
-
         String expiredToken = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
                 .setExpiration(convertLocalDateTimeToDate(expirationTime))
-                .setSubject(inputUser.getUuid().toString())
+                .setSubject(userSample.getUuid().toString())
                 .signWith(refreshTokenPrivateKey, SignatureAlgorithm.RS256)
                 .compact();
 
-        when(refreshTokenRedisTemplate.hasKey(inputUser.getUuid())).thenReturn(false);
+        when(refreshTokenRedisTemplate.hasKey(userSample.getUuid())).thenReturn(false);
 
-        InvalidTokenException thrownException = assertThrows(
-                InvalidTokenException.class,
-                () -> jwtService.parseRefreshToken(expiredToken)
-        );
-        assertEquals( "Given refresh token has expired", thrownException.getMessage());
-        verify(refreshTokenRedisTemplate, times(1)).hasKey(inputUser.getUuid());
+        assertThatThrownBy(() -> jwtService.parseRefreshToken(expiredToken))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessage("Given refresh token has expired");
+        verify(refreshTokenRedisTemplate).hasKey(userSample.getUuid());
     }
 
     @Test
     void parseRefreshToken_ShouldReturnCorrectlyParsedRefreshToken() {
-        User inputUser = new User(UUID.randomUUID());
         LocalDateTime issuedTime = LocalDateTime.now();
         LocalDateTime expirationTime = issuedTime.plusMinutes(refreshTokenExpirationTime);
-
-        String validToken = Jwts.builder()
+        String validRefreshTokenAsString = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
                 .setExpiration(convertLocalDateTimeToDate(expirationTime))
-                .setSubject(inputUser.getUuid().toString())
+                .setSubject(userSample.getUuid().toString())
                 .signWith(refreshTokenPrivateKey, SignatureAlgorithm.RS256)
                 .compact();
+        RefreshToken expectedRefreshToken = refreshTokenParser.parse(
+                validRefreshTokenAsString,
+                refreshTokenHandlerAdapter
+        );
+        when(refreshTokenRedisTemplate.hasKey(userSample.getUuid())).thenReturn(true);
 
-        when(refreshTokenRedisTemplate.hasKey(inputUser.getUuid())).thenReturn(true);
+        RefreshToken parsedToken = jwtService.parseRefreshToken(validRefreshTokenAsString);
 
-        RefreshToken parsedToken = jwtService.parseRefreshToken(validToken);
-
-        assertEquals(issuedTime.withNano(0), parsedToken.claims().iat());
-        assertEquals(expirationTime.withNano(0), parsedToken.claims().exp());
-        assertEquals(inputUser.getUuid(), parsedToken.claims().sub());
-        verify(refreshTokenRedisTemplate, times(1)).hasKey(inputUser.getUuid());
+        assertEquals(expectedRefreshToken, parsedToken);
+        verify(refreshTokenRedisTemplate).hasKey(userSample.getUuid());
     }
 }
