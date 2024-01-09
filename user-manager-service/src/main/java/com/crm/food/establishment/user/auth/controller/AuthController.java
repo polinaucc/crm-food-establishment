@@ -18,13 +18,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.crm.food.establishment.user.validation.ValidationErrorMessages.REFRESH_TOKEN_MESSAGE;
+import static com.crm.food.establishment.user.validation.ValidationErrorMessages.UUID_MESSAGE;
+import static com.crm.food.establishment.user.validation.ValidationRegexps.REFRESH_TOKEN_REGEXP;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Validated
 public class AuthController {
 
-    public static final String AUTH_PATH = "/api/auth";
+    public static final String AUTH_LOGIN_PATH = "/api/auth/login";
+    public static final String AUTH_REFRESH_PATH = "/api/auth/refresh";
+    public static final String AUTH_LOGOUT_PATH = "/api/auth/logout/{userId}";
 
     private final AuthService authService;
 
@@ -37,8 +43,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<String> refresh(
-            @RequestParam(name = "refreshToken")
-            @Pattern(regexp = "^([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_=]+)\\.([a-zA-Z0-9_\\-\\+\\/=]*)")
+            @RequestParam @Pattern(regexp = REFRESH_TOKEN_REGEXP, message = REFRESH_TOKEN_MESSAGE)
             String refreshToken
     ) {
         String accessToken = authService.refresh(refreshToken);
@@ -47,7 +52,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout/{userId}")
-    public ResponseEntity<Void> logout(@PathVariable @UUID String userId) {
+    public ResponseEntity<Void> logout(@PathVariable @UUID(message = UUID_MESSAGE) String userId) {
         authService.logout(java.util.UUID.fromString(userId));
 
         return ResponseEntity.ok().build();

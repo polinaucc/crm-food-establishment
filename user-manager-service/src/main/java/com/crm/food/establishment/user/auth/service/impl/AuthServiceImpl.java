@@ -46,7 +46,9 @@ public class AuthServiceImpl implements AuthService {
 
         User foundUser = userRepository
                 .findByUuid(parsedRefreshToken.claims().sub())
-                .orElseThrow(() -> new InvalidTokenException("Invalid subject: no such user with that id"));
+                .orElseThrow(() -> new InvalidTokenException(
+                        "Invalid subject: no users with id + " + parsedRefreshToken.claims().sub()
+                ));
 
         log.info("User: " + foundUser.getUuid() + " refreshed access token");
         return jwtService.issueAccessToken(foundUser);

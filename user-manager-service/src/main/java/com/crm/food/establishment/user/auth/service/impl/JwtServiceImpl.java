@@ -117,13 +117,12 @@ public class JwtServiceImpl implements JwtService {
                 .signWith(refreshTokenPrivateKey, SignatureAlgorithm.RS256)
                 .compact();
 
-        refreshTokenRedisTemplate.opsForValue()
-                .set(
-                        user.getUuid(),
-                        builtRefreshToken,
-                        jwtProperties.refreshToken().expirationTimeInMinutes(),
-                        TimeUnit.MINUTES
-                );
+        refreshTokenRedisTemplate.opsForValue().set(
+                user.getUuid(),
+                builtRefreshToken,
+                jwtProperties.refreshToken().expirationTimeInMinutes(),
+                TimeUnit.MINUTES
+        );
 
         log.info("Issued refresh token for user: " + user.getEmail());
         return builtRefreshToken;

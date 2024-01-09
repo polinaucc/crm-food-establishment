@@ -9,7 +9,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableDiscoveryClient
 @ConfigurationPropertiesScan
 
-//TODO write validation messages
+//TODO add tests for logs
 public class UserManagerApplication {
 
 	public static void main(String[] args) {

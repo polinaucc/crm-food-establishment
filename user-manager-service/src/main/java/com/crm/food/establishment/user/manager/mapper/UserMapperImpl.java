@@ -1,7 +1,6 @@
 package com.crm.food.establishment.user.manager.mapper;
 
-import com.crm.food.establishment.user.manager.dto.RegisterUserRequestDTO;
-import com.crm.food.establishment.user.manager.dto.UpdateUserRequestDTO;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
 import com.crm.food.establishment.user.manager.dto.UserDTO;
 import com.crm.food.establishment.user.manager.entity.User;
 import com.crm.food.establishment.user.manager.entity.UserPersonalInfo;
@@ -30,26 +29,8 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public void mapRegisterUserRequestDTOToUser(
-            RegisterUserRequestDTO dto,
-            User user
-    ) {
-        user.setEmail(dto.email());
-        user.setPassword(
-                passwordEncoder.encode(dto.password())
-        );
-        user.setRole(dto.role());
-        user.setPersonalInfo(new UserPersonalInfo());
-        user.getPersonalInfo().setFirstName(dto.firstName());
-        user.getPersonalInfo().setLastName(dto.lastName());
-        user.getPersonalInfo().setBirthday(dto.birthday());
-        user.getPersonalInfo().setMale(dto.isMale());
-        user.getPersonalInfo().setAddress(dto.address());
-    }
-
-    @Override
-    public void mapUpdateUserRequestDTOToUser(
-            UpdateUserRequestDTO dto,
+    public void mapUpdateRegisterUserRequestDTOToUser(
+            UpdateRegisterUserRequestDTO dto,
             User user
     ) {
         user.setEmail(dto.email());
