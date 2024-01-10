@@ -28,21 +28,23 @@ Project consists of 3 domain microservices:
 Also there are gateway and registry services. The whole scheme of service-to-service communication can be found 
 in 'Documentation' section.
 
-All services are based on Java 17, Spring 6 and Hibernate 6.
+All services are based on Java 21, Spring 6 and Hibernate 6.
 We are supporting PostgreSQL DB. For DB migration Liquibase is used.
 
 ## Project Requirements
 
-Java, Maven should be installed. PostgreSQL should be started either in Docker or explicitly. 
-
-To run the whole project, all services mentioned in a previous section should be run. Detailed steps how to run 
-each of them can be found in their own README file. 
+Java, Maven should be installed. PostgreSQL should be started either in Docker or explicitly.
 
 ## How to build
 
 Each of the services should be built separately. To build one of the services the following command should be used:
 
 `mvn clean install`
+
+## How to run
+
+To run the whole project locally, all services mentioned in a previous section should be run. Detailed steps how to run
+each of them can be found in their own README file.
 
 ## Documentation
 
