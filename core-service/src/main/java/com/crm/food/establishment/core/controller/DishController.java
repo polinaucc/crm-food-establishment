@@ -26,13 +26,8 @@ public class DishController {
     private final DishService dishService;
 
     @PostMapping("/{menuId}")
-    public ResponseEntity<List<java.util.UUID>> createDishes(@PathVariable @UUID String menuId,
+    public List<java.util.UUID> createDishes(@PathVariable @UUID String menuId,
                                                              @RequestBody @NotEmpty List<@Valid CreateDishDto> dishesDto) {
-        List<java.util.UUID> result = dishService.addDishes(menuId, dishesDto);
-        if (result.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.CREATED).body(result);
-        }
+        return dishService.addDishes(menuId, dishesDto);
     }
 }
