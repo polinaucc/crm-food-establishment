@@ -6,9 +6,9 @@ import com.crm.food.establishment.user.manager.exception.NotFoundException;
 import com.crm.food.establishment.user.manager.repository.UserRepository;
 import com.crm.food.establishment.user.auth.service.JwtService;
 import com.crm.food.establishment.user.auth.token.TokenPair;
-import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
-import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDTO;
-import com.crm.food.establishment.user.manager.dto.UserDTO;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDto;
+import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDto;
+import com.crm.food.establishment.user.manager.dto.UserDto;
 import com.crm.food.establishment.user.manager.entity.Role;
 import com.crm.food.establishment.user.manager.entity.User;
 import com.crm.food.establishment.user.manager.mapper.UserMapper;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
@@ -33,42 +32,33 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
-    public RegisterUserResponseDTO register(UpdateRegisterUserRequestDTO creationDTO) {
-        User savedUser = createUser(creationDTO);
+    public RegisterUserResponseDto registerUser(UpdateRegisterUserRequestDto creationDto) {
+        User savedUser = createOrUpdateExistingUser(creationDto);
         TokenPair issuedTokenPair = jwtService.issueTokenPair(savedUser);
 
-        log.info("User: " + savedUser.getEmail() + " registered");
-        return new RegisterUserResponseDTO(savedUser.getUuid(), issuedTokenPair);
+        return new RegisterUserResponseDto(savedUser.getUuid(), issuedTokenPair);
     }
 
     @Override
-    public void update(UUID userUuid, UpdateRegisterUserRequestDTO updateDTO) {
-        AtomicReference<User> userToUpdate = new AtomicReference<>();
+    public void updateUser(UUID userUuid, UpdateRegisterUserRequestDto updateDto) {
+        Optional<User> userToUpdate = userRepository.findByEmail(updateDto.email());
 
-        userRepository.findByEmail(updateDTO.email()).ifPresent(
-                foundUser -> {
-                    if (foundUser.getUuid().equals(userUuid)) {
-                        userToUpdate.set(foundUser);
-                    } else {
-                        throw new InvalidArgumentException("Given already occupied email");
-                    }
-                }
-        );
-
-        if (userToUpdate.get() == null) {
-            userToUpdate.set(userRepository.findByUuid(userUuid)
+        if (userToUpdate.isPresent() && !userToUpdate.get().getUuid().equals(userUuid)) {
+            throw new InvalidArgumentException("Given already occupied email");
+        } else if (userToUpdate.isEmpty()) {
+            userToUpdate = Optional.of(userRepository.findByUuid(userUuid)
                     .orElseThrow(() -> new NotFoundException("No such users found"))
             );
         }
 
-        userMapper.mapUpdateRegisterUserRequestDTOToUser(updateDTO, userToUpdate.get());
-
-        userRepository.save(userToUpdate.get());
-        log.info("Updated user: " + userUuid);
+        userRepository.save(userMapper.mapUpdateRegisterUserRequestDtoToUser(
+                userToUpdate.get().getId(), userUuid, updateDto
+        ));
+        log.info("Updated user with uuid: [" + userUuid + "]");
     }
 
     @Override
-    public void delete(UUID userUuid) {
+    public void deleteUser(UUID userUuid) {
         User userToDelete = userRepository.findByUuid(userUuid)
                 .orElseThrow(() -> new NotFoundException("No such users found"));
 
@@ -77,51 +67,59 @@ public class UserServiceImpl implements UserService {
             userToDelete.setRole(Role.CLIENT);
             userRepository.save(userToDelete);
 
-            log.info("Fired " + userToDeleteRole.name() + ": " + userUuid);
+            log.info("Role of user [" + userUuid + "] was changed from ["  + userToDeleteRole.name() + "] to [" + Role.CLIENT.name() + "]");
         } else if (userToDeleteRole == Role.CLIENT) {
             userRepository.delete(userToDelete);
             authService.logout(userToDelete.getUuid());
 
-            log.info("Deleted user: " + userUuid);
+            log.info("Deleted user with uuid: [" + userUuid + "]");
         }
     }
 
     @Override
-    public UserDTO getById(UUID userUuid) {
+    public UserDto getUserById(UUID userUuid) {
         User foundUser = userRepository
                 .findByUuid(userUuid)
                 .orElseThrow(() -> new NotFoundException("No such users found"));
 
-        return userMapper.mapUserToUserDTO(foundUser);
+        return userMapper.mapUserToUserDto(foundUser);
     }
 
     @Override
-    public List<UserDTO> listAll() {
+    public List<UserDto> getAllUsers() {
         return userRepository
                 .findAll()
                 .stream()
-                .map(userMapper::mapUserToUserDTO)
+                .map(userMapper::mapUserToUserDto)
                 .toList();
     }
 
-    private User createUser(UpdateRegisterUserRequestDTO creationData) {
-        Optional<User> user = userRepository.findByEmail(creationData.email());
-        User userToRegister;
+    private User createOrUpdateExistingUser(UpdateRegisterUserRequestDto creationData) {
+        Optional<User> fetchedUser = userRepository.findByEmail(creationData.email());
 
         if (
-                user.isPresent()
-                && user.get().getRole() == Role.CLIENT
+                fetchedUser.isPresent()
+                && fetchedUser.get().getRole() == Role.CLIENT
                 && (creationData.role() == Role.ADMIN || creationData.role() == Role.EMPLOYEE)
         ) {
-            userToRegister = user.get();
-        } else if (user.isEmpty()) {
-            userToRegister = new User(UUID.randomUUID());
+            User userToUpdate = userMapper.mapUpdateRegisterUserRequestDtoToUser(
+                    fetchedUser.get().getId(), fetchedUser.get().getUuid(), creationData
+            );
+            userToUpdate.setPassword(fetchedUser.get().getPassword());
+
+            User updatedUser = userRepository.save(userToUpdate);
+            log.info("Updated user with uuid: [" + updatedUser.getUuid() + "]");
+            return updatedUser;
+        } else if (fetchedUser.isEmpty()) {
+            User userToRegister = userMapper.mapUpdateRegisterUserRequestDtoToUser(
+                    null, UUID.randomUUID(), creationData
+            );
+
+            User registeredUser = userRepository.save(userToRegister);
+            log.info("User with email: [" + registeredUser.getEmail() + "] registered");
+            return registeredUser;
         } else {
             throw new InvalidArgumentException("Given already occupied email");
         }
-
-        userMapper.mapUpdateRegisterUserRequestDTOToUser(creationData, userToRegister);
-
-        return userRepository.save(userToRegister);
     }
 }

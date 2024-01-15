@@ -1,12 +1,14 @@
 package com.crm.food.establishment.user.manager.mapper;
 
-import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
-import com.crm.food.establishment.user.manager.dto.UserDTO;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDto;
+import com.crm.food.establishment.user.manager.dto.UserDto;
 import com.crm.food.establishment.user.manager.entity.User;
+
+import java.util.UUID;
 
 public interface UserMapper {
 
-    UserDTO mapUserToUserDTO(User user);
+    UserDto mapUserToUserDto(User user);
 
-    void mapUpdateRegisterUserRequestDTOToUser(UpdateRegisterUserRequestDTO dto, User user);
+    User mapUpdateRegisterUserRequestDtoToUser(Long id, UUID uuid, UpdateRegisterUserRequestDto dto);
 }

@@ -1,7 +1,7 @@
 package com.crm.food.establishment.user.manager.mapper;
 
-import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
-import com.crm.food.establishment.user.manager.dto.UserDTO;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDto;
+import com.crm.food.establishment.user.manager.dto.UserDto;
 import com.crm.food.establishment.user.manager.entity.Role;
 import com.crm.food.establishment.user.manager.entity.User;
 import com.crm.food.establishment.user.manager.entity.UserPersonalInfo;
@@ -17,8 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserMapperImplTest {
@@ -43,7 +42,7 @@ class UserMapperImplTest {
         user.setRole(Role.CLIENT);
         user.setPersonalInfo(userPersonalInfo);
 
-        UserDTO userDTO = userMapper.mapUserToUserDTO(user);
+        UserDto userDTO = userMapper.mapUserToUserDto(user);
 
         assertEquals(user.getUuid(), userDTO.uuid());
         assertEquals(user.getEmail(), userDTO.email());
@@ -57,7 +56,7 @@ class UserMapperImplTest {
 
     @Test
     void mapRegisterUserRequestDTOToUser() {
-        UpdateRegisterUserRequestDTO requestDTO = new UpdateRegisterUserRequestDTO(
+        UpdateRegisterUserRequestDto requestDTO = new UpdateRegisterUserRequestDto(
                 "test@gmail.com",
                 "qwerty1234",
                 Role.CLIENT,
@@ -67,10 +66,13 @@ class UserMapperImplTest {
                 LocalDate.now(),
                 "Some address"
         );
-        User user = new User();
+        UUID expectedUuid = UUID.randomUUID();
+        User user = userMapper.mapUpdateRegisterUserRequestDtoToUser(
+                123L, expectedUuid, requestDTO
+        );
 
-        userMapper.mapUpdateRegisterUserRequestDTOToUser(requestDTO, user);
-
+        assertEquals(123L, user.getId());
+        assertEquals(expectedUuid, user.getUuid());
         assertEquals(requestDTO.email(), user.getEmail());
         assertTrue(passwordEncoder.matches(requestDTO.password(), user.getPassword()));
         assertEquals(requestDTO.role(), user.getRole());

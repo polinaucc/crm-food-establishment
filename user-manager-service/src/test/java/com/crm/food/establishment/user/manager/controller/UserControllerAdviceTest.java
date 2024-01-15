@@ -36,6 +36,8 @@ class UserControllerAdviceTest {
     @MockBean
     private UserService userService;
 
+    public static final String USER_PATH = "/api/user";
+
     @Test
     void handleInvalidArguments_ShouldComposeDTO_And_ReturnBadRequestStatus() throws Exception {
         InvalidArgumentException expectedException = new InvalidArgumentException("InvalidArgumentException");
@@ -43,9 +45,9 @@ class UserControllerAdviceTest {
                 InvalidArgumentException.errorCode(),
                 expectedException.getMessage()
         );
-        when(userService.listAll()).thenThrow(expectedException);
+        when(userService.getAllUsers()).thenThrow(expectedException);
 
-        ResultActions response = mockMvc.perform(get(UserController.USER_PATH));
+        ResultActions response = mockMvc.perform(get(USER_PATH));
         ApiErrorDTO actualErrorDTO = objectMapper.readValue(
                 response.andReturn().getResponse().getContentAsString(),
                 ApiErrorDTO.class
@@ -63,9 +65,9 @@ class UserControllerAdviceTest {
                 NotFoundException.errorCode(),
                 expectedException.getMessage()
         );
-        when(userService.listAll()).thenThrow(expectedException);
+        when(userService.getAllUsers()).thenThrow(expectedException);
 
-        ResultActions response = mockMvc.perform(get(UserController.USER_PATH));
+        ResultActions response = mockMvc.perform(get(USER_PATH));
         ApiErrorDTO actualErrorDTO = objectMapper.readValue(
                 response.andReturn().getResponse().getContentAsString(),
                 ApiErrorDTO.class

@@ -86,10 +86,8 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public String issueAccessToken(User user) {
-        LocalDateTime issuedTime = LocalDateTime.now().withSecond(0).withNano(0);
-        LocalDateTime expirationTime = issuedTime.plusMinutes(
-                jwtProperties.accessToken().expirationTimeInMinutes()
-        );
+        LocalDateTime issuedTime = LocalDateTime.now().withNano(0);
+        LocalDateTime expirationTime = issuedTime.plusMinutes(jwtProperties.accessToken().expirationTimeInMinutes());
 
         String builtAccessToken = Jwts.builder()
                 .setIssuedAt(convertLocalDateTimeToDate(issuedTime))
@@ -99,13 +97,13 @@ public class JwtServiceImpl implements JwtService {
                 .signWith(accessTokenPrivateKey, SignatureAlgorithm.RS256)
                 .compact();
 
-        log.info("Issued access token for user: " + user.getEmail());
+        log.info("Issued access token for user with email: [" + user.getEmail() + "]");
         return builtAccessToken;
     }
 
     @Override
     public String issueRefreshToken(User user) {
-        LocalDateTime issuedTime = LocalDateTime.now().withSecond(0).withNano(0);
+        LocalDateTime issuedTime = LocalDateTime.now().withNano(0);
         LocalDateTime expirationTime = issuedTime.plusMinutes(
                 jwtProperties.refreshToken().expirationTimeInMinutes()
         );
@@ -124,7 +122,7 @@ public class JwtServiceImpl implements JwtService {
                 TimeUnit.MINUTES
         );
 
-        log.info("Issued refresh token for user: " + user.getEmail());
+        log.info("Issued refresh token for user with email: [" + user.getEmail() + "]");
         return builtRefreshToken;
     }
 
@@ -139,18 +137,13 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public void invalidateRefreshToken(UUID userUuid) {
         refreshTokenRedisTemplate.delete(userUuid);
-        log.info("Invalidated refresh token for user: " + userUuid);
+        log.info("Invalidated refresh token for user with uuid: [" + userUuid + "]");
     }
 
     @Override
     public AccessToken parseAccessToken(String accessToken) {
-        AccessToken parsedAccessToken;
-
         try {
-            parsedAccessToken = accessTokenParser.parse(
-                    accessToken,
-                    accessTokenHandlerAdapter
-            );
+            return accessTokenParser.parse(accessToken, accessTokenHandlerAdapter);
         } catch (ExpiredJwtException e) {
             log.error(e.getMessage(), e);
             throw new InvalidTokenException("Given access token has expired");
@@ -158,8 +151,6 @@ public class JwtServiceImpl implements JwtService {
             log.error(e.getMessage(), e);
             throw new InvalidTokenException("Given invalid access token");
         }
-
-        return parsedAccessToken;
     }
 
     @Override
@@ -167,18 +158,13 @@ public class JwtServiceImpl implements JwtService {
         RefreshToken parsedRefreshToken;
 
         try {
-            parsedRefreshToken = refreshTokenParser.parse(
-                    refreshToken,
-                    refreshTokenHandlerAdapter
-            );
+            parsedRefreshToken = refreshTokenParser.parse(refreshToken, refreshTokenHandlerAdapter);
         } catch (RuntimeException e) {
             log.error(e.getMessage(), e);
             throw new InvalidTokenException("Given invalid refresh token");
         }
 
-        if (Boolean.FALSE.equals(refreshTokenRedisTemplate.hasKey(
-                parsedRefreshToken.claims().sub()
-        ))) {
+        if (Boolean.FALSE.equals(refreshTokenRedisTemplate.hasKey(parsedRefreshToken.claims().sub()))) {
             throw new InvalidTokenException("Given refresh token has expired");
         }
 

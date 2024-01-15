@@ -1,21 +1,21 @@
 package com.crm.food.establishment.user.manager.service;
 
-import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
-import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDTO;
-import com.crm.food.establishment.user.manager.dto.UserDTO;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDto;
+import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDto;
+import com.crm.food.establishment.user.manager.dto.UserDto;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
 
-    RegisterUserResponseDTO register(UpdateRegisterUserRequestDTO creationDTO);
+    RegisterUserResponseDto registerUser(UpdateRegisterUserRequestDto creationDto);
 
-    void update(UUID userUuid, UpdateRegisterUserRequestDTO updateDTO);
+    void updateUser(UUID userUuid, UpdateRegisterUserRequestDto updateDto);
 
-    void delete(UUID userUuid);
+    void deleteUser(UUID userUuid);
 
-    UserDTO getById(UUID userUuid);
+    UserDto getUserById(UUID userUuid);
 
-    List<UserDTO> listAll();
+    List<UserDto> getAllUsers();
 }

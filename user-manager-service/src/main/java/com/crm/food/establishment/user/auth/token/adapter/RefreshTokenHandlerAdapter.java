@@ -19,9 +19,7 @@ public class RefreshTokenHandlerAdapter extends JwtHandlerAdapter<RefreshToken> 
                 new RefreshTokenClaims(
                         convertDateToLocalDateTime(jws.getBody().getIssuedAt()),
                         convertDateToLocalDateTime(jws.getBody().getExpiration()),
-                        UUID.fromString(
-                                jws.getBody().getSubject()
-                        )
+                        UUID.fromString(jws.getBody().getSubject())
                 )
         );
     }

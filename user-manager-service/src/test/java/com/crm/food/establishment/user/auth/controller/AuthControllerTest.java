@@ -1,6 +1,6 @@
 package com.crm.food.establishment.user.auth.controller;
 
-import com.crm.food.establishment.user.auth.dto.CredentialsDTO;
+import com.crm.food.establishment.user.auth.dto.CredentialsDto;
 import com.crm.food.establishment.user.auth.service.AuthService;
 import com.crm.food.establishment.user.auth.token.TokenPair;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,12 +41,16 @@ class AuthControllerTest {
     @MockBean
     private AuthService authService;
 
+    public static final String AUTH_LOGIN_PATH = "/api/auth/login";
+    public static final String AUTH_REFRESH_PATH = "/api/auth/refresh";
+    public static final String AUTH_LOGOUT_PATH = "/api/auth/logout/{userId}";
+
     @Test
     void login_ShouldValidateCredentialsDTO() throws Exception {
-        CredentialsDTO invalidCredentials = new CredentialsDTO("email", null);
+        CredentialsDto invalidCredentials = new CredentialsDto("email", null);
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_LOGIN_PATH)
+                post(AUTH_LOGIN_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidCredentials))
         );
@@ -58,12 +62,12 @@ class AuthControllerTest {
 
     @Test
     void login_ShouldReturnTokenPair_And_OkStatus() throws Exception {
-        CredentialsDTO inputCredentials = new CredentialsDTO("test@gmail.com", "qwerty1234");
+        CredentialsDto inputCredentials = new CredentialsDto("test@gmail.com", "qwerty1234");
         TokenPair expectedTokenPair = new TokenPair("accessToken", "refreshToken");
         when(authService.login(inputCredentials)).thenReturn(expectedTokenPair);
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_LOGIN_PATH)
+                post(AUTH_LOGIN_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputCredentials))
         );
@@ -83,7 +87,7 @@ class AuthControllerTest {
         String invalidRefreshToken = "invalid_token";
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_REFRESH_PATH).queryParam("refreshToken", invalidRefreshToken)
+                post(AUTH_REFRESH_PATH).queryParam("refreshToken", invalidRefreshToken)
         );
 
         response.andExpect(status().isBadRequest());
@@ -97,7 +101,7 @@ class AuthControllerTest {
         when(authService.refresh(inputRefreshToken)).thenReturn(expectedAccessToken);
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_REFRESH_PATH).queryParam("refreshToken", inputRefreshToken)
+                post(AUTH_REFRESH_PATH).queryParam("refreshToken", inputRefreshToken)
         );
 
         response.andExpect(status().isOk())
@@ -111,7 +115,7 @@ class AuthControllerTest {
         String invalidUuid = "invalidUuid";
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_LOGOUT_PATH.replace("{userId}", invalidUuid))
+                post(AUTH_LOGOUT_PATH.replace("{userId}", invalidUuid))
         );
 
         response.andExpect(status().isBadRequest());
@@ -123,7 +127,7 @@ class AuthControllerTest {
         UUID inputUuid = UUID.randomUUID();
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_LOGOUT_PATH.replace("{userId}", inputUuid.toString()))
+                post(AUTH_LOGOUT_PATH.replace("{userId}", inputUuid.toString()))
         );
 
         response.andExpect(status().isOk());

@@ -3,9 +3,9 @@ package com.crm.food.establishment.user.manager.service;
 import com.crm.food.establishment.user.auth.service.AuthService;
 import com.crm.food.establishment.user.auth.service.JwtService;
 import com.crm.food.establishment.user.auth.token.TokenPair;
-import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDTO;
-import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
-import com.crm.food.establishment.user.manager.dto.UserDTO;
+import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDto;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDto;
+import com.crm.food.establishment.user.manager.dto.UserDto;
 import com.crm.food.establishment.user.manager.entity.Role;
 import com.crm.food.establishment.user.manager.entity.User;
 import com.crm.food.establishment.user.manager.entity.UserPersonalInfo;
@@ -65,12 +65,12 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
-    private UpdateRegisterUserRequestDTO updateRegisterPayloadSample;
+    private UpdateRegisterUserRequestDto updateRegisterPayloadSample;
     private User userSample;
 
     @BeforeEach
     public void setUp() {
-        updateRegisterPayloadSample = new UpdateRegisterUserRequestDTO(
+        updateRegisterPayloadSample = new UpdateRegisterUserRequestDto(
                 "test@gmail.com",
                 "qwerty1234",
                 Role.CLIENT,
@@ -82,6 +82,7 @@ class UserServiceImplTest {
         );
 
         userSample = new User(UUID.randomUUID());
+        userSample.setId(123L);
         userSample.setEmail(updateRegisterPayloadSample.email());
         userSample.setPassword(
                 passwordEncoder.encode(updateRegisterPayloadSample.password())
@@ -97,7 +98,7 @@ class UserServiceImplTest {
 
     @Test
     public void register_ShouldRegisterNewClient_And_ReturnRegisterResponse() {
-        var expectedRegisterResponse = new RegisterUserResponseDTO(
+        var expectedRegisterResponse = new RegisterUserResponseDto(
                 userSample.getUuid(),
                 new TokenPair("", "")
         );
@@ -105,7 +106,7 @@ class UserServiceImplTest {
         when(userRepository.save(any())).thenReturn(userSample);
         when(jwtService.issueTokenPair(userSample)).thenReturn(expectedRegisterResponse.tokenPair());
 
-        RegisterUserResponseDTO actualRegisterResponse = userService.register(updateRegisterPayloadSample);
+        RegisterUserResponseDto actualRegisterResponse = userService.registerUser(updateRegisterPayloadSample);
 
         verify(userRepository).save(userArgumentCaptor.capture());
         assertEquals(userArgumentCaptor.getValue().getEmail(), userSample.getEmail());
@@ -115,7 +116,7 @@ class UserServiceImplTest {
 
     @Test
     public void register_ShouldRegisterEmployeeFromExisting() {
-        var employeeRegisterDTO = new UpdateRegisterUserRequestDTO(
+        var employeeRegisterDto = new UpdateRegisterUserRequestDto(
                 "test@gmail.com",
                 "qwerty1234",
                 Role.EMPLOYEE,
@@ -125,16 +126,18 @@ class UserServiceImplTest {
                 LocalDate.now(),
                 "Some address"
         );
-        when(userRepository.findByEmail(employeeRegisterDTO.email())).thenReturn(Optional.of(userSample));
+        when(userRepository.findByEmail(employeeRegisterDto.email())).thenReturn(Optional.of(userSample));
         when(userRepository.save(userSample)).thenReturn(userSample);
         when(jwtService.issueTokenPair(userSample)).thenReturn(new TokenPair("", ""));
 
-        RegisterUserResponseDTO responseDTO = userService.register(employeeRegisterDTO);
+        RegisterUserResponseDto responseDTO = userService.registerUser(employeeRegisterDto);
 
-        verify(userRepository).save(userSample);
+        verify(userRepository).save(userArgumentCaptor.capture());
+        assertEquals(userSample.getUuid(), userArgumentCaptor.getValue().getUuid());
+        assertEquals(employeeRegisterDto.role(), userArgumentCaptor.getValue().getRole());
+        assertEquals(userSample.getPassword(), userArgumentCaptor.getValue().getPassword());
         verify(jwtService).issueTokenPair(userSample);
         assertEquals(userSample.getUuid(), responseDTO.userUuid());
-        assertEquals(employeeRegisterDTO.role(), userSample.getRole());
         assertNotNull(responseDTO.tokenPair());
     }
 
@@ -142,7 +145,7 @@ class UserServiceImplTest {
     public void register_ShouldValidateEmailUniqueness() {
         when(userRepository.findByEmail(updateRegisterPayloadSample.email())).thenReturn(Optional.of(userSample));
 
-        assertThatThrownBy(() -> userService.register(updateRegisterPayloadSample))
+        assertThatThrownBy(() -> userService.registerUser(updateRegisterPayloadSample))
                 .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Given already occupied email");
         verify(userRepository).findByEmail(updateRegisterPayloadSample.email());
@@ -156,11 +159,13 @@ class UserServiceImplTest {
         when(userRepository.findByEmail(updateRegisterPayloadSample.email())).thenReturn(Optional.empty());
         when(userRepository.findByUuid(userSample.getUuid())).thenReturn(Optional.of(userSample));
 
-        userService.update(userSample.getUuid(), updateRegisterPayloadSample);
+        userService.updateUser(userSample.getUuid(), updateRegisterPayloadSample);
 
         verify(userRepository).findByEmail(updateRegisterPayloadSample.email());
         verify(userRepository).findByUuid(userSample.getUuid());
-        verify(userMapper).mapUpdateRegisterUserRequestDTOToUser(updateRegisterPayloadSample, userSample);
+        verify(userMapper).mapUpdateRegisterUserRequestDtoToUser(
+                userSample.getId(), userSample.getUuid(), updateRegisterPayloadSample
+        );
         verify(userRepository).save(userArgumentCaptor.capture());
         assertEquals(userSample.getUuid(), userArgumentCaptor.getValue().getUuid());
         assertEquals(updateRegisterPayloadSample.email(), userArgumentCaptor.getValue().getEmail());
@@ -171,10 +176,12 @@ class UserServiceImplTest {
         userSample.getPersonalInfo().setFirstName("Old_Name");
         when(userRepository.findByEmail(updateRegisterPayloadSample.email())).thenReturn(Optional.of(userSample));
 
-        userService.update(userSample.getUuid(), updateRegisterPayloadSample);
+        userService.updateUser(userSample.getUuid(), updateRegisterPayloadSample);
 
         verify(userRepository).findByEmail(updateRegisterPayloadSample.email());
-        verify(userMapper).mapUpdateRegisterUserRequestDTOToUser(updateRegisterPayloadSample, userSample);
+        verify(userMapper).mapUpdateRegisterUserRequestDtoToUser(
+                userSample.getId(), userSample.getUuid(), updateRegisterPayloadSample
+        );
         verify(userRepository).save(userArgumentCaptor.capture());
         assertEquals(userSample.getUuid(), userArgumentCaptor.getValue().getUuid());
         assertEquals(updateRegisterPayloadSample.firstName(), userArgumentCaptor.getValue().getPersonalInfo().getFirstName());
@@ -184,7 +191,7 @@ class UserServiceImplTest {
     public void update_ShouldValidateEmailUniqueness() {
         when(userRepository.findByEmail(updateRegisterPayloadSample.email())).thenReturn(Optional.of(userSample));
 
-        assertThatThrownBy(() -> userService.update(UUID.randomUUID(), updateRegisterPayloadSample))
+        assertThatThrownBy(() -> userService.updateUser(UUID.randomUUID(), updateRegisterPayloadSample))
                 .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Given already occupied email");
         verify(userRepository).findByEmail(updateRegisterPayloadSample.email());
@@ -197,7 +204,7 @@ class UserServiceImplTest {
         when(userRepository.findByEmail(updateRegisterPayloadSample.email())).thenReturn(Optional.empty());
         when(userRepository.findByUuid(inputUserUuid)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.update(inputUserUuid, updateRegisterPayloadSample))
+        assertThatThrownBy(() -> userService.updateUser(inputUserUuid, updateRegisterPayloadSample))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("No such users found");
 
@@ -211,7 +218,7 @@ class UserServiceImplTest {
         userSample.setRole(Role.ADMIN);
         when(userRepository.findByUuid(userSample.getUuid())).thenReturn(Optional.of(userSample));
 
-        userService.delete(userSample.getUuid());
+        userService.deleteUser(userSample.getUuid());
 
         verify(userRepository).findByUuid(userSample.getUuid());
         verify(userRepository).save(userArgumentCaptor.capture());
@@ -225,7 +232,7 @@ class UserServiceImplTest {
     public void delete_ShouldDeleteClient_And_LogoutHim() {
         when(userRepository.findByUuid(userSample.getUuid())).thenReturn(Optional.of(userSample));
 
-        userService.delete(userSample.getUuid());
+        userService.deleteUser(userSample.getUuid());
 
         verify(userRepository).findByUuid(userSample.getUuid());
         verify(userRepository).delete(userSample);
@@ -237,7 +244,7 @@ class UserServiceImplTest {
     public void delete_ShouldThrowNotFoundException() {
         when(userRepository.findByUuid(userSample.getUuid())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.delete(userSample.getUuid()))
+        assertThatThrownBy(() -> userService.deleteUser(userSample.getUuid()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("No such users found");
 
@@ -248,14 +255,14 @@ class UserServiceImplTest {
 
     @Test
     public void getById_ShouldReturnUserDTO() {
-        UserDTO expectedUserDTO = userMapper.mapUserToUserDTO(userSample);
+        UserDto expectedUserDTO = userMapper.mapUserToUserDto(userSample);
         when(userRepository.findByUuid(userSample.getUuid())).thenReturn(Optional.of(userSample));
 
-        UserDTO actualUserDTO = userService.getById(userSample.getUuid());
+        UserDto actualUserDTO = userService.getUserById(userSample.getUuid());
 
         verify(userRepository).findByUuid(userSample.getUuid());
         //first when creating expected dto
-        verify(userMapper, times(2)).mapUserToUserDTO(userSample);
+        verify(userMapper, times(2)).mapUserToUserDto(userSample);
         assertEquals(expectedUserDTO, actualUserDTO);
     }
 
@@ -263,7 +270,7 @@ class UserServiceImplTest {
     public void getById_ThrowsNotFoundException() {
         when(userRepository.findByUuid(userSample.getUuid())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.getById(userSample.getUuid()))
+        assertThatThrownBy(() -> userService.getUserById(userSample.getUuid()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("No such users found");
         verify(userRepository).findByUuid(userSample.getUuid());
@@ -271,17 +278,17 @@ class UserServiceImplTest {
 
     @Test
     public void listAll_ReturnsListUserDTO() {
-        List<UserDTO> expectedUserDTOList = List.of(
-                userMapper.mapUserToUserDTO(userSample),
-                userMapper.mapUserToUserDTO(userSample)
+        List<UserDto> expectedUserDTOList = List.of(
+                userMapper.mapUserToUserDto(userSample),
+                userMapper.mapUserToUserDto(userSample)
         );
         when(userRepository.findAll()).thenReturn(List.of(userSample, userSample));
 
-        List<UserDTO> actualUserDTOList = userService.listAll();
+        List<UserDto> actualUserDTOList = userService.getAllUsers();
 
         verify(userRepository).findAll();
         //first when creating expected dtos
-        verify(userMapper, times(4)).mapUserToUserDTO(userSample);
+        verify(userMapper, times(4)).mapUserToUserDto(userSample);
         assertIterableEquals(expectedUserDTOList, actualUserDTOList);
     }
 }

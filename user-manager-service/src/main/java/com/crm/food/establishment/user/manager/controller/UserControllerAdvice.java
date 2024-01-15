@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class UserControllerAdvice {
 
-    @ExceptionHandler({InvalidArgumentException.class})
+    @ExceptionHandler(InvalidArgumentException.class)
     public ResponseEntity<ApiErrorDTO> handleInvalidArguments(InvalidArgumentException exception) {
         ApiErrorDTO errorDTO = ApiErrorDTO.builder()
                 .code(InvalidArgumentException.errorCode())
@@ -22,7 +22,7 @@ public class UserControllerAdvice {
         return new ResponseEntity<>(errorDTO, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({NotFoundException.class})
+    @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiErrorDTO> handleNotFound(NotFoundException exception) {
         ApiErrorDTO errorDTO = ApiErrorDTO.builder()
                 .code(NotFoundException.errorCode())

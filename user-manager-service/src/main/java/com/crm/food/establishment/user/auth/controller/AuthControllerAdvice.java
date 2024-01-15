@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class AuthControllerAdvice {
 
-    @ExceptionHandler({InvalidTokenException.class})
+    @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ApiErrorDTO> handleInvalidToken(InvalidTokenException exception) {
         ApiErrorDTO errorInfo = ApiErrorDTO.builder()
                 .code(InvalidTokenException.errorCode())
@@ -22,7 +22,7 @@ public class AuthControllerAdvice {
         return new ResponseEntity<>(errorInfo, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({InvalidUserCredentialsException.class})
+    @ExceptionHandler(InvalidUserCredentialsException.class)
     public ResponseEntity<ApiErrorDTO> handleInvalidUserCredentials(InvalidUserCredentialsException exception) {
         ApiErrorDTO errorInfo = ApiErrorDTO.builder()
                 .code(InvalidUserCredentialsException.errorCode())

@@ -11,38 +11,37 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-import static com.crm.food.establishment.user.validation.ValidationErrorMessages.EMAIL_REGEXP_MESSAGE;
-import static com.crm.food.establishment.user.validation.ValidationErrorMessages.NOT_BLANC_MESSAGE;
+import static com.crm.food.establishment.user.validation.ValidationErrorMessages.INVALID_EMAIL_MESSAGE;
+import static com.crm.food.establishment.user.validation.ValidationErrorMessages.NOT_BLANK_MESSAGE;
 import static com.crm.food.establishment.user.validation.ValidationErrorMessages.NOT_NULL_MESSAGE;
-import static com.crm.food.establishment.user.validation.ValidationErrorMessages.PASSWORD_REGEXP_MESSAGE;
+import static com.crm.food.establishment.user.validation.ValidationErrorMessages.INVALID_PASSWORD_MESSAGE;
 import static com.crm.food.establishment.user.validation.ValidationErrorMessages.PAST_MESSAGE;
 import static com.crm.food.establishment.user.validation.ValidationErrorMessages.SIZE_MAX_1024_MESSAGE;
 import static com.crm.food.establishment.user.validation.ValidationErrorMessages.SIZE_MAX_32_MESSAGE;
 import static com.crm.food.establishment.user.validation.ValidationRegexps.EMAIL_REGEXP;
 import static com.crm.food.establishment.user.validation.ValidationRegexps.PASSWORD_REGEXP;
 
-public record UpdateRegisterUserRequestDTO(
-        @Email(regexp = EMAIL_REGEXP, message = EMAIL_REGEXP_MESSAGE)
-        @NotBlank(message = NOT_BLANC_MESSAGE)
+public record UpdateRegisterUserRequestDto(
+        @Email(regexp = EMAIL_REGEXP, message = INVALID_EMAIL_MESSAGE)
+        @NotBlank(message = NOT_BLANK_MESSAGE)
         String email,
 
-        @Pattern(regexp = PASSWORD_REGEXP, message = PASSWORD_REGEXP_MESSAGE)
-        @NotBlank(message = NOT_BLANC_MESSAGE)
+        @Pattern(regexp = PASSWORD_REGEXP, message = INVALID_PASSWORD_MESSAGE)
+        @NotBlank(message = NOT_BLANK_MESSAGE)
         String password,
 
         @NotNull(message = NOT_NULL_MESSAGE)
         Role role,
 
-        @NotBlank(message = NOT_BLANC_MESSAGE)
+        @NotBlank(message = NOT_BLANK_MESSAGE)
         @Size(max = 32, message = SIZE_MAX_32_MESSAGE)
         String firstName,
 
-        @NotBlank(message = NOT_BLANC_MESSAGE)
+        @NotBlank(message = NOT_BLANK_MESSAGE)
         @Size(max = 32, message = SIZE_MAX_32_MESSAGE)
         String lastName,
 
-        @NotNull(message = NOT_NULL_MESSAGE)
-        Boolean isMale,
+        boolean isMale,
 
         @NotNull(message = NOT_NULL_MESSAGE)
         @Past(message = PAST_MESSAGE)

@@ -20,13 +20,8 @@ public class AccessTokenHandlerAdapter extends JwtHandlerAdapter<AccessToken> {
                 new AccessTokenClaims(
                         convertDateToLocalDateTime(jws.getBody().getIssuedAt()),
                         convertDateToLocalDateTime(jws.getBody().getExpiration()),
-                        UUID.fromString(
-                                jws.getBody().getSubject()
-                        ),
-                        Role.valueOf(jws.getBody().get(
-                                "role",
-                                String.class
-                        ))
+                        UUID.fromString(jws.getBody().getSubject()),
+                        Role.valueOf(jws.getBody().get("role", String.class))
                 )
         );
     }

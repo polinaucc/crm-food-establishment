@@ -5,7 +5,7 @@ import com.crm.food.establishment.user.manager.entity.Role;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record UserDTO (
+public record UserDto(
         UUID uuid,
         String email,
         Role role,
@@ -18,7 +18,7 @@ public record UserDTO (
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UserDTO userDTO)) return false;
+        if (!(o instanceof UserDto userDTO)) return false;
 
         return uuid.equals(userDTO.uuid);
     }

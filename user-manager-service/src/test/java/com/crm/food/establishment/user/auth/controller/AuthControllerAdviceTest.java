@@ -1,7 +1,7 @@
 package com.crm.food.establishment.user.auth.controller;
 
 import com.crm.food.establishment.user.ApiErrorDTO;
-import com.crm.food.establishment.user.auth.dto.CredentialsDTO;
+import com.crm.food.establishment.user.auth.dto.CredentialsDto;
 import com.crm.food.establishment.user.auth.exception.InvalidTokenException;
 import com.crm.food.establishment.user.auth.exception.InvalidUserCredentialsException;
 import com.crm.food.establishment.user.auth.service.AuthService;
@@ -39,11 +39,12 @@ class AuthControllerAdviceTest {
     @MockBean
     private AuthService authService;
 
-    private CredentialsDTO credentialsSample;
+    public static final String AUTH_LOGIN_PATH = "/api/auth/login";
+    private CredentialsDto credentialsSample;
 
     @BeforeEach
     void setUp() {
-        credentialsSample = new CredentialsDTO("test@gmail.com", "qwerty1234");
+        credentialsSample = new CredentialsDto("test@gmail.com", "qwerty1234");
     }
 
     @Test
@@ -56,7 +57,7 @@ class AuthControllerAdviceTest {
         when(authService.login(any())).thenThrow(expectedException);
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_LOGIN_PATH)
+                post(AUTH_LOGIN_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(credentialsSample))
         );
@@ -80,7 +81,7 @@ class AuthControllerAdviceTest {
         when(authService.login(any())).thenThrow(expectedException);
 
         ResultActions response = mockMvc.perform(
-                post(AuthController.AUTH_LOGIN_PATH)
+                post(AUTH_LOGIN_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(credentialsSample))
         );

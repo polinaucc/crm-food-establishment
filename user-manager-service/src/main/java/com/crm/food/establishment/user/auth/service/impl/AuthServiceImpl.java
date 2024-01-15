@@ -1,7 +1,7 @@
 package com.crm.food.establishment.user.auth.service.impl;
 
 import com.crm.food.establishment.user.manager.repository.UserRepository;
-import com.crm.food.establishment.user.auth.dto.CredentialsDTO;
+import com.crm.food.establishment.user.auth.dto.CredentialsDto;
 import com.crm.food.establishment.user.auth.exception.InvalidTokenException;
 import com.crm.food.establishment.user.auth.exception.InvalidUserCredentialsException;
 import com.crm.food.establishment.user.auth.service.AuthService;
@@ -27,7 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public TokenPair login(CredentialsDTO credentials) {
+    public TokenPair login(CredentialsDto credentials) {
         User foundUser = userRepository
                 .findByEmail(credentials.email())
                 .orElseThrow(() -> new InvalidUserCredentialsException("Wrong email"));
@@ -35,7 +35,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidUserCredentialsException("Wrong password");
         }
 
-        log.info("User: " + foundUser.getEmail() + " logged");
+        log.info("User with email: [" + foundUser.getEmail() + "] is logged in");
         return jwtService.issueTokenPair(foundUser);
     }
 
@@ -50,13 +50,13 @@ public class AuthServiceImpl implements AuthService {
                         "Invalid subject: no users with id + " + parsedRefreshToken.claims().sub()
                 ));
 
-        log.info("User: " + foundUser.getUuid() + " refreshed access token");
+        log.info("User with uuid: [" + foundUser.getUuid() + "] refreshed access token");
         return jwtService.issueAccessToken(foundUser);
     }
 
     @Override
     public void logout(UUID userUuid) {
         jwtService.invalidateRefreshToken(userUuid);
-        log.info("User: " + userUuid + " logged out");
+        log.info("User with uuid: [" + userUuid + "] is logged out");
     }
 }

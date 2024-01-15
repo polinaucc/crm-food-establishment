@@ -1,6 +1,6 @@
 package com.crm.food.establishment.user.auth.service.impl;
 
-import com.crm.food.establishment.user.auth.dto.CredentialsDTO;
+import com.crm.food.establishment.user.auth.dto.CredentialsDto;
 import com.crm.food.establishment.user.auth.exception.InvalidTokenException;
 import com.crm.food.establishment.user.auth.exception.InvalidUserCredentialsException;
 import com.crm.food.establishment.user.auth.service.JwtService;
@@ -41,14 +41,14 @@ class AuthServiceImplTest {
     @InjectMocks
     private AuthServiceImpl authService;
 
-    private CredentialsDTO credentialsSample;
+    private CredentialsDto credentialsSample;
     private User userSample;
     private RefreshToken refreshTokenSample;
     private String refreshTokenAsString;
 
     @BeforeEach
     void setUp() {
-        credentialsSample = new CredentialsDTO(
+        credentialsSample = new CredentialsDto(
                 "test@gmail.com",
                 "qwerty"
         );

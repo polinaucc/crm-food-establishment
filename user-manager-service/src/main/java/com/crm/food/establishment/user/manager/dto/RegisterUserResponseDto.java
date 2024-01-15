@@ -4,7 +4,7 @@ import com.crm.food.establishment.user.auth.token.TokenPair;
 
 import java.util.UUID;
 
-public record RegisterUserResponseDTO (
+public record RegisterUserResponseDto (
         UUID userUuid,
         TokenPair tokenPair
 ) {}

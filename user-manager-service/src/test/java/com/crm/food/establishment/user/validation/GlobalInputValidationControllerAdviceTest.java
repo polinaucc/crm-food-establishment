@@ -2,7 +2,7 @@ package com.crm.food.establishment.user.validation;
 
 import com.crm.food.establishment.user.ApiErrorDTO;
 import com.crm.food.establishment.user.manager.controller.UserController;
-import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDto;
 import com.crm.food.establishment.user.manager.exception.InvalidArgumentException;
 import com.crm.food.establishment.user.manager.service.UserService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,10 +21,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.crm.food.establishment.user.validation.ValidationErrorMessages.EMAIL_REGEXP_MESSAGE;
+import static com.crm.food.establishment.user.validation.ValidationErrorMessages.INVALID_EMAIL_MESSAGE;
 import static com.crm.food.establishment.user.validation.ValidationErrorMessages.NOT_NULL_MESSAGE;
-import static com.crm.food.establishment.user.validation.ValidationErrorMessages.PASSWORD_REGEXP_MESSAGE;
-import static com.crm.food.establishment.user.validation.ValidationErrorMessages.UUID_MESSAGE;
+import static com.crm.food.establishment.user.validation.ValidationErrorMessages.INVALID_PASSWORD_MESSAGE;
+import static com.crm.food.establishment.user.validation.ValidationErrorMessages.INVALID_UUID_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -47,7 +47,7 @@ class GlobalInputValidationControllerAdviceTest {
 
     @Test
     void handleMethodArgumentNotValid_ShouldComposeDTOList_And_ReturnBadRequestStatus() throws Exception {
-        var invalidPayload = new UpdateRegisterUserRequestDTO(
+        var invalidPayload = new UpdateRegisterUserRequestDto(
                 "aaaaaa",
                 "a",
                 null,
@@ -58,14 +58,13 @@ class GlobalInputValidationControllerAdviceTest {
                 "some"
         );
         List<ApiErrorDTO> expectedErrorDTOList = List.of(
-                new ApiErrorDTO(InvalidArgumentException.errorCode(), "email: " + EMAIL_REGEXP_MESSAGE),
-                new ApiErrorDTO(InvalidArgumentException.errorCode(), "password: " + PASSWORD_REGEXP_MESSAGE),
+                new ApiErrorDTO(InvalidArgumentException.errorCode(), "email: " + INVALID_EMAIL_MESSAGE),
+                new ApiErrorDTO(InvalidArgumentException.errorCode(), "password: " + INVALID_PASSWORD_MESSAGE),
                 new ApiErrorDTO(InvalidArgumentException.errorCode(), "role: " + NOT_NULL_MESSAGE)
         );
 
-
         ResultActions response = mockMvc.perform(
-                post(UserController.USER_PATH)
+                post("/api/user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidPayload))
         );
@@ -80,11 +79,9 @@ class GlobalInputValidationControllerAdviceTest {
 
     @Test
     void handleConstraintViolationException_ShouldComposeDTO_And_ReturnBadRequestStatus() throws Exception {
-        ApiErrorDTO expectedErrorDTO = new ApiErrorDTO(InvalidArgumentException.errorCode(), UUID_MESSAGE);
+        ApiErrorDTO expectedErrorDTO = new ApiErrorDTO(InvalidArgumentException.errorCode(), INVALID_UUID_MESSAGE);
 
-        ResultActions response = mockMvc.perform(
-                get(UserController.USER_PATH_WITH_ID.replace("{userId}", "invalidUuid"))
-        );
+        ResultActions response = mockMvc.perform(get("/api/user/invalidUuid"));
         ApiErrorDTO actualErrorDTO = objectMapper.readValue(
                 response.andReturn().getResponse().getContentAsString(),
                 ApiErrorDTO.class

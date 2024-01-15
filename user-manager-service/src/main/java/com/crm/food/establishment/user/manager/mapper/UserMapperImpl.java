@@ -1,12 +1,14 @@
 package com.crm.food.establishment.user.manager.mapper;
 
-import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
-import com.crm.food.establishment.user.manager.dto.UserDTO;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDto;
+import com.crm.food.establishment.user.manager.dto.UserDto;
 import com.crm.food.establishment.user.manager.entity.User;
 import com.crm.food.establishment.user.manager.entity.UserPersonalInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -15,8 +17,8 @@ public class UserMapperImpl implements UserMapper {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDTO mapUserToUserDTO(User user) {
-        return new UserDTO(
+    public UserDto mapUserToUserDto(User user) {
+        return new UserDto(
                 user.getUuid(),
                 user.getEmail(),
                 user.getRole(),
@@ -29,10 +31,11 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public void mapUpdateRegisterUserRequestDTOToUser(
-            UpdateRegisterUserRequestDTO dto,
-            User user
+    public User mapUpdateRegisterUserRequestDtoToUser(
+            Long id, UUID uuid, UpdateRegisterUserRequestDto dto
     ) {
+        User user = new User(uuid);
+        user.setId(id);
         user.setEmail(dto.email());
         user.setPassword(
                 passwordEncoder.encode(dto.password())
@@ -44,5 +47,7 @@ public class UserMapperImpl implements UserMapper {
         user.getPersonalInfo().setBirthday(dto.birthday());
         user.getPersonalInfo().setMale(dto.isMale());
         user.getPersonalInfo().setAddress(dto.address());
+
+        return user;
     }
 }

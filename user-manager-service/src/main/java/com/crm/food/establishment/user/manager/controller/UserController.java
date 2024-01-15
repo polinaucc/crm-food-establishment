@@ -1,8 +1,8 @@
 package com.crm.food.establishment.user.manager.controller;
 
-import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
-import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDTO;
-import com.crm.food.establishment.user.manager.dto.UserDTO;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDto;
+import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDto;
+import com.crm.food.establishment.user.manager.dto.UserDto;
 import com.crm.food.establishment.user.manager.service.UserService;
 
 import jakarta.validation.Valid;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static com.crm.food.establishment.user.validation.ValidationErrorMessages.UUID_MESSAGE;
+import static com.crm.food.establishment.user.validation.ValidationErrorMessages.INVALID_UUID_MESSAGE;
 
 @RestController
 @RequestMapping("/api/user")
@@ -30,47 +30,46 @@ import static com.crm.food.establishment.user.validation.ValidationErrorMessages
 @Validated
 public class UserController {
 
-    public static final String USER_PATH = "/api/user";
-    public static final String USER_PATH_WITH_ID = "/api/user/{userId}";
+    public static final String USER_ID_PATH_VAR = "/{userId}";
 
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<RegisterUserResponseDTO> registerUser(
-            @RequestBody @Valid UpdateRegisterUserRequestDTO creationDTO
+    public ResponseEntity<RegisterUserResponseDto> registerUser(
+            @RequestBody @Valid UpdateRegisterUserRequestDto creationDTO
     ) {
-        RegisterUserResponseDTO registerResponse = userService.register(creationDTO);
+        RegisterUserResponseDto registerResponse = userService.registerUser(creationDTO);
 
         return new ResponseEntity<>(registerResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{userId}")
+    @PutMapping(USER_ID_PATH_VAR)
     public ResponseEntity<Void> updateUser(
-            @PathVariable @UUID(message = UUID_MESSAGE) String userId,
-            @RequestBody @Valid UpdateRegisterUserRequestDTO updateDTO
+            @PathVariable @UUID(message = INVALID_UUID_MESSAGE) String userId,
+            @RequestBody @Valid UpdateRegisterUserRequestDto updateDTO
     ) {
-        userService.update(java.util.UUID.fromString(userId), updateDTO);
+        userService.updateUser(java.util.UUID.fromString(userId), updateDTO);
 
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable @UUID(message = UUID_MESSAGE) String userId) {
-        userService.delete(java.util.UUID.fromString(userId));
+    @DeleteMapping(USER_ID_PATH_VAR)
+    public ResponseEntity<Void> deleteUser(@PathVariable @UUID(message = INVALID_UUID_MESSAGE) String userId) {
+        userService.deleteUser(java.util.UUID.fromString(userId));
 
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable @UUID(message = UUID_MESSAGE) String userId) {
-        UserDTO fetchedUser = userService.getById(java.util.UUID.fromString(userId));
+    @GetMapping(USER_ID_PATH_VAR)
+    public ResponseEntity<UserDto> getUserById(@PathVariable @UUID(message = INVALID_UUID_MESSAGE) String userId) {
+        UserDto fetchedUser = userService.getUserById(java.util.UUID.fromString(userId));
 
         return ResponseEntity.ok(fetchedUser);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> listUsers() {
-        List<UserDTO> fetchedUserList = userService.listAll();
+    public ResponseEntity<List<UserDto>> listUsers() {
+        List<UserDto> fetchedUserList = userService.getAllUsers();
 
         return ResponseEntity.ok(fetchedUserList);
     }

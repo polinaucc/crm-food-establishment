@@ -2,11 +2,11 @@ package com.crm.food.establishment.user.validation;
 
 public class ValidationErrorMessages {
 
-    public static final String EMAIL_REGEXP_MESSAGE = "Given invalid email";
+    public static final String INVALID_EMAIL_MESSAGE = "Given invalid email";
 
-    public static final String PASSWORD_REGEXP_MESSAGE = "Given invalid password";
+    public static final String INVALID_PASSWORD_MESSAGE = "Given invalid password";
 
-    public static final String NOT_BLANC_MESSAGE = "Value can't be blanc";
+    public static final String NOT_BLANK_MESSAGE = "Value can't be blank";
 
     public static final String NOT_NULL_MESSAGE = "Value can't be null";
 
@@ -16,7 +16,7 @@ public class ValidationErrorMessages {
 
     public static final String PAST_MESSAGE = "Date must be past";
 
-    public static final String UUID_MESSAGE = "String must be valid uuid";
+    public static final String INVALID_UUID_MESSAGE = "String must be valid uuid";
 
-    public static final String REFRESH_TOKEN_MESSAGE = "String must be valid refresh token";
+    public static final String INVALID_REFRESH_TOKEN_MESSAGE = "String must be valid refresh token";
 }

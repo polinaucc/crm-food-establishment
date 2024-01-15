@@ -115,7 +115,7 @@ class JwtServiceImplTest {
 
     @Test
     void issueAccessToken_ShouldReturnValidAccessToken() {
-        LocalDateTime issuedTime = LocalDateTime.now().withSecond(0).withNano(0);
+        LocalDateTime issuedTime = LocalDateTime.now().withNano(0);
         LocalDateTime expirationTime = issuedTime.plusMinutes(accessTokenExpirationTime);
         AccessTokenClaims expectedAccessTokenClaims = new AccessTokenClaims(
                 issuedTime,
@@ -135,7 +135,7 @@ class JwtServiceImplTest {
 
     @Test
     void issueRefreshToken_ShouldReturnValidRefreshToken_And_SafeItToRedis() {
-        LocalDateTime issuedTime = LocalDateTime.now().withSecond(0).withNano(0);
+        LocalDateTime issuedTime = LocalDateTime.now().withNano(0);
         LocalDateTime expirationTime = issuedTime.plusMinutes(refreshTokenExpirationTime);
         RefreshTokenClaims expectedRefreshTokenClaims = new RefreshTokenClaims(
                 issuedTime,

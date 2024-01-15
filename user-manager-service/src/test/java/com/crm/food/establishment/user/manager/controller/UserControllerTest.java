@@ -1,9 +1,9 @@
 package com.crm.food.establishment.user.manager.controller;
 
 import com.crm.food.establishment.user.auth.token.TokenPair;
-import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDTO;
-import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDTO;
-import com.crm.food.establishment.user.manager.dto.UserDTO;
+import com.crm.food.establishment.user.manager.dto.RegisterUserResponseDto;
+import com.crm.food.establishment.user.manager.dto.UpdateRegisterUserRequestDto;
+import com.crm.food.establishment.user.manager.dto.UserDto;
 import com.crm.food.establishment.user.manager.entity.Role;
 import com.crm.food.establishment.user.manager.service.UserService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -52,13 +52,15 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
-    private UpdateRegisterUserRequestDTO validUpdateRegisterPayload;
-    private UpdateRegisterUserRequestDTO invalidUpdateRegisterPayload;
-    private UserDTO userDTOSample;
+    public static final String USER_PATH = "/api/user";
+    public static final String USER_PATH_WITH_ID = "/api/user/{userId}";
+    private UpdateRegisterUserRequestDto validUpdateRegisterPayload;
+    private UpdateRegisterUserRequestDto invalidUpdateRegisterPayload;
+    private UserDto userDTOSample;
 
     @BeforeEach
     public void setUp() {
-        validUpdateRegisterPayload = new UpdateRegisterUserRequestDTO(
+        validUpdateRegisterPayload = new UpdateRegisterUserRequestDto(
                 "test@gmail.com",
                 "qwerty1234",
                 Role.CLIENT,
@@ -68,17 +70,17 @@ class UserControllerTest {
                 LocalDate.now().minusYears(2),
                 "Some address"
         );
-        invalidUpdateRegisterPayload = new UpdateRegisterUserRequestDTO(
+        invalidUpdateRegisterPayload = new UpdateRegisterUserRequestDto(
                 "aaaaaaa",
                 "",
                 null,
                 "",
                 "",
-                null,
+                true,
                 LocalDate.now().plusYears(2),
                 null
         );
-        userDTOSample = new UserDTO(
+        userDTOSample = new UserDto(
                 UUID.randomUUID(),
                 "test@gmail.com",
                 Role.CLIENT,
@@ -93,31 +95,31 @@ class UserControllerTest {
     @Test
     public void registerUser_ShouldValidateRequestBody() throws Exception {
         ResultActions response = mockMvc.perform(
-                post(UserController.USER_PATH)
+                post(USER_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidUpdateRegisterPayload))
         );
 
         response.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.size()", is(8)));
+                .andExpect(jsonPath("$.size()", is(7)));
         verifyNoInteractions(userService);
     }
 
     @Test
     public void registerUser_ShouldReturnRegisterUserResponseDTO_And_CreatedStatus() throws Exception {
-        var expectedRegisterUserResponseDTO = new RegisterUserResponseDTO(
+        var expectedRegisterUserResponseDTO = new RegisterUserResponseDto(
                 UUID.randomUUID(), new TokenPair("", "")
         );
-        when(userService.register(validUpdateRegisterPayload)).thenReturn(expectedRegisterUserResponseDTO);
+        when(userService.registerUser(validUpdateRegisterPayload)).thenReturn(expectedRegisterUserResponseDTO);
 
         ResultActions response = mockMvc.perform(
-                post(UserController.USER_PATH)
+                post(USER_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUpdateRegisterPayload))
         );
         var actualRegisterUserResponseDTO = objectMapper.readValue(
                 response.andReturn().getResponse().getContentAsString(),
-                RegisterUserResponseDTO.class
+                RegisterUserResponseDto.class
         );
 
         response.andExpect(status().isCreated())
@@ -128,7 +130,7 @@ class UserControllerTest {
     @Test
     void updateUser_ShouldValidateUserId() throws Exception {
         ResultActions response = mockMvc.perform(
-                put(UserController.USER_PATH_WITH_ID.replace("{userId}", "invalidUuid"))
+                put(USER_PATH_WITH_ID.replace("{userId}", "invalidUuid"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUpdateRegisterPayload))
         );
@@ -140,12 +142,13 @@ class UserControllerTest {
     @Test
     void updateUser_ShouldValidateRequestBody() throws Exception {
         ResultActions response = mockMvc.perform(
-                put(UserController.USER_PATH_WITH_ID.replace("{userId}", UUID.randomUUID().toString()))
+                put(USER_PATH_WITH_ID.replace("{userId}", UUID.randomUUID().toString()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidUpdateRegisterPayload))
         );
 
-        response.andExpect(status().isBadRequest());
+        response.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.size()", is(7)));
         verifyNoInteractions(userService);
     }
 
@@ -154,19 +157,19 @@ class UserControllerTest {
         UUID inputUserId = UUID.randomUUID();
 
         ResultActions response = mockMvc.perform(
-                put(UserController.USER_PATH_WITH_ID.replace("{userId}", inputUserId.toString()))
+                put(USER_PATH_WITH_ID.replace("{userId}", inputUserId.toString()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validUpdateRegisterPayload))
         );
 
         response.andExpect(status().isNoContent());
-        verify(userService).update(inputUserId, validUpdateRegisterPayload);
+        verify(userService).updateUser(inputUserId, validUpdateRegisterPayload);
     }
 
     @Test
     void deleteUser_ShouldValidateUserId() throws Exception {
         ResultActions response = mockMvc.perform(
-                delete(UserController.USER_PATH_WITH_ID.replace("{userId}", "invalidUuid"))
+                delete(USER_PATH_WITH_ID.replace("{userId}", "invalidUuid"))
         );
 
         response.andExpect(status().isBadRequest());
@@ -178,17 +181,17 @@ class UserControllerTest {
         UUID inputUserId = UUID.randomUUID();
 
         ResultActions response = mockMvc.perform(
-                delete(UserController.USER_PATH_WITH_ID.replace("{userId}", inputUserId.toString()))
+                delete(USER_PATH_WITH_ID.replace("{userId}", inputUserId.toString()))
         );
 
         response.andExpect(status().isNoContent());
-        verify(userService).delete(inputUserId);
+        verify(userService).deleteUser(inputUserId);
     }
 
     @Test
     void getUserById_ShouldValidateUserId() throws Exception {
         ResultActions response = mockMvc.perform(
-                get(UserController.USER_PATH_WITH_ID.replace("{userId}", "invalidUuid"))
+                get(USER_PATH_WITH_ID.replace("{userId}", "invalidUuid"))
         );
 
         response.andExpect(status().isBadRequest());
@@ -197,29 +200,29 @@ class UserControllerTest {
 
     @Test
     void getUserById_ShouldReturnUserDTO_And_OkStatus() throws Exception {
-        when(userService.getById(userDTOSample.uuid())).thenReturn(userDTOSample);
+        when(userService.getUserById(userDTOSample.uuid())).thenReturn(userDTOSample);
 
         ResultActions response = mockMvc.perform(
-                get(UserController.USER_PATH_WITH_ID.replace("{userId}", userDTOSample.uuid().toString()))
+                get(USER_PATH_WITH_ID.replace("{userId}", userDTOSample.uuid().toString()))
         );
         var actualUserDTO = objectMapper.readValue(
                 response.andReturn().getResponse().getContentAsString(),
-                UserDTO.class
+                UserDto.class
         );
 
         response.andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
         assertEquals(userDTOSample, actualUserDTO);
-        verify(userService).getById(userDTOSample.uuid());
+        verify(userService).getUserById(userDTOSample.uuid());
     }
 
     @Test
     void listUsers_ShouldReturnUserDTOList_And_OkStatus() throws Exception {
-        List<UserDTO> expectedUserDTOList = List.of(userDTOSample, userDTOSample);
-        when(userService.listAll()).thenReturn(expectedUserDTOList);
+        List<UserDto> expectedUserDTOList = List.of(userDTOSample, userDTOSample);
+        when(userService.getAllUsers()).thenReturn(expectedUserDTOList);
 
-        ResultActions response = mockMvc.perform(get(UserController.USER_PATH));
-        List<UserDTO> actualUserDTOList = objectMapper.readValue(
+        ResultActions response = mockMvc.perform(get(USER_PATH));
+        List<UserDto> actualUserDTOList = objectMapper.readValue(
                 response.andReturn().getResponse().getContentAsString(),
                 new TypeReference<>() {}
         );
